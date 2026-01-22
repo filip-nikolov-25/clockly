@@ -1,67 +1,59 @@
-import db from "../db.js"
+import {
+  getAllEmployees,
+  getEmployeeById,
+  createEmployee,
+  updateEmployee,
+  deleteEmployee,
+  deleteAllEmployees,
+} from "../models/employeesModel.js";
 
 // GET ALL
-export const getEmployees = async (req, res) => {
+export const getEmployeesController = async (req, res) => {
   try {
-    const result = await db.query("SELECT * FROM employees");
-    res.json(result.rows);
+    const employees = await getAllEmployees();
+    res.json(employees);
   } catch (error) {
     res.status(500).json({ error: "Server error" });
   }
 };
 
 // GET ONE
-export const getEmployeeById = async (req, res) => {
+export const getEmployeeByIdController = async (req, res) => {
   try {
-    const { id } = req.params;
-    const result = await db.query(
-      "SELECT * FROM employees WHERE id = $1",
-      [id]
-    );
-    res.json(result.rows[0]);
+    const employee = await getEmployeeById(req.params.id);
+    if (!employee) return res.status(404).json({ error: "Employee not found" });
+    res.json(employee);
   } catch (error) {
     res.status(500).json({ error: "Server error" });
   }
 };
 
 // CREATE
-export const createEmployee = async (req, res) => {
+export const createEmployeeController = async (req, res) => {
   try {
     const { name, lastname } = req.body;
-
-    const result = await db.query(
-      "INSERT INTO employees (name, lastname) VALUES ($1, $2) RETURNING *",
-      [name, lastname]
-    );
-
-    res.status(201).json(result.rows[0]);
+    const employee = await createEmployee(name, lastname);
+    res.status(201).json(employee);
   } catch (error) {
     res.status(500).json({ error: "Server error" });
   }
 };
 
 // UPDATE
-export const updateEmployee = async (req, res) => {
+export const updateEmployeeController = async (req, res) => {
   try {
-    const { id } = req.params;
     const { name, lastname } = req.body;
-
-    const result = await db.query(
-      "UPDATE employees SET name = $1, lastname = $2 WHERE id = $3 RETURNING *",
-      [name, lastname, id]
-    );
-
-    res.json(result.rows[0]);
+    const employee = await updateEmployee(req.params.id, name, lastname);
+    res.json(employee);
   } catch (error) {
     res.status(500).json({ error: "Server error" });
   }
 };
 
 // DELETE ONE
-export const deleteEmployee = async (req, res) => {
+export const deleteEmployeeController = async (req, res) => {
   try {
-    const { id } = req.params;
-    await db.query("DELETE FROM employees WHERE id = $1", [id]);
+    await deleteEmployee(req.params.id);
     res.json({ message: "Employee deleted" });
   } catch (error) {
     res.status(500).json({ error: "Server error" });
@@ -69,9 +61,9 @@ export const deleteEmployee = async (req, res) => {
 };
 
 // DELETE ALL
-export const deleteAllEmployees = async (req, res) => {
+export const deleteAllEmployeesController = async (req, res) => {
   try {
-    await db.query("DELETE FROM employees");
+    await deleteAllEmployees();
     res.json({ message: "All employees deleted" });
   } catch (error) {
     res.status(500).json({ error: "Server error" });
