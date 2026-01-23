@@ -1,89 +1,63 @@
-import { useEffect, useState } from 'react'
-import './index.css'
+import { Route, Routes, BrowserRouter } from "react-router-dom";
+import NavBar from "./components/NavBar";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Homepage from "./pages/Homepage";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import type { userType } from "./interfaces/types";
 
-interface Employee {
-  id: number;
-  name: string
-  lastname: string
-  createdat: string
-}
 const App = () => {
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [name, setName] = useState("");
-  const [lastname, setLastName] = useState("");
+  axios.defaults.withCredentials = true;
+  const [user, setUser] = useState<userType | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetchEmployees();
+    const fetchUser = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get("http://localhost:5000/api/auth/me");
+        setUser(response.data);
+      } catch (err: any) {
+        setUser(null);
+        console.error("Error fetching user data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
   }, []);
-
-  const fetchEmployees = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/api/allemployees");
-      const data = await response.json();
-      setEmployees(data);
-    } catch (error) {
-      console.error("Error fetching employees:", error);
-    }
-  };
-
-  const addEmployee = async (e: { preventDefault: () => void; }) => {
-    e.preventDefault();
-    try {
-      const response = await fetch("http://localhost:5000/api/createemployee", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, lastname }),
-      });
-
-      const newEmployee = await response.json();
-      setEmployees([...employees, newEmployee]); 
-      setName("");
-      setLastName("");
-    } catch (error) {
-      console.error("Error adding employee:", error);
-    }
-  };
+  if (loading)
+    return (
+      <div className="text-white flex justify-center items-center min-h-screen">
+        Loading...
+      </div>
+    );
 
   return (
-    <div className="text-2xl p-4 " >
-      <h1 className="text-3xl font-bold mb-4">Employees</h1>
+    <BrowserRouter>
+      <NavBar user={user} setUser={setUser} />
 
-      <form onSubmit={addEmployee} className="flex flex-col mb-6 gap-2">
-        <input
-          className="text-black p-2 bg-amber-50"
-          type="text"
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
+      <Routes>
+        <Route
+          path="/"
+          element={<Homepage error={error} setError={setError} user={user} />}
         />
-        <input
-          className="text-black p-2 bg-amber-50"
-          type="text"
-          placeholder="Last Name"
-          value={lastname}
-          onChange={(e) => setLastName(e.target.value)}
-          required
+        <Route
+          path="/login"
+          element={<Login user={user} setUser={setUser} />}
         />
-        <button
-          type="submit"
-          className="bg-green-500 text-white p-2 mt-2 hover:bg-green-600"
-        >
-          Add Employee
-        </button>
-      </form>
-
-      <ul className="flex flex-col gap-2">
-         {employees?.map((emp,index) => (
-          <li key={emp.id} className="p-2 bg-gray-100 rounded text-black">
-            {index + 1}. {emp.name} {emp.lastname}
-          </li>
-        ))}
-      </ul>
-    </div>
-    
+        <Route
+          path="/register"
+          element={<Register user={user} setUser={setUser} />}
+        />
+        <Route
+          path="*"
+          element={<div className="text-white p-10">NOT FOUND PAGE</div>}
+        />
+      </Routes>
+    </BrowserRouter>
   );
 };
 

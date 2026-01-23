@@ -76,8 +76,7 @@ router.post("/login", async (req, res) => {
   if (!isCorrect) {
     return res.status(400).json({ message: "Invalid credentials" });
   }
-
-  const token = generateToken(userData);
+  const token = generateToken(userData.id);
 
   res.cookie("token", token, cookieOptions);
 
@@ -92,7 +91,6 @@ router.post("/login", async (req, res) => {
 
 router.get("/me", protect, async (req, res) => {
   res.json(req.user);
-
   //return info from logged in user from protect middleware
 });
 
