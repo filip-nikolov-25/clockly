@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { userType } from "../interfaces/types";
+import type { LoginType, userType } from "../interfaces/types";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -9,7 +9,7 @@ interface props {
 }
 
 const Login = ({ setUser }: props) => {
-  const [userInfo, setUserInfo] = useState<userType>({
+  const [userInfo, setUserInfo] = useState<LoginType>({
     email: "",
     password: "",
   });
@@ -33,7 +33,7 @@ const Login = ({ setUser }: props) => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-linear-to-br from-gray-900 via-black to-gray-800 p-4">
+    <div className="flex justify-center items-center min-h-screen bg-linear-to-br from-orange-950 via-black to-gray-800 p-4">
       <div className="bg-gray-900 border border-gray-700 rounded-xl shadow-xl p-10 max-w-md w-full">
         <h2 className="text-center mb-2 text-4xl font-extrabold text-white">
           Welcome Back

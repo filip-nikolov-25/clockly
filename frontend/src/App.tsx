@@ -6,6 +6,7 @@ import Homepage from "./pages/Homepage";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import type { userType } from "./interfaces/types";
+import Admin from "./pages/Admin";
 
 const App = () => {
   axios.defaults.withCredentials = true;
@@ -13,6 +14,7 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  console.log("Current User in App ROLE:", user?.role);
   useEffect(() => {
     const fetchUser = async () => {
       setLoading(true);
@@ -51,6 +53,10 @@ const App = () => {
         <Route
           path="/register"
           element={<Register user={user} setUser={setUser} />}
+        />
+        <Route
+          path="/admin"
+          element={<Admin user={user} />}
         />
         <Route
           path="*"

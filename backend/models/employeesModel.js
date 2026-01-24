@@ -2,7 +2,7 @@ import db from "../db.js";
 
 // GET ALL
 export const getAllEmployees = async () => {
-  const result = await db.query("SELECT * FROM users");
+  const result = await db.query("SELECT * FROM users RETURNING *");
   return result.rows;
 };
 

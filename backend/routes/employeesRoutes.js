@@ -7,6 +7,8 @@ import {
   getEmployeesController,
   updateEmployeeController,
 } from "../controllers/employeesController.js";
+import { sendInviteController } from "../controllers/adminController.js";
+import { protect } from "../middleware/auth.js";
 
 const router = Router();
 
@@ -16,5 +18,8 @@ router.post("/createemployee", createEmployeeController);
 router.put("/editemployee/:id", updateEmployeeController);
 router.delete("/deleteemployee/:id", deleteEmployeeController);
 router.delete("/deleteallemployees", deleteAllEmployeesController);
+
+//Invite routes 
+router.post("/sendinvite",protect, sendInviteController);
 
 export default router;

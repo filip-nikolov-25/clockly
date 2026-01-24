@@ -19,37 +19,62 @@ const generateToken = (id) => {
 };
 
 //REGISTER User
-
 router.post("/register", async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, role, religion, company_id, invite_code } = req.body;
 
   if (!username || !email || !password) {
-    return res
-      .status(400)
-      .json({ message: "Please provide all required fields" });
+    return res.status(400).json({ message: "Please provide all required fields" });
   }
 
-  const userExist = await pool.query("SELECT * FROM users WHERE email = $1", [
-    email,
-  ]);
-
+  const userExist = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
   if (userExist.rows.length > 0) {
     return res.status(400).json({ message: "User already exists" });
   }
 
+  let finalCompanyId;
+
+  if (role === "admin") {
+    if (!company_id) {
+      return res.status(400).json({ message: "Admins must provide company_id" });
+    }
+    finalCompanyId = company_id;
+  } else {
+    if (!invite_code) {
+      return res.status(400).json({ message: "Invite code is required for employees" });
+    }
+
+    const inviteQuery = await pool.query(
+      "SELECT * FROM company_invites WHERE code = $1 AND used_by IS NULL",
+      [invite_code]
+    );
+
+    if (inviteQuery.rows.length === 0) {
+      return res.status(400).json({ message: "Invalid or already used invite code" });
+    }
+
+    finalCompanyId = inviteQuery.rows[0].company_id;
+  }
+
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const newUserRegistered = await pool.query(
-    "INSERT INTO users (username, email, password) VALUES ($1,$2,$3) RETURNING id,username,email",
-    [username, email, hashedPassword],
+  const newUser = await pool.query(
+    "INSERT INTO users (username, email, password, company_id, role, religion) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, username, email, company_id, role, religion",
+    [username, email, hashedPassword, finalCompanyId, role || "employee", religion || "none"]
   );
 
-  const token = generateToken(newUserRegistered.rows[0].id);
+  if (invite_code) {
+    await pool.query(
+      "UPDATE company_invites SET used_by = $1, used_at = NOW() WHERE code = $2",
+      [newUser.rows[0].id, invite_code]
+    );
+  }
 
+  const token = generateToken(newUser.rows[0].id);
   res.cookie("token", token, cookieOptions);
 
-  return res.status(201).json({ user: newUserRegistered.rows[0] });
+  return res.status(201).json({ user: newUser.rows[0] });
 });
+
 //logic route ,,
 
 router.post("/login", async (req, res) => {
@@ -85,6 +110,9 @@ router.post("/login", async (req, res) => {
       id: userData.id,
       username: userData.username,
       email: userData.email,
+      role: userData.role,
+      company_id: userData.company_id,
+      religion: userData.religion
     },
   });
 });

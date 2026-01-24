@@ -3,20 +3,30 @@ import type { userType } from "../interfaces/types";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-interface props {
+interface Props {
   user?: userType | null;
   setUser: (user: userType | null) => void;
 }
 
-const Register = ({ setUser, user }: props) => {
-  const [userInfo, setUserInfo] = useState<userType>({
+const Register = ({ setUser }: Props) => {
+  const [userInfo, setUserInfo] = useState<Partial<userType>>({
+    username: "",
     email: "",
     password: "",
-    username: "",
+    company_id: "",
+    role: "employee", 
+    religion: "",
+    code: "",
   });
-  const [error, setError] = useState("");
 
+  console.log(userInfo, "userif  ");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  const handleRoleToggle = () => {
+    const newRole = userInfo.role === "admin" ? "employee" : "admin";
+    setUserInfo({ ...userInfo, role: newRole });
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,6 +43,9 @@ const Register = ({ setUser, user }: props) => {
       console.error(err);
     }
   };
+
+  console.log(userInfo, "user sasd");
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-linear-to-br from-gray-900 via-black to-gray-800 p-4">
       <div className="bg-gray-900 border border-gray-700 rounded-xl shadow-xl p-10 max-w-md w-full">
@@ -43,15 +56,11 @@ const Register = ({ setUser, user }: props) => {
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label
-              htmlFor="username"
-              className="block text-gray-300 mb-1 font-medium"
-            >
+            <label className="block text-gray-300 mb-1 font-medium">
               Name
             </label>
             <input
               type="text"
-              id="username"
               value={userInfo.username}
               placeholder="Your Name"
               onChange={(e) =>
@@ -62,15 +71,9 @@ const Register = ({ setUser, user }: props) => {
             />
           </div>
           <div className="mb-4">
-            <label
-              htmlFor="email"
-              className="block text-gray-300 mb-1 font-medium"
-            >
-              Email
-            </label>
+            <label className="block text-gray-300 mb-1 font-medium">Email</label>
             <input
               type="email"
-              id="email"
               value={userInfo.email}
               placeholder="you@example.com"
               onChange={(e) =>
@@ -82,15 +85,9 @@ const Register = ({ setUser, user }: props) => {
           </div>
 
           <div className="mb-6">
-            <label
-              htmlFor="password"
-              className="block text-gray-300 mb-1 font-medium"
-            >
-              Password
-            </label>
+            <label className="block text-gray-300 mb-1 font-medium">Password</label>
             <input
               type="password"
-              id="password"
               value={userInfo.password}
               placeholder="Enter Password"
               onChange={(e) =>
@@ -99,8 +96,57 @@ const Register = ({ setUser, user }: props) => {
               className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all"
               required
             />
-            {error && <div className="text-red-500 mt-2">{error}</div>}
           </div>
+
+          <div className="mb-4 flex items-center gap-3">
+            <span className="text-white font-medium">Role: {userInfo.role}</span>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={userInfo.role === "admin"}
+                onChange={handleRoleToggle}
+              />
+              <div className="w-14 h-7 bg-gray-700 rounded-full peer-focus:ring-2 peer-focus:ring-indigo-500 peer-checked:bg-indigo-600 transition-all duration-200"></div>
+              <div
+                className={`absolute left-0.5 top-0.5 w-6 h-6 bg-white rounded-full shadow transform transition-all duration-200 ${
+                  userInfo.role === "admin" ? "translate-x-full" : "translate-x-0"
+                }`}
+              ></div>
+            </label>
+          </div>
+
+       <div className="mb-6">
+  {userInfo.role === "admin" ? (
+    <>
+      <label className="block text-gray-300 mb-1 font-medium">Company ID</label>
+      <input
+        type="text"
+        value={userInfo.company_id}
+        placeholder="Company ID"
+        onChange={(e) =>
+          setUserInfo({ ...userInfo, company_id: e.target.value })
+        }
+        className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all"
+        required
+      />
+    </>
+  ) : (
+    <>
+      <label className="block text-gray-300 mb-1 font-medium">Invite Code</label>
+      <input
+        type="text"
+        value={userInfo.company_id}
+        placeholder="Invite Code"
+        onChange={(e) =>
+          setUserInfo({ ...userInfo, code: e.target.value })
+        }
+        className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all"
+        required
+      />
+    </>
+  )}
+</div>
 
           <button
             type="submit"
@@ -108,6 +154,7 @@ const Register = ({ setUser, user }: props) => {
           >
             Register
           </button>
+          {error && <p className="text-red-500 mt-3">{error}</p>}
         </form>
 
         <p className="text-center text-gray-500 text-sm mt-4">
