@@ -33,7 +33,10 @@ const Login = ({ setUser }: props) => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-linear-to-br from-orange-950 via-black to-gray-800 p-4">
+    <div
+      className="flex justify-center items-center pb-72 pt-28 bg-linear-to-b from-black via-gray-700 to-orange-300
+ p-4"
+    >
       <div className="bg-gray-900 border border-gray-700 rounded-xl shadow-xl p-10 max-w-md w-full">
         <h2 className="text-center mb-2 text-4xl font-extrabold text-white">
           Welcome Back
@@ -58,7 +61,7 @@ const Login = ({ setUser }: props) => {
               onChange={(e) =>
                 setUserInfo({ ...userInfo, email: e.target.value })
               }
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all"
+              className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-500 focus:outline-none transition-all"
               required
             />
           </div>
@@ -78,7 +81,7 @@ const Login = ({ setUser }: props) => {
               onChange={(e) =>
                 setUserInfo({ ...userInfo, password: e.target.value })
               }
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all"
+              className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-500 focus:outline-none transition-all"
               required
             />
             {error && <div className="text-red-500 mt-2">{error}</div>}
@@ -86,7 +89,7 @@ const Login = ({ setUser }: props) => {
 
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-indigo-500 shadow-md hover:shadow-lg transition-all"
+            className="w-full bg-orange-500 text-white py-2 rounded-lg font-semibold hover:bg-orange-300 shadow-md hover:shadow-lg transition-all"
           >
             Login
           </button>
@@ -94,7 +97,7 @@ const Login = ({ setUser }: props) => {
 
         <p className="text-center text-gray-500 text-sm mt-4">
           Don't have an account?{" "}
-          <span className="text-indigo-500 hover:underline cursor-pointer">
+          <span className="text-orange-500 hover:underline hover:text-orange-300 cursor-pointer">
             Register
           </span>
         </p>

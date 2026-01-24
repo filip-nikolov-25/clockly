@@ -25,9 +25,6 @@ const NavBar = ({ user, setUser }: props) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  console.log("Current User in NavBar ROLE:", user?.role);
-  console.log("Current User in NavBar:", user);
-
   return (
     <div className="sticky top-0 z-50 shadow-md bg-black">
       <ul className="flex justify-between items-center border-b-2 border-gray-700 px-5 py-3 text-white">
@@ -85,12 +82,12 @@ const NavBar = ({ user, setUser }: props) => {
             ) : (
               <>
                 <Link to="/login">
-                  <li className="cursor-pointer hover:text-indigo-500 transition-colors duration-200">
+                  <li className="cursor-pointer hover:text-orange-300 transition-colors duration-200">
                     Login
                   </li>
                 </Link>
                 <Link to="/register">
-                  <li className="cursor-pointer hover:text-indigo-500 transition-colors duration-200">
+                  <li className="cursor-pointer hover:text-orange-300 transition-colors duration-200">
                     Register
                   </li>
                 </Link>
@@ -107,7 +104,7 @@ const NavBar = ({ user, setUser }: props) => {
         </div>
       </ul>
       <div
-        className="h-1 bg-orange-50 transition-all duration-700 ease-out"
+        className="h-1 bg-orange-100 transition-all duration-700 ease-out"
         style={{ width: `${scrollProgress}%` }}
       ></div>
     </div>

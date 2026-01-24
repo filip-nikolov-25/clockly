@@ -20,7 +20,7 @@ const generateToken = (id) => {
 
 //REGISTER User
 router.post("/register", async (req, res) => {
-  const { username, email, password, role, religion, company_id, invite_code } = req.body;
+  const { username, email, password, role, religion, company_id, code } = req.body;
 
   if (!username || !email || !password) {
     return res.status(400).json({ message: "Please provide all required fields" });
@@ -39,13 +39,13 @@ router.post("/register", async (req, res) => {
     }
     finalCompanyId = company_id;
   } else {
-    if (!invite_code) {
+    if (!code) {
       return res.status(400).json({ message: "Invite code is required for employees" });
     }
 
     const inviteQuery = await pool.query(
       "SELECT * FROM company_invites WHERE code = $1 AND used_by IS NULL",
-      [invite_code]
+      [code]
     );
 
     if (inviteQuery.rows.length === 0) {
@@ -62,10 +62,10 @@ router.post("/register", async (req, res) => {
     [username, email, hashedPassword, finalCompanyId, role || "employee", religion || "none"]
   );
 
-  if (invite_code) {
+  if (code) {
     await pool.query(
       "UPDATE company_invites SET used_by = $1, used_at = NOW() WHERE code = $2",
-      [newUser.rows[0].id, invite_code]
+      [newUser.rows[0].id, code]
     );
   }
 

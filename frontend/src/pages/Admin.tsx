@@ -7,44 +7,35 @@ interface Props {
 }
 
 const Admin = ({ user }: Props) => {
-  const [inviteCode, setInviteCode] = useState("");
+  const [inviteCodes, setInviteCodes] = useState<string[]>([]);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [count, setCount] = useState(0);
 
-  console.log(inviteCode,)
-const handleSubmit = async (e: FormEvent) => {
-  e.preventDefault();
+  console.log("scs msg:", successMessage);
 
-  if (!inviteCode) {
-    setErrorMessage("Please enter an invite code");
-    setSuccessMessage("");
-    return;
-  }
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
 
-  try {
-    const response = await axios.post(
-      "http://localhost:5000/api/sendinvite",
-      { code: inviteCode },
-      {
-        withCredentials: true, 
-      }
-    );
+    if (!count || count < 1) {
+      setErrorMessage("Please enter an invite code");
+      setSuccessMessage("");
+      return;
+    }
 
-    // Success: show the invite code
-    setSuccessMessage(`INVITE CODE: ${response.data.invite.code}`);
-    setErrorMessage("");
-    setInviteCode(""); // clear input
-  } catch (err: any) {
-    console.error(err.response?.data || err);
-
-    // Show error message from backend if available
-    setErrorMessage(
-      err.response?.data?.message || "Something went wrong on the server"
-    );
-    setSuccessMessage("");
-  }
-};
-
+    console.log("Submitting invite code:", inviteCodes);
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/sendinvite",
+        { count },
+      );
+      setInviteCodes(response.data.codes);
+      setErrorMessage("");
+    } catch (err: any) {
+      console.error(err.response?.data || err);
+      setErrorMessage(err.response?.data?.message);
+    }
+  };
 
   return (
     <div className="bg-black text-white min-h-screen p-10">
@@ -60,24 +51,40 @@ const handleSubmit = async (e: FormEvent) => {
             Invite Code:
           </label>
           <input
-            type="text"
+            type="number"
+            min={1}
+            max={50}
             placeholder="Enter invite code"
             id="invite"
-            value={inviteCode}
-            onChange={(e) => setInviteCode(e.target.value)}
+            value={count}
+            onChange={(e) => {
+              // setInviteCode(e.target.value)
+              setCount(Number(e.target.value));
+            }}
             className="border-2  rounded p-2 text-white"
           />
         </div>
 
         <button
           type="submit"
-          className="bg-green-600 hover:bg-green-700 p-3 rounded text-xl"
+          className="bg-red-500 hover:bg-red-700 p-3 cursor-pointer rounded text-xl"
         >
-          Create Invite
+          Create Invite Codes
         </button>
 
-        {successMessage && (
-          <p className="text-green-400 mt-3">{successMessage}</p>
+        {inviteCodes?.length > 0 && (
+          <div className="bg-gray-700 p-10 rounded">
+            <h2 className="text-2xl mb-2">
+              Your invite codes for the employees:
+            </h2>
+            <ul className=" ">
+              {inviteCodes?.map((code, index) => (
+                <li key={index} className="text-lg">
+                  {index + 1} {code}
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
         {errorMessage && <p className="text-red-500 mt-3">{errorMessage}</p>}
       </form>
