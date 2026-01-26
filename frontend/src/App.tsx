@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import type { userType } from "./interfaces/types";
 import Admin from "./pages/Admin";
+import CalendarPage from "./pages/CalendarPage";
 
 const App = () => {
   axios.defaults.withCredentials = true;
@@ -36,7 +37,7 @@ const App = () => {
         Loading...
       </div>
     );
-
+    
   return (
     <BrowserRouter>
       <NavBar user={user} setUser={setUser} />
@@ -57,6 +58,14 @@ const App = () => {
         <Route
           path="/admin"
           element={<Admin user={user} />}
+        />
+        <Route
+          path="/calendar"
+          element={<CalendarPage />}
+        />
+        <Route
+          path="/employees"
+          element={<div className="text-white p-10">Employees Page</div>}
         />
         <Route
           path="*"

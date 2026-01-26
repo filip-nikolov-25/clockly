@@ -10,7 +10,7 @@ interface Props {
 const Homepage = ({ error, user }: Props) => {
   console.log("Current User in Homepage:", user?.role);
   return (
-    <div className="bg-black text-white">
+    <div className=" text-white">
       {/* {error && <div className="text-red-500">{error}</div>}
       {user ? (
         <h2>Welcome {user.username}</h2>
@@ -28,7 +28,7 @@ const Homepage = ({ error, user }: Props) => {
           </div>
         </div>
       </div>
-      <div className=" bg-black py-[550px]"></div>
+      <div className="  py-[550px]"></div>
     </div>
   );
 };
