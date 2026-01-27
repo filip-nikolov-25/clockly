@@ -12,3 +12,30 @@ export type LoginType = {
   password: string;
 };
 
+export interface RequestTimeOffType {
+  status: string;
+  start_date: string;
+  end_date: string;
+}
+export interface TimeOff {
+  start_date: string;
+  end_date: string;
+  status: "accepted";
+}
+
+export interface Employee {
+  user_id: string;
+  username: string;
+  email: string;
+  leaves: TimeOff[];
+  daysOff?: string[];
+}
+
+export type TimeOffRequest = {
+  id: string;
+  status: string;
+  start_date: string;
+  end_date: string;
+  username: string;
+  email: string;
+};

@@ -8,6 +8,7 @@ import axios from "axios";
 import type { userType } from "./interfaces/types";
 import Admin from "./pages/Admin";
 import CalendarPage from "./pages/CalendarPage";
+import AboutMe from "./pages/AboutMe";
 
 const App = () => {
   axios.defaults.withCredentials = true;
@@ -37,7 +38,7 @@ const App = () => {
         Loading...
       </div>
     );
-    
+
   return (
     <BrowserRouter>
       <NavBar user={user} setUser={setUser} />
@@ -55,18 +56,13 @@ const App = () => {
           path="/register"
           element={<Register user={user} setUser={setUser} />}
         />
-        <Route
-          path="/admin"
-          element={<Admin user={user} />}
-        />
-        <Route
-          path="/calendar"
-          element={<CalendarPage />}
-        />
+        <Route path="/admin" element={<Admin user={user} />} />
+        <Route path="/calendar" element={<CalendarPage />} />
         <Route
           path="/employees"
           element={<div className="text-white p-10">Employees Page</div>}
         />
+        <Route path="/aboutme" element={<AboutMe />} />
         <Route
           path="*"
           element={<div className="text-white p-10">NOT FOUND PAGE</div>}

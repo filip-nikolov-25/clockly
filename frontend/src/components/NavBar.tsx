@@ -36,8 +36,6 @@ const NavBar = ({ user, setUser }: Props) => {
 
   return (
     <div className="sticky top-0 z-50">
-     
-
       <div className="bg-[#101010] shadow-md">
         <div className="w-10/12 mx-auto">
           <div className="flex justify-between items-center  py-3 text-white">
@@ -56,11 +54,21 @@ const NavBar = ({ user, setUser }: Props) => {
             </Link>
 
             <ul className="hidden md:flex items-center gap-6">
-              <Link to="/"><li className="hover:text-orange-300">Home</li></Link>
-              <Link to="/calendar"><li className="hover:text-orange-300">Calendar</li></Link>
-              <Link to="/employees"><li className="hover:text-orange-300">Employees</li></Link>
-              <Link to="/time"><li className="hover:text-orange-300">Time</li></Link>
-              <Link to="/about"><li className="hover:text-orange-300">My Status</li></Link>
+              <Link to="/">
+                <li className="hover:text-orange-300">Home</li>
+              </Link>
+              <Link to="/calendar">
+                <li className="hover:text-orange-300">Calendar</li>
+              </Link>
+              <Link to="/employees">
+                <li className="hover:text-orange-300">Employees</li>
+              </Link>
+              <Link to="/time">
+                <li className="hover:text-orange-300">Time</li>
+              </Link>
+              <Link to="/aboutme">
+                <li className="hover:text-orange-300">My Status</li>
+              </Link>
 
               {user ? (
                 <button
@@ -71,8 +79,12 @@ const NavBar = ({ user, setUser }: Props) => {
                 </button>
               ) : (
                 <>
-                  <Link to="/login"><li className="hover:text-orange-300">Login</li></Link>
-                  <Link to="/register"><li className="hover:text-orange-300">Register</li></Link>
+                  <Link to="/login">
+                    <li className="hover:text-orange-300">Login</li>
+                  </Link>
+                  <Link to="/register">
+                    <li className="hover:text-orange-300">Register</li>
+                  </Link>
                 </>
               )}
 
@@ -94,11 +106,21 @@ const NavBar = ({ user, setUser }: Props) => {
           {menuOpen && (
             <div className="md:hidden pb-4">
               <ul className="flex flex-col gap-4 text-white px-5">
-                <Link to="/" onClick={() => setMenuOpen(false)}>Home</Link>
-                <Link to="/calendar" onClick={() => setMenuOpen(false)}>Calendar</Link>
-                <Link to="/employees" onClick={() => setMenuOpen(false)}>Employees</Link>
-                <Link to="/time" onClick={() => setMenuOpen(false)}>Time Tracking</Link>
-                <Link to="/about" onClick={() => setMenuOpen(false)}>My Status</Link>
+                <Link to="/" onClick={() => setMenuOpen(false)}>
+                  Home
+                </Link>
+                <Link to="/calendar" onClick={() => setMenuOpen(false)}>
+                  Calendar
+                </Link>
+                <Link to="/employees" onClick={() => setMenuOpen(false)}>
+                  Employees
+                </Link>
+                <Link to="/time" onClick={() => setMenuOpen(false)}>
+                  Time Tracking
+                </Link>
+                <Link to="/about" onClick={() => setMenuOpen(false)}>
+                  My Status
+                </Link>
 
                 {user ? (
                   <button
@@ -109,8 +131,12 @@ const NavBar = ({ user, setUser }: Props) => {
                   </button>
                 ) : (
                   <>
-                    <Link to="/login" onClick={() => setMenuOpen(false)}>Login</Link>
-                    <Link to="/register" onClick={() => setMenuOpen(false)}>Register</Link>
+                    <Link to="/login" onClick={() => setMenuOpen(false)}>
+                      Login
+                    </Link>
+                    <Link to="/register" onClick={() => setMenuOpen(false)}>
+                      Register
+                    </Link>
                   </>
                 )}
 
@@ -124,7 +150,7 @@ const NavBar = ({ user, setUser }: Props) => {
           )}
         </div>
       </div>
-       <div className="w-full h-1 bg-[#101010] border-b-2 border-{#101010}">
+      <div className="w-full h-1 bg-[#101010] border-b-2 border-{#101010}">
         <div
           className="h-full bg-orange-300 transition-all duration-300 ease-in-out"
           style={{ width: `${scrollProgress}%` }}
