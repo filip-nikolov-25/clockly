@@ -20,7 +20,7 @@ const generateToken = (id) => {
 
 //REGISTER User
 router.post("/register", async (req, res) => {
-  const { username, email, password, role, religion, company_id, code } = req.body;
+  const { username, email, password, role, religion, company_id, code,country_code } = req.body;
 
   if (!username || !email || !password) {
     return res.status(400).json({ message: "Please provide all required fields" });
@@ -58,8 +58,8 @@ router.post("/register", async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const newUser = await pool.query(
-    "INSERT INTO users (username, email, password, company_id, role, religion) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, username, email, company_id, role, religion",
-    [username, email, hashedPassword, finalCompanyId, role || "employee", religion || "none"]
+    "INSERT INTO users (username, email, password, company_id, role, religion, country_code) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id, username, email, company_id, role, religion,country_code",
+    [username, email, hashedPassword, finalCompanyId, role || "employee", religion || "none", country_code]
   );
 
   if (code) {

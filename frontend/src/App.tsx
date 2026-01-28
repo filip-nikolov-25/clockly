@@ -15,8 +15,9 @@ const App = () => {
   const [user, setUser] = useState<userType | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  
 
-  console.log("Current User in App ROLE:", user?.role);
+  console.log("Current User in App ROLE:", user);
   useEffect(() => {
     const fetchUser = async () => {
       setLoading(true);

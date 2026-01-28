@@ -12,7 +12,7 @@ export const protect = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const user = await pool.query(
-      "SELECT id,username,email, role,company_id, religion FROM users WHERE id = $1",
+      "SELECT id,username,email, role,company_id, religion, country_code FROM users WHERE id = $1",
       [decoded.id],
     );
     if (user.rows.length === 0) {

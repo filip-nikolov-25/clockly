@@ -7,7 +7,7 @@ import {
 } from "../models/requestTimeOffModel.js";
 
 export const requestTimeOffController = async (req, res) => {
-  const { start_date, end_date, reason } = req.body;
+  const { start_date, end_date, reason,leave_type } = req.body;
 
   const user_id = req.user.id;
   const company_id = req.user.company_id;
@@ -18,7 +18,7 @@ export const requestTimeOffController = async (req, res) => {
       end_date,
       reason,
       user_id,
-      company_id,
+      company_id,leave_type
     );
     res.status(201).json(result);
   } catch (error) {

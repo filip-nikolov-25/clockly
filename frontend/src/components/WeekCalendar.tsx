@@ -1,19 +1,20 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import TimeOffRequestForm from "./TimeOffRequestForm";
-import type { Employee, TimeOff } from "../interfaces/types";
+import type { Employee, PublicHolidayType, TimeOff } from "../interfaces/types";
+import { formatDateForCompare } from "../helperFunctions";
+
+interface Props {
+  publicHolidays: PublicHolidayType[];
+}
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-const WeekCalendar = () => {
+const WeekCalendar = ({ publicHolidays }: Props) => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(false);
-  const [showRequestModal, setShowRequestModal] = useState(false);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-
-  const todayStr = (date: Date) => date.toISOString().split("T")[0];
 
   const getStartOfWeek = (date: Date) => {
     const d = new Date(date);
@@ -79,77 +80,118 @@ const WeekCalendar = () => {
   }, []);
 
   return (
-    <div className="mt-8 pb-40 px-4">
-      <div className="flex justify-between items-center mb-6">
-        <p className="text-3xl font-bold">Weekly Schedule</p>
-        <button
-          onClick={() => setShowRequestModal(true)}
-          className="px-8 border-2 hover:bg-orange-50 hover:text-black"
-        >
-          Request Time Off
-        </button>
-      </div>
-
-      <div className="mb-10">
-        {showRequestModal && (
-          <TimeOffRequestForm
-            onClose={() => setShowRequestModal(false)}
-            onSubmitted={fetchEmployees}
-          />
-        )}
-      </div>
-
+    <div className="mt-8 pb-40 ">
       {loading ? (
-        <p>Loading employees...</p>
+        <p className="text-center text-gray-500 text-lg">
+          Loading employees...
+        </p>
       ) : (
         <>
-          <div className="text-end mb-10">
+          <div className="flex justify-end mb-6 ">
             <button
               onClick={handlePrevWeek}
-              className="mr-3 py-2 px-5 border-2 hover:bg-gray-200"
+              className="py-2 px-5 border-2 mr-3 hover:bg-orange-400 transition-colors"
             >
               Previous
             </button>
             <button
               onClick={handleNextWeek}
-              className="py-2 px-5 border-2 hover:bg-gray-200"
+              className="py-2 px-5 border-2 hover:bg-orange-400 transition-colors"
             >
               Next
             </button>
           </div>
-          {/* Weekdays header */}
-          <div className="grid grid-cols-8 text-center font-bold border-b pb-2">
-            <div className="text-left pl-2">Employee</div>
-            {next7Days.map((d, i) => (
-              <div key={i}>
-                {daysOfWeek[d.getDay()]} {d.getDate()}
-              </div>
-            ))}
+
+          <div className="grid grid-cols-8 text-center font-bold border-b-2 border-gray-200 pb-2">
+            <div className="text-left pl-2 text-white">Employee</div>
+            {next7Days.map((d, i) => {
+              const isToday = d.toDateString() === today.toDateString();
+              return (
+                <div
+                  key={i}
+                  className={`text-gray-700 flex flex-col items-center ${
+                    isToday ? "bg-white text-black rounded-md px-2 py-1" : ""
+                  }`}
+                >
+                  <span className="block text-sm  text-gray-400">
+                    {d.toLocaleString("default", { month: "short" })}
+                  </span>
+                  <span className="block text-lg font-semibold">
+                    {daysOfWeek[d.getDay()]} {d.getDate()}
+                  </span>
+                </div>
+              );
+            })}
           </div>
 
-          <div className="mt-3 flex flex-col gap-2">
+          <div className="mt-4 flex flex-col gap-3">
             {employees.map((emp) => (
-              <div key={emp.user_id} className="grid grid-cols-8 border h-16">
-                <div className="flex items-center pl-2 font-semibold">
+              <div
+                key={emp.user_id}
+                className="grid grid-cols-8 min-h-20 border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-center pl-3 font-semibold text-gray-800 bg-gray-50">
                   {emp.username}
                 </div>
+
                 {next7Days.map((d, i) => {
-                  const dateStr = todayStr(d);
+                  const dateStr = formatDateForCompare(d);
                   const isOff = emp.daysOff?.includes(dateStr);
-                  let bgClass = isOff
-                    ? "bg-red-500 text-white"
-                    : d.toDateString() === today.toDateString()
-                      ? "bg-orange-400 text-black"
-                      : d < today
-                        ? "bg-green-500 text-black"
-                        : "bg-black text-white";
+
+                  const dayHolidayList = publicHolidays.filter(
+                    (h) =>
+                      formatDateForCompare(h.date) ===
+                        formatDateForCompare(d) &&
+                      h.countryCode === emp.country_code,
+                  );
+
+                  let bgClass =
+                    dayHolidayList.length > 0
+                      ? "text-white"
+                      : isOff
+                        ? "bg-red-500 text-white"
+                        : d.toDateString() === today.toDateString()
+                          ? "bg-gray-100 text-black font-bold"
+                          : d < today
+                            ? "bg-green-200 text-black"
+                            : "bg-gray-900 text-white";
+                  const leaveForDay = emp.leaves?.find(
+                    (leave) =>
+                      formatDateForCompare(leave.start_date) <= dateStr &&
+                      formatDateForCompare(leave.end_date) >= dateStr,
+                  );
+
+                  let label =
+                    dayHolidayList.length > 0
+                      ? "Holiday"
+                      : leaveForDay
+                        ? `${leaveForDay.leave_type} (Not working)`
+                        : "Working";
+                  ("Working");
 
                   return (
                     <div
                       key={i}
-                      className={`flex items-center justify-center border-l ${bgClass}`}
+                      className={`flex flex-col items-center justify-center border-l text-xs p-1 ${bgClass}`}
                     >
-                      {isOff ? "Off" : "Work"}
+                      <span className="font-medium">{label}</span>
+
+                      {dayHolidayList.length > 0 && (
+                        <div className="flex flex-col gap-1 mt-1">
+                          {dayHolidayList.map((h) => (
+                            <div
+                              key={h.countryCode + h.date}
+                              className="text-[10px] font-bold flex flex-col items-center"
+                              title={`${h.localName} (${h.countryCode})`}
+                            >
+                              <span>{h.localName}</span>
+                              <span className="text-gray-200">
+                                {h.countryCode}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   );
                 })}

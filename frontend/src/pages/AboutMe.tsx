@@ -47,6 +47,7 @@ const AboutMe = () => {
                     className={`px-3 py-1 text-xs rounded-full border ${statusColor}`}
                   >
                     {request.status.toUpperCase()}
+                    {request.leave_type}
                   </span>
                 </div>
 

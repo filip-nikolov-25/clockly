@@ -17,9 +17,8 @@ const Register = ({ setUser }: Props) => {
     role: "employee",
     religion: "",
     code: "",
+    country_code: "",
   });
-
-  console.log(userInfo, "userif  ");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -82,6 +81,35 @@ const Register = ({ setUser }: Props) => {
               className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-500 focus:outline-none transition-all"
               required
             />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-300 mb-1 font-medium">
+              Country
+            </label>
+            <select
+              value={userInfo.country_code}
+              onChange={(e) =>
+                setUserInfo({ ...userInfo, country_code: e.target.value })
+              }
+              className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-500 focus:outline-none transition-all"
+              required
+            >
+              <option value="">Select your country</option>
+              {[
+                { name: "Switzerland", code: "CH" },
+                { name: "Canada", code: "CA" },
+                { name: "North Macedonia", code: "MK" },
+                { name: "Germany", code: "DE" },
+                { name: "France", code: "FR" },
+                { name: "Italy", code: "IT" },
+                { name: "Spain", code: "ES" },
+                { name: "Australia", code: "AU" },
+              ].map((country) => (
+                <option key={country.code} value={country.code}>
+                  {country.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="mb-6">

@@ -47,8 +47,8 @@ const TimeOffRequestForm = ({
       await axios.post("http://localhost:5000/api/requesttimeoff", {
         start_date: leaveStart,
         end_date: leaveEnd,
-        type: leaveType,
-        reason,
+        leave_type: leaveType,
+        reason: reason,
       });
 
       setMessage("Request submitted successfully!");
@@ -66,7 +66,7 @@ const TimeOffRequestForm = ({
       setLoading(false);
     }
   };
-
+    console.log(leaveType,"LEAVE TYPE")
   return (
     <div className="bg-[#202020] mt-4 p-6 rounded-xl ">
       <h2 className="text-white text-2xl font-bold mb-4">New Leave Request</h2>
@@ -102,9 +102,9 @@ const TimeOffRequestForm = ({
         <option value="" disabled>
           Select Leave Type
         </option>
-        <option value="vacation">Vacation</option>
-        <option value="sick">Sick Leave</option>
-        <option value="personal">Personal</option>
+        <option value="Vacation">Vacation</option>
+        <option value="Sick Leave">Sick Leave</option>
+        <option value="Personal">Personal</option>
       </select>
 
       <textarea

@@ -150,9 +150,9 @@ const NavBar = ({ user, setUser }: Props) => {
           )}
         </div>
       </div>
-      <div className="w-full h-1 bg-[#101010] border-b-2 border-{#101010}">
+      <div className="w-full h-1 bg-[#101010] ">
         <div
-          className="h-full bg-orange-300 transition-all duration-300 ease-in-out"
+          className="h-full bg-orange-50 transition-all duration-300 ease-in-out"
           style={{ width: `${scrollProgress}%` }}
         />
       </div>
