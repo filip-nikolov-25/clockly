@@ -9,6 +9,7 @@ import type { userType } from "./interfaces/types";
 import Admin from "./pages/Admin";
 import CalendarPage from "./pages/CalendarPage";
 import AboutMe from "./pages/AboutMe";
+import TimeManagment from "./pages/TimeManagment";
 
 const App = () => {
   axios.defaults.withCredentials = true;
@@ -64,6 +65,7 @@ const App = () => {
           element={<div className="text-white p-10">Employees Page</div>}
         />
         <Route path="/aboutme" element={<AboutMe />} />
+        <Route path="/time" element={<TimeManagment />}/>
         <Route
           path="*"
           element={<div className="text-white p-10">NOT FOUND PAGE</div>}

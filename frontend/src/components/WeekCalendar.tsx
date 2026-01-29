@@ -12,6 +12,7 @@ const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const WeekCalendar = ({ publicHolidays }: Props) => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(false);
+  const [workEntries, setWorkEntries] = useState<{ [key: string]: any }>({});
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -23,6 +24,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
     d.setHours(0, 0, 0, 0);
     return d;
   };
+
   const [startDate, setStartDate] = useState(getStartOfWeek(new Date()));
 
   const next7Days = Array.from({ length: 7 }, (_, i) => {
@@ -74,10 +76,42 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
       setLoading(false);
     }
   };
+  // ADD THIS FOR THE WEEK CALENDAR TO SHOW FOR PAST DAAYS HOW MANY HOURS EACH USER HAS WORKED
+  const fetchWorkHoursForEmployees = async () => {
+    try {
+      const startStr = startDate.toISOString().split("T")[0];
+      const endStr = next7Days[next7Days.length - 1]
+        .toISOString()
+        .split("T")[0];
+
+      const res = await axios.get(
+        "http://localhost:5000/api/weekcalendar/work-time",
+        {
+          params: { startDate: startStr, endDate: endStr },
+        },
+      );
+      console.log(res, "REPSONSE");
+
+      const entriesMap: { [key: string]: any } = {};
+      res.data.forEach((entry: any) => {
+        const dateKey = entry.work_date.split("T")[0]; 
+        const key = `${entry.user_id}_${dateKey}`;
+        entriesMap[key] = entry;
+      });
+
+      setWorkEntries(entriesMap);
+    } catch (err) {
+      console.error("Failed to fetch work entries", err);
+    }
+  };
 
   useEffect(() => {
     fetchEmployees();
   }, []);
+
+  useEffect(() => {
+    fetchWorkHoursForEmployees();
+  }, [startDate]);
 
   return (
     <div className="mt-8 pb-40 ">
@@ -136,14 +170,25 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
 
                 {next7Days.map((d, i) => {
                   const dateStr = formatDateForCompare(d);
+
+                  const key = `${emp.user_id}_${dateStr}`;
+                  const entry = workEntries[key];
+
+                  const isPast = d < today;
+
                   const isOff = emp.daysOff?.includes(dateStr);
 
                   const dayHolidayList = publicHolidays.filter(
                     (h) =>
-                      formatDateForCompare(h.date) ===
-                        formatDateForCompare(d) &&
+                      formatDateForCompare(h.date) === dateStr &&
                       h.countryCode === emp.country_code,
                   );
+
+                  let label: string | number = "Working";
+                  console.log(entry, "ENTRY");
+                  if (dayHolidayList.length > 0) label = "Holiday";
+                  else if (isOff) label = "Not working";
+                  else if (isPast && true) label = entry?.total_minutes; /// ADD HERE THE PAST DAYS HOW MANY HOURS THE USER HAD WORKED OVER THE WEEK
 
                   let bgClass =
                     dayHolidayList.length > 0
@@ -153,21 +198,8 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                         : d.toDateString() === today.toDateString()
                           ? "bg-gray-100 text-black font-bold"
                           : d < today
-                            ? "bg-green-200 text-black"
+                            ? "bg-gray-900 text-orange-400"
                             : "bg-gray-900 text-white";
-                  const leaveForDay = emp.leaves?.find(
-                    (leave) =>
-                      formatDateForCompare(leave.start_date) <= dateStr &&
-                      formatDateForCompare(leave.end_date) >= dateStr,
-                  );
-
-                  let label =
-                    dayHolidayList.length > 0
-                      ? "Holiday"
-                      : leaveForDay
-                        ? `${leaveForDay.leave_type} (Not working)`
-                        : "Working";
-                  ("Working");
 
                   return (
                     <div
@@ -175,7 +207,6 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                       className={`flex flex-col items-center justify-center border-l text-xs p-1 ${bgClass}`}
                     >
                       <span className="font-medium">{label}</span>
-
                       {dayHolidayList.length > 0 && (
                         <div className="flex flex-col gap-1 mt-1">
                           {dayHolidayList.map((h) => (
