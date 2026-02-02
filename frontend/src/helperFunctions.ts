@@ -23,4 +23,10 @@ export const formatTime = (dateString: string | Date) => {
   return `${h}:${m}`;
 // 14:35
 };
+export const formatMinutesToHHMM = (minutes?: string | number) => {
+  const mins = Number(minutes || 0);
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
 
+  return `${h}:${String(m).padStart(2, "0")} h`;
+};

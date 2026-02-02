@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import type { Employee, PublicHolidayType, TimeOff } from "../interfaces/types";
-import { formatDateForCompare } from "../helperFunctions";
+import { formatDateForCompare, formatMinutesToHHMM } from "../helperFunctions";
 
 interface Props {
   publicHolidays: PublicHolidayType[];
@@ -94,7 +94,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
 
       const entriesMap: { [key: string]: any } = {};
       res.data.forEach((entry: any) => {
-        const dateKey = entry.work_date.split("T")[0]; 
+        const dateKey = entry.work_date.split("T")[0];
         const key = `${entry.user_id}_${dateKey}`;
         entriesMap[key] = entry;
       });
@@ -188,7 +188,11 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                   console.log(entry, "ENTRY");
                   if (dayHolidayList.length > 0) label = "Holiday";
                   else if (isOff) label = "Not working";
-                  else if (isPast && true) label = entry?.total_minutes; /// ADD HERE THE PAST DAYS HOW MANY HOURS THE USER HAD WORKED OVER THE WEEK
+                  else if (isPast) {
+                    label = entry
+                      ? formatMinutesToHHMM(entry.worked_minutes)
+                      : "0 h";
+                  }
 
                   let bgClass =
                     dayHolidayList.length > 0

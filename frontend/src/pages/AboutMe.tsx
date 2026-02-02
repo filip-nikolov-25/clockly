@@ -46,11 +46,9 @@ const AboutMe = () => {
         const { data } = await axios.get(
           "http://localhost:5000/api/work/previous-month",
           {
-            headers: { "Cache-Control": "no-cache" },
             params: { t: new Date().getTime() },
           }
         );
-
         setPreviousMonthWork(data); 
       } catch (err) {
         console.error("Fetch previous month work failed", err);

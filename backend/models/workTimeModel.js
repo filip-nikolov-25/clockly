@@ -7,7 +7,7 @@ export const createEntry = async (userId, companyId) => {
     VALUES ($1, $2, NOW(), CURRENT_DATE)
     RETURNING *
     `,
-    [userId, companyId]
+    [userId, companyId],
   );
 
   return result.rows[0];
@@ -20,7 +20,7 @@ export const startBreak = async (entryId) => {
     SET break_start = NOW()
     WHERE id = $1
     `,
-    [entryId]
+    [entryId],
   );
 };
 //end break
@@ -31,7 +31,7 @@ export const endBreak = async (entryId) => {
     SET break_end = NOW()
     WHERE id = $1
     `,
-    [entryId]
+    [entryId],
   );
 };
 // end work
@@ -48,12 +48,12 @@ export const endWork = async (entryId) => {
     WHERE id = $1
     RETURNING total_minutes
     `,
-    [entryId]
+    [entryId],
   );
 
   return result.rows[0];
 };
-// Get this for my status to fetch the today work and for clock when starting to work aka onClick START 
+// Get this for my status to fetch the today work and for clock when starting to work aka onClick START
 export const getTodayEntry = async (userId, companyId) => {
   const result = await pool.query(
     `
@@ -65,39 +65,57 @@ export const getTodayEntry = async (userId, companyId) => {
     ORDER BY created_at DESC
     LIMIT 1
     `,
-    [userId, companyId]
+    [userId, companyId],
   );
 
   return result.rows[0];
 };
-// // get working time for employee past 30 days 
-export const getEntriesForPeriod = async (user_id, company_id, startDate, endDate) => {
+// // get working time for employee past 30 days
+export const getEntriesForPeriod = async (
+  user_id,
+  company_id,
+  startDate,
+  endDate,
+) => {
   const query = `
-    SELECT *,
-      (total_minutes - EXTRACT(EPOCH FROM break_end - break_start)/60) AS worked_minutes,
-      (EXTRACT(EPOCH FROM break_end - break_start)/60) AS break_minutes
-    FROM worktime_employees
-    WHERE user_id = $1
-      AND company_id = $2
-      AND work_date BETWEEN $3 AND $4
-    ORDER BY work_date ASC
+  SELECT *,
+  (
+    total_minutes
+    - COALESCE(EXTRACT(EPOCH FROM (break_end - break_start)) / 60, 0)
+  ) AS worked_minutes,
+  COALESCE(
+    EXTRACT(EPOCH FROM (break_end - break_start)) / 60,
+    0
+  ) AS break_minutes
+FROM worktime_employees
+WHERE user_id = $1
+  AND company_id = $2
+  AND work_date BETWEEN $3 AND $4
+ORDER BY work_date ASC;
   `;
   const values = [user_id, company_id, startDate, endDate];
   const result = await pool.query(query, values);
   return result.rows;
 };
 
-export const getWorkTimeForAllUsersForWeekCalendarModel= async (startDate, endDate) => {
+export const getWorkTimeForAllUsersForWeekCalendarModel = async (
+  startDate,
+  endDate,
+) => {
   const query = `
     SELECT
       user_id,
-      work_date::date AS work_date, -- just the date, no timezone
-      total_minutes,
-      (COALESCE(total_minutes, 0) - COALESCE(EXTRACT(EPOCH FROM break_end - break_start)/60, 0)) AS worked_minutes
+      work_date::date AS work_date,
+      COALESCE(total_minutes, 0) AS total_minutes,
+      ROUND(
+        COALESCE(total_minutes, 0)
+        - COALESCE(EXTRACT(EPOCH FROM (break_end - break_start)) / 60, 0)
+      )::int AS worked_minutes
     FROM worktime_employees
-    WHERE work_date BETWEEN $1 AND $2
+    WHERE work_date::date BETWEEN $1::date AND $2::date
+    ORDER BY work_date ASC
   `;
+
   const result = await pool.query(query, [startDate, endDate]);
   return result.rows;
 };
-
