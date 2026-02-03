@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import Wrapper from "../components/base/Wrapper";
 import axios from "axios";
-import { formatDate, formatTime } from "../helperFunctions";
+import { formatDateDisplay, formatTimeDisplay } from "../helperFunctions";
 
 const AboutMe = () => {
   const [todayWork, setTodayWork] = useState<any>(null);
   const [previousMonthWork, setPreviousMonthWork] = useState<any[]>([]);
   const [requestTimeOff, setRequestTimeOff] = useState<any[]>([]);
 
-  //  HH:mm format 
   const formatWorkedTime = (minutes: number) => {
     if (!minutes) return "0h 0m";
     const hrs = Math.floor(minutes / 60);
@@ -49,6 +48,7 @@ const AboutMe = () => {
             params: { t: new Date().getTime() },
           }
         );
+        console.log(data,"DATA ")
         setPreviousMonthWork(data); 
       } catch (err) {
         console.error("Fetch previous month work failed", err);
@@ -80,11 +80,11 @@ const AboutMe = () => {
         <div className="bg-[#202020] border border-white/10 rounded-2xl p-5 mb-8">
           <div className="flex justify-between text-gray-400">
             <span>Start Time:</span>
-            <span className="text-white">{formatTime(todayWork.start_time)}</span>
+            <span className="text-white">{formatTimeDisplay(todayWork.start_time)}</span>
           </div>
           <div className="flex justify-between text-gray-400">
             <span>End Time:</span>
-            <span className="text-white">{todayWork.end_time ? formatTime(todayWork.end_time) : "-"}</span>
+            <span className="text-white">{todayWork.end_time ? formatTimeDisplay(todayWork.end_time) : "-"}</span>
           </div>
           <div className="flex justify-between text-gray-400">
             <span>Total Break:</span>
@@ -105,18 +105,18 @@ const AboutMe = () => {
       {previousMonthWork.length > 0 ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 mb-8">
           {previousMonthWork.map((entry: any, index: number) => (
-            <div key={index} className="bg-[#202020] border border-white/10 rounded-2xl p-5">
+            <div key={entry.id} className="bg-[#202020] border border-white/10 rounded-2xl p-5">
               <div className="flex justify-between text-gray-400">
                 <span>Date:</span>
-                <span className="text-white">{formatDate(entry.work_date)}</span>
+                <span className="text-white">{formatDateDisplay(entry.work_date)}</span>
               </div>
               <div className="flex justify-between text-gray-400">
                 <span>Start:</span>
-                <span className="text-white">{formatTime(entry.start_time)}</span>
+                <span className="text-white">{formatTimeDisplay(entry.start_time)}</span>
               </div>
               <div className="flex justify-between text-gray-400">
                 <span>End:</span>
-                <span className="text-white">{entry.end_time ? formatTime(entry.end_time) : "-"}</span>
+                <span className="text-white">{entry.end_time ? formatTimeDisplay(entry.end_time) : "-"}</span>
               </div>
               <div className="flex justify-between text-gray-400">
                 <span>Break:</span>
@@ -157,11 +157,11 @@ const AboutMe = () => {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between text-gray-400">
                     <span>From</span>
-                    <span className="text-white">{formatDate(request.start_date)}</span>
+                    <span className="text-white">{formatDateDisplay(request.start_date)}</span>
                   </div>
                   <div className="flex justify-between text-gray-400">
                     <span>To</span>
-                    <span className="text-white">{formatDate(request.end_date)}</span>
+                    <span className="text-white">{formatDateDisplay(request.end_date)}</span>
                   </div>
                 </div>
               </div>

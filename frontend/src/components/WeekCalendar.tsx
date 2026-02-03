@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import type { Employee, PublicHolidayType, TimeOff } from "../interfaces/types";
-import { formatDateForCompare, formatMinutesToHHMM } from "../helperFunctions";
+import { formatDateToISO, formatMinutesToTime, toLocalISODate } from "../helperFunctions";
 
 interface Props {
   publicHolidays: PublicHolidayType[];
@@ -74,8 +74,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
       console.error(err);
     } finally {
       setLoading(false);
-    }
-  };
+    }}
   // ADD THIS FOR THE WEEK CALENDAR TO SHOW FOR PAST DAAYS HOW MANY HOURS EACH USER HAS WORKED
   const fetchWorkHoursForEmployees = async () => {
     try {
@@ -94,7 +93,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
 
       const entriesMap: { [key: string]: any } = {};
       res.data.forEach((entry: any) => {
-        const dateKey = entry.work_date.split("T")[0];
+        const dateKey = toLocalISODate(entry.work_date);
         const key = `${entry.user_id}_${dateKey}`;
         entriesMap[key] = entry;
       });
@@ -169,7 +168,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                 </div>
 
                 {next7Days.map((d, i) => {
-                  const dateStr = formatDateForCompare(d);
+               const dateStr = toLocalISODate(d);
 
                   const key = `${emp.user_id}_${dateStr}`;
                   const entry = workEntries[key];
@@ -180,7 +179,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
 
                   const dayHolidayList = publicHolidays.filter(
                     (h) =>
-                      formatDateForCompare(h.date) === dateStr &&
+                      formatDateToISO(h.date) === dateStr &&
                       h.countryCode === emp.country_code,
                   );
 
@@ -190,7 +189,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                   else if (isOff) label = "Not working";
                   else if (isPast) {
                     label = entry
-                      ? formatMinutesToHHMM(entry.worked_minutes)
+                      ? formatMinutesToTime(entry.worked_minutes)
                       : "0 h";
                   }
 
@@ -202,7 +201,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                         : d.toDateString() === today.toDateString()
                           ? "bg-gray-100 text-black font-bold"
                           : d < today
-                            ? "bg-gray-900 text-orange-400"
+                            ? "bg-gray-900 text-green-400"
                             : "bg-gray-900 text-white";
 
                   return (
@@ -239,4 +238,4 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
   );
 };
 
-export default WeekCalendar;
+export default WeekCalendar

@@ -91,7 +91,7 @@ FROM worktime_employees
 WHERE user_id = $1
   AND company_id = $2
   AND work_date BETWEEN $3 AND $4
-ORDER BY work_date ASC;
+ORDER BY work_date DESC, created_at DESC
   `;
   const values = [user_id, company_id, startDate, endDate];
   const result = await pool.query(query, values);

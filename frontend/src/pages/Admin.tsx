@@ -2,7 +2,7 @@ import { useState, useEffect, type FormEvent } from "react";
 import type { TimeOffRequest, userType } from "../interfaces/types";
 import axios from "axios";
 import Wrapper from "../components/base/Wrapper";
-import { formatDate } from "../helperFunctions";
+import { formatDateDisplay } from "../helperFunctions";
 
 interface Props {
   user: userType | null;
@@ -157,8 +157,8 @@ const Admin = ({ user }: Props) => {
                     <p className="text-sm text-gray-400">{request.email}</p>
 
                     <div className="flex justify-between mt-2 text-sm">
-                      <span>{formatDate(request.start_date)}</span>
-                      <span>{formatDate(request.end_date)}</span>
+                      <span>{formatDateDisplay(request.start_date)}</span>
+                      <span>{formatDateDisplay(request.end_date)}</span>
                     </div>
 
                     <span
