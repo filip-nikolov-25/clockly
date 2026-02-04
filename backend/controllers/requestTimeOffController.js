@@ -1,3 +1,4 @@
+import { createNotificationModel } from "../models/notificationModel.js";
 import {
   sendLeaveRequest,
   getLeaveRequests,
@@ -49,26 +50,34 @@ export const getTimeOffRequestsForAdminController = async (req, res) => {
   }
 };
 
+
 export const adminUpdateTimeOffStatusController = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
   const company_id = req.user.company_id;
-
-  console.log("Updating Request ID:", id, "to Status:", status);
 
   if (!["accepted", "rejected"].includes(status)) {
     return res.status(400).json({ message: "Invalid status" });
   }
 
   try {
-    const result = await adminUpdateTimeOffStatusModel(id, status, company_id);
+  
+    const updatedRequest = await adminUpdateTimeOffStatusModel(id, status, company_id);
 
-    if (result.rowCount === 0) {
+    if (!updatedRequest) {
       return res.status(404).json({ message: "Request not found" });
     }
 
-    res.status(200).json(result.rows[0]);
+    //  Create notification 
+    const title = status === "accepted" ? "Time Off Approved" : "Time Off Rejected";
+    const message = `Your time off request from ${updatedRequest.start_date} to ${updatedRequest.end_date} has been ${status}.`;
+
+    await createNotificationModel(updatedRequest.user_id, title, message);
+
+ 
+    res.status(200).json(updatedRequest);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: err.message });
   }
 };

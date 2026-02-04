@@ -1,22 +1,9 @@
-import React from "react";
-import type { userType } from "../interfaces/types";
 
-interface Props {
-  error: string | null;
-  setError: React.Dispatch<React.SetStateAction<string>>;
-  user: userType | null;
-}
 
-const Homepage = ({ error, user }: Props) => {
-  console.log("Current User in Homepage:", user?.role);
+const Homepage = () => {
   return (
     <div className=" text-white">
-      {/* {error && <div className="text-red-500">{error}</div>}
-      {user ? (
-        <h2>Welcome {user.username}</h2>
-      ) : (
-        <h2>Please login or register</h2>
-      )} */}
+
 
       <div className="flex justify-center p-20 items-center">
         <div>
@@ -28,7 +15,7 @@ const Homepage = ({ error, user }: Props) => {
           </div>
         </div>
       </div>
-      <div className="  py-[550px]"></div>
+      <div className="  py-137.5"></div>
     </div>
   );
 };

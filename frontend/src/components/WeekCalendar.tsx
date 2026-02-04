@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import type { Employee, PublicHolidayType, TimeOff } from "../interfaces/types";
-import { formatDateToISO, formatMinutesToTime, toLocalISODate } from "../helperFunctions";
+import {
+  formatDateToISO,
+  formatMinutesToTime,
+  toLocalISODate,
+} from "../helperFunctions";
 
 interface Props {
   publicHolidays: PublicHolidayType[];
@@ -46,16 +50,21 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
   };
 
   const formatLeavesToDays = (leaves: TimeOff[] = []) => {
-    const days: string[] = [];
+    const days: Record<string, string> = {};
+
     leaves.forEach((leave) => {
       if (!leave.start_date || !leave.end_date) return;
+
       let current = new Date(leave.start_date);
       const end = new Date(leave.end_date);
+
       while (current <= end) {
-        days.push(current.toISOString().split("T")[0]);
+        const dateKey = current.toISOString().split("T")[0];
+        days[dateKey] = leave.leave_type; // 👈 store type
         current.setDate(current.getDate() + 1);
       }
     });
+
     return days;
   };
 
@@ -74,7 +83,8 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
       console.error(err);
     } finally {
       setLoading(false);
-    }}
+    }
+  };
   // ADD THIS FOR THE WEEK CALENDAR TO SHOW FOR PAST DAAYS HOW MANY HOURS EACH USER HAS WORKED
   const fetchWorkHoursForEmployees = async () => {
     try {
@@ -111,7 +121,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
   useEffect(() => {
     fetchWorkHoursForEmployees();
   }, [startDate]);
-
+  console.log(employees);
   return (
     <div className="mt-8 pb-40 ">
       {loading ? (
@@ -134,7 +144,6 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
               Next
             </button>
           </div>
-
           <div className="grid grid-cols-8 text-center font-bold border-b-2 border-gray-200 pb-2">
             <div className="text-left pl-2 text-white">Employee</div>
             {next7Days.map((d, i) => {
@@ -156,7 +165,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
               );
             })}
           </div>
-
+          ``
           <div className="mt-4 flex flex-col gap-3">
             {employees.map((emp) => (
               <div
@@ -168,14 +177,15 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                 </div>
 
                 {next7Days.map((d, i) => {
-               const dateStr = toLocalISODate(d);
+                  const dateStr = toLocalISODate(d);
 
                   const key = `${emp.user_id}_${dateStr}`;
                   const entry = workEntries[key];
 
                   const isPast = d < today;
 
-                  const isOff = emp.daysOff?.includes(dateStr);
+                  const leaveType = emp.daysOff?.[dateStr];
+                  const isOff = leaveType;
 
                   const dayHolidayList = publicHolidays.filter(
                     (h) =>
@@ -186,7 +196,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                   let label: string | number = "Working";
                   console.log(entry, "ENTRY");
                   if (dayHolidayList.length > 0) label = "Holiday";
-                  else if (isOff) label = "Not working";
+                  else if (isOff) label = leaveType;
                   else if (isPast) {
                     label = entry
                       ? formatMinutesToTime(entry.worked_minutes)
@@ -238,4 +248,4 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
   );
 };
 
-export default WeekCalendar
+export default WeekCalendar;

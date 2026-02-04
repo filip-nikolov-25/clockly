@@ -5,6 +5,7 @@ import {
   updateEmployee,
   deleteEmployee,
   deleteAllEmployees,
+  getCurrentCompanyModel,
 } from "../models/employeesModel.js";
 
 // GET ALL
@@ -69,3 +70,15 @@ export const deleteAllEmployeesController = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+//Get current company
+export const getCurrentCompanyController = async (req,res) => {
+  
+ const company_id = req.user.company_id;
+  try {
+   const selectCompany =  await getCurrentCompanyModel(company_id)
+    res.status(200).json(selectCompany)
+  } catch (error) {
+    res.status(500).json({error:"Server error"})
+  }
+}

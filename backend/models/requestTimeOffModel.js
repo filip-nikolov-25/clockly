@@ -19,7 +19,7 @@ export const sendLeaveRequest = async (
 
 export const getLeaveRequests = async (user_id, company_id) => {
   const result = await db.query(
-    "SELECT status, start_date, end_date FROM leave_requests WHERE user_id = $1 AND company_id = $2",
+    "SELECT status, start_date, end_date, leave_type,reason FROM leave_requests WHERE user_id = $1 AND company_id = $2",
     [user_id, company_id],
   );
   return result.rows;
@@ -33,6 +33,7 @@ export const getTimeOffRequestsForAdminModel = async (company_id) => {
       lr.status,
       lr.start_date,
       lr.end_date,
+      lr.leave_type,
       u.username,
       u.email
     FROM leave_requests lr
@@ -63,7 +64,7 @@ export const adminUpdateTimeOffStatusModel = async (id, status, company_id) => {
     [normalizedStatus, id, company_id],
   );
 
-  return result;
+  return result.rows[0];
 };
 
 export const getUsersWithApprovedTimeOffModel = async (company_id) => {

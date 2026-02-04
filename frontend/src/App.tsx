@@ -5,7 +5,7 @@ import Register from "./pages/Register";
 import Homepage from "./pages/Homepage";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import type { userType } from "./interfaces/types";
+import type { UserType } from "./interfaces/types";
 import Admin from "./pages/Admin";
 import CalendarPage from "./pages/CalendarPage";
 import AboutMe from "./pages/AboutMe";
@@ -13,12 +13,10 @@ import TimeManagment from "./pages/TimeManagment";
 
 const App = () => {
   axios.defaults.withCredentials = true;
-  const [user, setUser] = useState<userType | null>(null);
+  const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   
-
-  console.log("Current User in App ROLE:", user);
   useEffect(() => {
     const fetchUser = async () => {
       setLoading(true);
@@ -48,7 +46,7 @@ const App = () => {
       <Routes>
         <Route
           path="/"
-          element={<Homepage error={error} setError={setError} user={user} />}
+          element={<Homepage  />}
         />
         <Route
           path="/login"
@@ -64,7 +62,7 @@ const App = () => {
           path="/employees"
           element={<div className="text-white p-10">Employees Page</div>}
         />
-        <Route path="/aboutme" element={<AboutMe />} />
+        <Route path="/aboutme" element={<AboutMe user={user} />} />
         <Route path="/time" element={<TimeManagment />}/>
         <Route
           path="*"

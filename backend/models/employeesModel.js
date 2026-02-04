@@ -39,3 +39,8 @@ export const deleteEmployee = async (id) => {
 export const deleteAllEmployees = async () => {
   await db.query("DELETE FROM users");
 };
+// Get current comppany
+export const getCurrentCompanyModel = async (id) => {
+ const res= await db.query("SELECT name FROM companies WHERE id = $1 ",[id])
+  return res.rows[0];
+}

@@ -1,11 +1,11 @@
 import { useState, useEffect, type FormEvent } from "react";
-import type { TimeOffRequest, userType } from "../interfaces/types";
+import type { TimeOffRequest, UserType } from "../interfaces/types";
 import axios from "axios";
 import Wrapper from "../components/base/Wrapper";
 import { formatDateDisplay } from "../helperFunctions";
 
 interface Props {
-  user: userType | null;
+  user: UserType | null;
 }
 
 const Admin = ({ user }: Props) => {
@@ -47,7 +47,6 @@ const Admin = ({ user }: Props) => {
       return;
     }
 
-    console.log("Submitting invite code:", inviteCodes);
     try {
       const response = await axios.post(
         "http://localhost:5000/api/sendinvite",
@@ -70,7 +69,6 @@ const Admin = ({ user }: Props) => {
         `http://localhost:5000/api/requesttimeoff/admin/${id}`,
         { status },
       );
-      console.log("Updated Request Status:", res.data);
 
       setRequests((prev) =>
         prev.map((r) => (r.id === id ? { ...r, status: res.data.status } : r)),
@@ -80,11 +78,15 @@ const Admin = ({ user }: Props) => {
     }
   };
 
+  console.log(requests,"reques ats")
   return (
     <Wrapper>
       <div className="text-white min-h-screen p-10">
         <h1 className="text-6xl text-center">Admin Panel</h1>
-        <p className="text-center text-3xl mt-10">Welcome, {user?.username}</p>
+        <p className="text-center text-3xl mt-10">
+          Admin:{" "}
+          <span className="font-bold text-orange-400"> {user?.username} </span>
+        </p>
 
         <form
           className="mt-10 w-1/3 mx-auto flex flex-col gap-5"
@@ -132,8 +134,8 @@ const Admin = ({ user }: Props) => {
         </form>
 
         <div className="mt-16">
-          <h2 className="text-3xl mb-5 text-center">
-            Employees' Time Off Requests
+          <h2 className="text-4xl mb-10 text-start font-bold ">
+            Employee's Absence Requests
           </h2>
 
           {loadingRequests ? (
@@ -153,12 +155,14 @@ const Admin = ({ user }: Props) => {
                     key={request.id}
                     className="bg-[#202020] border border-white/10 rounded-2xl p-5 hover:scale-[1.02] transition-transform duration-200"
                   >
+                    <p className="text-2xl font-extrabold mb-2">{request.leave_type}</p>
                     <p className="font-semibold">{request.username}</p>
                     <p className="text-sm text-gray-400">{request.email}</p>
+                    <p className="text-sm text-gray-400">{request.reason}</p>
 
-                    <div className="flex justify-between mt-2 text-sm">
-                      <span>{formatDateDisplay(request.start_date)}</span>
-                      <span>{formatDateDisplay(request.end_date)}</span>
+                    <div className="mt-2 flex  justify-between  text-sm">
+                      <span className="mr-5 mb-2">Start:  {formatDateDisplay(request.start_date)}</span> 
+                      <span>End: {formatDateDisplay(request.end_date)}</span>
                     </div>
 
                     <span
@@ -172,6 +176,7 @@ const Admin = ({ user }: Props) => {
                         <>
                           <button
                             onClick={() =>
+                              request.id &&
                               updateRequestStatus(request.id, "accepted")
                             }
                             className="bg-green-500 hover:bg-green-700 px-3 py-1 rounded text-xs"
@@ -180,6 +185,7 @@ const Admin = ({ user }: Props) => {
                           </button>
                           <button
                             onClick={() =>
+                              request.id &&
                               updateRequestStatus(request.id, "rejected")
                             }
                             className="bg-red-500 hover:bg-red-700 px-3 py-1 rounded text-xs"

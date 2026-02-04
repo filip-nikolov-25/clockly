@@ -47,10 +47,10 @@ const Calendar = ({ publicHolidays = [], onDateClick }: MonthCalendarProps) => {
       <div className="flex justify-between items-center mb-6">
         <p className="text-3xl font-bold">{monthName} {year}</p>
         <div>
-          <button onClick={handlePrev} className="mr-3 py-2 px-5 border-2 hover:bg-orange-400">
+          <button onClick={handlePrev} className="mr-3 py-2 px-5 border-2 duration-300 hover:bg-orange-400">
             Previous
           </button>
-          <button onClick={handleNext} className="py-2 px-5 border-2 hover:bg-orange-400">
+          <button onClick={handleNext} className="py-2 px-5 border-2 duration-300 hover:bg-orange-400">
             Next
           </button>
         </div>

@@ -79,25 +79,29 @@ const TimeOffRequestForm = ({
             value={leaveStart}
             onChange={(e) => setLeaveStart(e.target.value)}
             min={todayStr}
-            className="bg-black border-2 px-2 py-1 rounded"
+            className="bg-black border-2 px-2 py-1 rounded
+             [&::-webkit-calendar-picker-indicator]:invert
+             [&::-webkit-calendar-picker-indicator]:cursor-pointer"
           />
         </div>
         <div className="flex-1 flex flex-col text-white">
           <label>End Date:</label>
-          <input
-            type="date"
-            value={leaveEnd}
-            onChange={(e) => setLeaveEnd(e.target.value)}
-            min={leaveStart || todayStr}
-            className="bg-black border-2 px-2 py-1 rounded"
-          />
+      <input
+  type="date"
+  value={leaveEnd}
+  onChange={(e) => setLeaveEnd(e.target.value)}
+  min={leaveStart || todayStr}
+  className="bg-black border-2 px-2 py-1 rounded
+             [&::-webkit-calendar-picker-indicator]:invert
+             [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+/>
         </div>
       </div>
 
       <select
         value={leaveType}
         onChange={(e) => setLeaveType(e.target.value)}
-        className="mt-3 w-full bg-black border-2 px-2 py-1 rounded text-white"
+        className="mt-3  w-full  bg-black border-2 px-2 py-1 rounded text-white"
       >
         <option value="" disabled>
           Select Leave Type
@@ -118,14 +122,14 @@ const TimeOffRequestForm = ({
       <div className="flex justify-between mt-3">
         <button
           onClick={onClose}
-          className="px-4 py-2 border-2 hover:bg-gray-200"
+          className="px-4 py-2 border-2 hover:text-red-500 duration-300"
         >
           Cancel
         </button>
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="px-4 py-2 border-2 hover:bg-gray-200"
+          className="px-4 py-2 border-2  hover:text-green-500 duration-300"
         >
           {loading ? "Submitting..." : "Submit Request"}
         </button>
