@@ -1,4 +1,4 @@
-import { getNotificationsByUserModel } from "../models/notificationModel.js";
+import { getNotificationsByUserModel, updateStatusNotificationModel } from "../models/notificationModel.js";
 
 export const getNotificationsByUserController = async (req,res) => {
         const user_id = req.user.id;
@@ -9,5 +9,15 @@ export const getNotificationsByUserController = async (req,res) => {
             res.json(notification)
     } catch (error) {
         console.error(error)
+    }
+}
+
+export const updateStatusNotificationController = async (req,res) => {
+    const user_id = req.user.id;
+    try {
+        const notification = await updateStatusNotificationModel(user_id)       
+        res.json(notification)    
+    } catch (error) {
+        console.error(error);
     }
 }

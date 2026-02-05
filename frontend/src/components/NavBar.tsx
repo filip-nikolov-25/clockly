@@ -12,7 +12,7 @@ interface NotificationType {
   id: string;
   title: string;
   message: string;
-  read: boolean;
+  is_read: boolean;
   created_at: string;
 }
 
@@ -64,8 +64,24 @@ const NavBar = ({ user, setUser }: Props) => {
     fetchNotifications();
   }, [user]);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+const updateNotificationStatus = async () => {
+  try {
+    await axios.patch("http://localhost:5000/api/notifications/read");
 
+    setNotifications((prev) =>
+      prev.map((prev) => ({
+        ...prev,
+        is_read: true,
+      }))
+    );
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+
+  const unreadCount = notifications.filter((notification) => !notification.is_read).length;
+  console.log(notifications,"NOTIFICATIONS")
   const handleLogout = async () => {
     await axios.post("http://localhost:5000/api/auth/logout");
     setUser(null);
@@ -146,7 +162,8 @@ const NavBar = ({ user, setUser }: Props) => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setShowNotifications((p) => !p);
+                      setShowNotifications((prevState) => !prevState);
+                      updateNotificationStatus()
                     }}
                     className="relative hover:text-orange-300"
                   >
@@ -177,7 +194,7 @@ const NavBar = ({ user, setUser }: Props) => {
                             <li
                               key={n.id}
                               className={`p-3 border-b border-white/5 text-sm cursor-pointer ${
-                                !n.read
+                                !n.is_read    
                                   ? "bg-orange-500/10"
                                   : "hover:bg-white/5"
                               }`}

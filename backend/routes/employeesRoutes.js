@@ -18,7 +18,7 @@ import {
   startWorkController,
 } from "../controllers/workTimeController.js";
 import { getCurrentCompanyController } from "../controllers/employeesController.js";
-import { getNotificationsByUserController } from "../controllers/notificationController.js";
+import { getNotificationsByUserController, updateStatusNotificationController } from "../controllers/notificationController.js";
 
 const router = Router();
 
@@ -67,5 +67,7 @@ router.get("/current-company",protect,getCurrentCompanyController);
 
 //MOTIFICATIONS
 router.get("/notifications", protect,getNotificationsByUserController)
+
+router.patch('/notifications/read',protect,updateStatusNotificationController)
 
 export default router;

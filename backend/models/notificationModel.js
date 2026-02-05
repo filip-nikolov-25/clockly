@@ -23,3 +23,8 @@ export const getNotificationsByUserModel = async (user_id) => {
   );
   return res.rows;
 };
+
+export const updateStatusNotificationModel = async (user_id) => {
+  const res = await db.query(`UPDATE notifications SET is_read = 'true' WHERE user_id = $1 RETURNING is_read`,[user_id])
+  return res.rows[0];
+}
