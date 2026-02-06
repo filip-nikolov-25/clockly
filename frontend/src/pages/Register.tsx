@@ -1,15 +1,15 @@
 import React, { useState } from "react";
-import type { userType } from "../interfaces/types";
+import type { UserType } from "../interfaces/types";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 interface Props {
-  user?: userType | null;
-  setUser: (user: userType | null) => void;
+  user?: UserType | null;
+  setUser: (user: UserType | null) => void;
 }
 
 const Register = ({ setUser }: Props) => {
-  const [userInfo, setUserInfo] = useState<Partial<userType>>({
+  const [userInfo, setUserInfo] = useState<Partial<UserType>>({
     username: "",
     email: "",
     password: "",

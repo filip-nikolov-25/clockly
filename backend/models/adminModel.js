@@ -9,3 +9,7 @@ export const sendInviteToEmployee = async (company_id, code, created_by) => {
   );
   return result.rows[0];
 };
+export const getInviteCodesForEmployeesModel = async (company_id) => {
+  const res = await db.query("SELECT code FROM company_invites WHERE company_id = $1 AND used_at IS NULL",[company_id])
+  return res.rows;
+}

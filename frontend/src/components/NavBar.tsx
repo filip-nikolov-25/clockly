@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import type { CurrentCompanyType, UserType } from "../interfaces/types";
+import type {  UserType } from "../interfaces/types";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 interface Props {
   user?: UserType | null;
   setUser: (user: UserType | null) => void;
+  currentCompany:string | undefined;
+  setCurrentCompany: (companyName:string) => void
 }
 
 interface NotificationType {
@@ -16,11 +18,10 @@ interface NotificationType {
   created_at: string;
 }
 
-const NavBar = ({ user, setUser }: Props) => {
+const NavBar = ({ user, setUser,currentCompany,setCurrentCompany }: Props) => {
   const navigate = useNavigate();
   const [scrollProgress, setScrollProgress] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [currentCompany, setCurrentCompany] = useState<CurrentCompanyType>();
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
   console.log(user, "USER AS");
@@ -37,23 +38,14 @@ const NavBar = ({ user, setUser }: Props) => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Fetch current company (unchanged)
-  useEffect(() => {
-    const fetchCurrentCompany = async () => {
-      const res = await axios.get("http://localhost:5000/api/current-company");
-      setCurrentCompany(res.data);
-    };
-    fetchCurrentCompany();
-  }, []);
-
   useEffect(() => {
     if (!user) return;
 
     const fetchNotifications = async () => {
+      
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/notifications",
-          {},
+          "http://localhost:5000/api/notifications"
         );
         setNotifications(res.data);
       } catch (err) {
@@ -62,6 +54,25 @@ const NavBar = ({ user, setUser }: Props) => {
     };
 
     fetchNotifications();
+  }, [user]);
+
+
+  useEffect(() => {
+    if (!user || user.role !== "admin") return;
+
+    const fetchNotificationsForAdmin = async () => {
+      
+      try {
+        const res = await axios.get(
+          "http://localhost:5000/api/admin-notifications"
+        );
+        setNotifications(res.data);
+      } catch (err) {
+        console.error("Failed to fetch notifications:", err);
+      }
+    };
+
+    fetchNotificationsForAdmin();
   }, [user]);
 
 const updateNotificationStatus = async () => {
@@ -87,6 +98,7 @@ const updateNotificationStatus = async () => {
     setUser(null);
     navigate("/login");
     setMenuOpen(false);
+    setCurrentCompany("")
   };
 
   return (
@@ -96,7 +108,7 @@ const updateNotificationStatus = async () => {
           <div
             className={`flex justify-between items-center ${currentCompany ? "py-6" : "py-3"} text-white`}
           >
-            {!currentCompany?.name ? (
+            {!currentCompany ? (
               <Link to="/" onClick={() => setMenuOpen(false)}>
                 <img
                   src="/img/LOGO-1.png"
@@ -107,7 +119,7 @@ const updateNotificationStatus = async () => {
             ) : (
               <Link to="/calendar">
                 <span className="text-orange-400 border-2 p-2 rounded-md font-extrabold">
-                  {currentCompany?.name.toLocaleUpperCase()}
+                  {currentCompany.toLocaleUpperCase()}
                 </span>
               </Link>
             )}
@@ -199,9 +211,9 @@ const updateNotificationStatus = async () => {
                                   : "hover:bg-white/5"
                               }`}
                             >
-                              <p className="font-semibold">{n.title}</p>
-                              <p className="text-gray-400 text-xs">
-                                {n.message}
+                              <p className="font-semibold">{user.role === "admin" ? "You have new abscence requests from your employees " : n.title}</p>
+                              <p className="text-gray-400 text-xs mt-2">
+                                {user.role === "admin" ? "Go to Admin Panel to view more details ": n.message}
                               </p>
                             </li>
                           ))}

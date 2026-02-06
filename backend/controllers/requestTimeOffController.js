@@ -7,37 +7,39 @@ import {
   getUsersWithApprovedTimeOffModel,
 } from "../models/requestTimeOffModel.js";
 
-export const requestTimeOffController = async (req, res) => {
-  const { start_date, end_date, reason,leave_type } = req.body;
+// export const requestTimeOffController = async (req, res) => {
+//   const { start_date, end_date, reason,leave_type } = req.body;
 
-  const user_id = req.user.id;
-  const company_id = req.user.company_id;
+//   const user_id = req.user.id;
+//   const company_id = req.user.company_id;
 
-  try {
-    const result = await sendLeaveRequest(
-      start_date,
-      end_date,
-      reason,
-      user_id,
-      company_id,leave_type
-    );
-    res.status(201).json(result);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+//   try {
+//     const result = await sendLeaveRequest(
+//       start_date,
+//       end_date,
+//       reason,
+//       user_id,
+//       company_id,leave_type
+//     );
+//     res.status(201).json(result);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
 
-export const getTimeOffRequestsController = async (req, res) => {
-  const user_id = req.user.id;
-  const company_id = req.user.company_id;
+// export const getTimeOffRequestsController = async (req, res) => {
+//   const user_id = req.user.id;
+//   const company_id = req.user.company_id;
 
-  try {
-    const result = await getLeaveRequests(user_id, company_id);
-    res.status(200).json(result);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+//   try {
+//     const result = await getLeaveRequests(user_id, company_id);
+//     res.status(200).json(result);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+
 
 export const getTimeOffRequestsForAdminController = async (req, res) => {
   const company_id = req.user.company_id;
@@ -72,7 +74,7 @@ export const adminUpdateTimeOffStatusController = async (req, res) => {
     const title = status === "accepted" ? "Time Off Approved" : "Time Off Rejected";
     const message = `Your time off request from ${updatedRequest.start_date} to ${updatedRequest.end_date} has been ${status}.`;
 
-    await createNotificationModel(updatedRequest.user_id, title, message);
+    await createNotificationModel(updatedRequest.user_id, title, message,company_id);
 
  
     res.status(200).json(updatedRequest);
@@ -81,6 +83,48 @@ export const adminUpdateTimeOffStatusController = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+// import { format } from "date-fns";
+
+// export const adminUpdateTimeOffStatusController = async (req, res) => {
+//   const { id } = req.params;
+//   const { status } = req.body;
+//   const company_id = req.user.company_id;
+
+//   if (!["accepted", "rejected"].includes(status)) {
+//     return res.status(400).json({ message: "Invalid status" });
+//   }
+
+//   try {
+//     const updatedRequest = await adminUpdateTimeOffStatusModel(id, status, company_id);
+
+//     if (!updatedRequest) {
+//       return res.status(404).json({ message: "Request not found" });
+//     }
+
+//     // Format the dates nicely
+//     const startStr = format(new Date(updatedRequest.start_date), "dd MMM yyyy");
+//     const endStr = format(new Date(updatedRequest.end_date), "dd MMM yyyy");
+
+//     // Create notification with formatted dates
+//     const title = status === "accepted" ? "Time Off Approved" : "Time Off Rejected";
+//     const message = `Your time off request from ${startStr} to ${endStr} has been ${status}.`;
+
+//     await createNotificationModel(updatedRequest.user_id, title, message, company_id);
+
+//     // Optionally, return the notification with formatted dates to frontend
+//     res.status(200).json({ 
+//       ...updatedRequest,
+//       start_date_formatted: startStr,
+//       end_date_formatted: endStr,
+//       notification_message: message
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
 export const getUsersWithApprovedTimeOffController = async (req, res) => {
   const company_id = req.user.company_id;
 

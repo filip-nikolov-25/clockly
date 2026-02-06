@@ -16,7 +16,7 @@ const Admin = ({ user }: Props) => {
 
   const [requests, setRequests] = useState<TimeOffRequest[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
-
+  console.log(inviteCodes,"inv codes all")
   // time off requests for admin
   useEffect(() => {
     const fetchRequests = async () => {
@@ -78,7 +78,18 @@ const Admin = ({ user }: Props) => {
     }
   };
 
-  console.log(requests,"reques ats")
+  useEffect(() => {
+    const fetchRemainingInviteCodes = async  () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/all-invitecodes")
+        console.log(res.data.codes,"RESPONSE Inv code")
+        setInviteCodes(res.data.codes)
+      } catch (error) {
+              console.error("Error getting all inv codes:", error);
+      }}
+      fetchRemainingInviteCodes()
+  },[])//count
+
   return (
     <Wrapper>
       <div className="text-white min-h-screen p-10">

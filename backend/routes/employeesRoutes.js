@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { sendInviteController } from "../controllers/adminController.js";
+import { getInviteCodesForEmployeesController, sendInviteController } from "../controllers/adminController.js";
 import { protect } from "../middleware/auth.js";
 import {
   adminUpdateTimeOffStatusController,
@@ -18,12 +18,13 @@ import {
   startWorkController,
 } from "../controllers/workTimeController.js";
 import { getCurrentCompanyController } from "../controllers/employeesController.js";
-import { getNotificationsByUserController, updateStatusNotificationController } from "../controllers/notificationController.js";
+import { getNotificationsByUserController, getNotificationsForAdminController, updateStatusNotificationController } from "../controllers/notificationController.js";
 
 const router = Router();
 
-// i nvite routes
+// invite routes
 router.post("/sendinvite", protect, sendInviteController);
+router.get("/all-invitecodes",protect,getInviteCodesForEmployeesController)
 
 router.post("/requesttimeoff", protect, requestTimeOffController);
 router.get("/requesttimeoff", protect, getTimeOffRequestsController);
@@ -67,7 +68,7 @@ router.get("/current-company",protect,getCurrentCompanyController);
 
 //MOTIFICATIONS
 router.get("/notifications", protect,getNotificationsByUserController)
-
+router.get("/admin-notifications", protect,getNotificationsForAdminController)
 router.patch('/notifications/read',protect,updateStatusNotificationController)
 
 export default router;

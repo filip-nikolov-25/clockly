@@ -1,11 +1,12 @@
 import { useState } from "react";
-import type { LoginType, userType } from "../interfaces/types";
+import type { LoginType, UserType } from "../interfaces/types";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 interface props {
-  user: userType | null;
-  setUser: (user: userType | null) => void;
+  user: UserType | null;
+  setUser: (user: UserType | null) => void;
+  setCurrentCompany:(companyName:string) => void
 }
 
 const Login = ({ setUser }: props) => {
@@ -34,10 +35,10 @@ const Login = ({ setUser }: props) => {
 
   return (
     <div
-      className="flex justify-center items-center pb-72 pt-28 bg-linear-to-b from-black via-gray-700 to-orange-300
+      className="flex justify-center items-center pb-72 pt-28 bg-linear-to-b  from-black via-gray-700 to-orange-300
  p-4"
     >
-      <div className="bg-gray-900 border border-gray-700 rounded-xl shadow-xl p-10 max-w-md w-full">
+      <div className="bg-gray-900 border border-gray-700 mt-[-25] rounded-xl shadow-xl p-10 max-w-md w-full">
         <h2 className="text-center mb-2 text-4xl font-extrabold text-white">
           Welcome Back
         </h2>

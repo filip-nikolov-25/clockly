@@ -1,4 +1,4 @@
-import { sendInviteToEmployee } from "../models/adminModel.js";
+import { getInviteCodesForEmployeesModel, sendInviteToEmployee } from "../models/adminModel.js";
 import crypto from "crypto";
 
 // export const sendInviteController = async (req, res) => {
@@ -54,8 +54,6 @@ export const sendInviteController = async (req, res) => {
     for (let i = 0; i < count; i++) {
       const code = generateInviteCode();
 
-      console.log("Generated:", code);
-
       const invite = await sendInviteToEmployee(company_id, code, created_by);
 
       codes.push(invite.code);
@@ -67,3 +65,17 @@ export const sendInviteController = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const getInviteCodesForEmployeesController = async (req,res) => {
+  const company_id = req.user.company_id
+  console.log(company_id,"comp id")
+  try {
+    const inviteCodes = await getInviteCodesForEmployeesModel(company_id)
+
+       const codeList = inviteCodes.map(c => c.code);
+
+    return res.status(200).json({ codes: codeList });
+  } catch (error) {
+    return res.status(500).json({ message: "Server error" });
+  }
+}
