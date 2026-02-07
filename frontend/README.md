@@ -1,73 +1,48 @@
-# React + TypeScript + Vite
+ Clockly – Time Tracking and Workforce Management App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Clockly is a full-stack app for tracking work hours and managing employees
+Employees can log their working time, request days off, and receive notifications.
+Admins can manage users, review work logs, and approve or reject requests from one place.
 
-Currently, two official plugins are available:
+--Features
+- Authentication & Roles
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Secure login using JWT
 
-## React Compiler
+Two roles: Admin and Employee
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Protected pages and API routes
 
-## Expanding the ESLint configuration
+---Time Tracking
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Clock in and clock out
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Daily and weekly work history
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Automatic calculation of worked hours
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Break time support
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+--- Time Off Requests
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Employees can request vacation or time off
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Admins can approve or reject requests
+
+Request status: pending, approved, or rejected
+
+--- Notifications
+
+Notifications for time-off updates and admin actions
+
+Mark notifications as read or unread
+
+Stored in the database
+
+--- Admin Panel
+
+Manage users
+
+View employee work logs
+
+Handle time-off requests
