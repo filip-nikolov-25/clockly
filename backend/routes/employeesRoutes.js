@@ -18,7 +18,7 @@ import {
   startWorkController,
 } from "../controllers/workTimeController.js";
 import { getCurrentCompanyController } from "../controllers/employeesController.js";
-import { getNotificationsByUserController, getNotificationsForAdminController, updateStatusNotificationController } from "../controllers/notificationController.js";
+import {  getEmployeeNotificationsController, markEmployeeNotificationsReadController, updateStatusNotificationController } from "../controllers/notificationController.js";
 
 const router = Router();
 
@@ -65,10 +65,16 @@ router.get(
 
 router.get("/current-company",protect,getCurrentCompanyController);
 
-
 //MOTIFICATIONS
-router.get("/notifications", protect,getNotificationsByUserController)
-router.get("/admin-notifications", protect,getNotificationsForAdminController)
-router.patch('/notifications/read',protect,updateStatusNotificationController)
+// router.get("/notifications", protect,getNotificationsController)
+// router.get("/admin-notifications", protect,getNotificationsController)
+// router.patch('/notifications/read',protect,updateStatusNotificationController)
+
+router.get("/notifications", protect, getEmployeeNotificationsController);
+router.patch("/notifications/read", protect, markEmployeeNotificationsReadController);
+
+// Admin notifications
+router.get("/admin-notifications", protect, getEmployeeNotificationsController);
+router.patch("/admin-notifications/read", protect, updateStatusNotificationController);
 
 export default router;

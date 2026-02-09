@@ -1,18 +1,28 @@
 import {
-  getNotificationsByUserModel,
-  getNotificationsForAdminModel,
+
+  
+  getNotificationsForEmployeeModel,
+  getNotificationsModel,
+  updateEmployeeNotificationsModel,
   updateStatusNotificationModel,
 } from "../models/notificationModel.js";
 
-export const getNotificationsByUserController = async (req, res) => {
+export const getNotificationsController = async (req, res) => {
   const user_id = req.user.id;
+  const role = req.user.role; // 'admin' or 'employee'
+  const company_id = req.user.company_id;
 
-  console.log(user_id, "USER ID BEFORE SENDIng");
   try {
-    const notification = await getNotificationsByUserModel(user_id);
-    return res.json(notification);
+    const notifications = await getNotificationsModel({
+      role,
+      user_id,
+      company_id,
+    });
+
+    return res.json(notifications);
   } catch (error) {
     console.error(error);
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -26,12 +36,38 @@ export const updateStatusNotificationController = async (req, res) => {
   }
 };
 
-export const getNotificationsForAdminController = async (req, res) => {
+// export const getNotificationsForAdminController = async (req, res) => {
+//   const company_id = req.user.company_id;
+//   try {
+//     const notifications = await getNotificationsForAdminModel(company_id);
+//     return res.status(200).json(notifications);
+//   } catch (error) {
+//     console.error(error);
+//   }
+// };
+
+export const getEmployeeNotificationsController = async (req, res) => {
+  const user_id = req.user.id;
   const company_id = req.user.company_id;
+
   try {
-    const notifications = await getNotificationsForAdminModel(company_id);
-    return res.status(200).json(notifications);
+    const notifications = await getNotificationsForEmployeeModel(user_id, company_id);
+    res.json(notifications);
   } catch (error) {
     console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const markEmployeeNotificationsReadController = async (req, res) => {
+  const user_id = req.user.id;
+  const company_id = req.user.company_id;
+
+  try {
+    const updated = await updateEmployeeNotificationsModel(user_id, company_id);
+    res.json({ updated });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
   }
 };
