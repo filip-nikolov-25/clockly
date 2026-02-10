@@ -29,19 +29,6 @@ const NavBar = ({
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
-  console.log(user, "USER AS");
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      const docHeight =
-        document.documentElement.scrollHeight - window.innerHeight;
-      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-      setScrollProgress(progress);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -54,7 +41,10 @@ const NavBar = ({
             : "http://localhost:5000/api/notifications";
 
         const res = await axios.get(url);
-        setNotifications(res.data);
+        const uniqueNotifications = Array.from(
+          new Map(res.data.map((n : any) => [n.id, n])).values(),
+        );
+        setNotifications(uniqueNotifications as any);
       } catch (err) {
         console.error("Failed to fetch notifications:", err);
       }
@@ -63,22 +53,6 @@ const NavBar = ({
     fetchNotifications();
   }, [user]);
 
-  useEffect(() => {
-    if (!user || user.role !== "admin") return;
-
-    const fetchNotificationsForAdmin = async () => {
-      try {
-        const res = await axios.get(
-          "http://localhost:5000/api/admin-notifications",
-        );
-        setNotifications(res.data);
-      } catch (err) {
-        console.error("Failed to fetch notifications:", err);
-      }
-    };
-
-    fetchNotificationsForAdmin();
-  }, [user]);
 
   const updateNotificationStatus = async () => {
     try {
@@ -87,21 +61,14 @@ const NavBar = ({
           ? "http://localhost:5000/api/admin-notifications/read"
           : "http://localhost:5000/api/notifications/read",
       );
-      setNotifications((prev) =>
-        prev.map((n) => ({
-          ...n,
-          is_read: true,
-        })),
-      );
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
     } catch (error) {
       console.error(error);
     }
   };
 
-  const unreadCount = notifications.filter(
-    (notification) => !notification.is_read,
-  ).length;
-  console.log(notifications, "NOTIFICATIONS");
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
+
   const handleLogout = async () => {
     await axios.post("http://localhost:5000/api/auth/logout");
     setUser(null);
@@ -110,25 +77,6 @@ const NavBar = ({
     setCurrentCompany("");
   };
 
-  useEffect(() => {
-    if (!user) return;
-
-    const fetchNotifications = async () => {
-      try {
-        const url =
-          user.role === "admin"
-            ? "http://localhost:5000/api/admin-notifications"
-            : "http://localhost:5000/api/notifications";
-
-        const res = await axios.get(url);
-        setNotifications(res.data);
-      } catch (err) {
-        console.error("Failed to fetch notifications:", err);
-      }
-    };
-
-    fetchNotifications();
-  }, [user]);
   useEffect(() => {
     if (!showNotifications) return;
     if (unreadCount === 0) return;
@@ -141,7 +89,9 @@ const NavBar = ({
       <div className="bg-[#101010]/60 backdrop-blur-md shadow-lg border-b border-white/20">
         <div className="w-10/12 mx-auto">
           <div
-            className={`flex justify-between items-center ${currentCompany ? "py-6" : "py-3"} text-white`}
+            className={`flex justify-between items-center ${
+              currentCompany ? "py-6" : "py-3"
+            } text-white`}
           >
             {!currentCompany ? (
               <Link to="/" onClick={() => setMenuOpen(false)}>
@@ -178,8 +128,6 @@ const NavBar = ({
               <Link to="/aboutme">
                 <li className="hover:text-orange-300">My Status</li>
               </Link>
-
-              {/* 🔔 Notifications Dropdown */}
 
               {user ? (
                 <button
@@ -236,27 +184,42 @@ const NavBar = ({
                         </p>
                       ) : (
                         <ul className="max-h-80 overflow-y-auto">
-                          {notifications.map((n) => (
-                            <li
-                              key={n.id}
-                              className={`p-3 border-b border-white/5 text-sm cursor-pointer ${
-                                !n.is_read
-                                  ? "bg-orange-500/10"
-                                  : "hover:bg-white/5"
-                              }`}
-                            >
-                              <p className="font-semibold">
-                                {user.role === "admin"
-                                  ? "You have new abscence requests from your employees "
-                                  : n.title}
-                              </p>
-                              <p className="text-gray-400 text-xs mt-2">
-                                {user.role === "admin"
-                                  ? "Go to Admin Panel to view more details "
-                                  : n.message}
-                              </p>
-                            </li>
-                          ))}
+                          {user.role === "admin"
+                            ? notifications.length > 0 && (
+                                <Link to={"/admin"}>
+                                  <li className="p-3 border-b border-white/5 text-sm cursor-pointer bg-orange-500/10">
+                                    <p className="font-semibold">
+                                      You have{" "}
+                                      <span className="text-orange-400">
+                                        pending
+                                      </span>{" "}
+                                      absence request
+                                      {notifications.length > 1 ? "s" : ""} from
+                                      your employees
+                                    </p>
+                                    <p className="text-gray-400 text-xs mt-2">
+                                      Go to Admin Panel to view more details
+                                    </p>
+                                  </li>
+                                </Link>
+                              )
+                            : notifications.map((n, index) => (
+                           <Link to={"/aboutme"}>
+                                 <li
+                                  key={`${n.id}-${index}`} 
+                                  className={`p-3 border-b border-white/5 text-sm cursor-pointer ${
+                                    !n.is_read
+                                      ? "bg-orange-500/10"
+                                      : "hover:bg-white/5"
+                                  }`}
+                                >
+                                  <p className="font-semibold">{n.title}</p>
+                                  <p className="text-gray-400 text-xs mt-2">
+                                    {n.message}
+                                  </p>
+                                </li>
+                           </Link>
+                              ))}
                         </ul>
                       )}
                     </div>
@@ -274,12 +237,12 @@ const NavBar = ({
           </div>
         </div>
       </div>
-      <div className="w-full h-1 bg-[#101010]">
+      {/* <div className="w-full h-1 bg-[#101010]">
         <div
           className="h-full bg-orange-50 transition-all duration-300 ease-in-out"
           style={{ width: `${scrollProgress}%` }}
-        />
-      </div>
+        />// this can cause unesecary rerenders, DELETE IT 
+      </div> */}
     </div>
   );
 };

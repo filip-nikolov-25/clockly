@@ -36,16 +36,6 @@ export const updateStatusNotificationController = async (req, res) => {
   }
 };
 
-// export const getNotificationsForAdminController = async (req, res) => {
-//   const company_id = req.user.company_id;
-//   try {
-//     const notifications = await getNotificationsForAdminModel(company_id);
-//     return res.status(200).json(notifications);
-//   } catch (error) {
-//     console.error(error);
-//   }
-// };
-
 export const getEmployeeNotificationsController = async (req, res) => {
   const user_id = req.user.id;
   const company_id = req.user.company_id;
