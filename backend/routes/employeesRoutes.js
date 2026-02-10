@@ -3,6 +3,7 @@ import { getInviteCodesForEmployeesController, sendInviteController } from "../c
 import { protect } from "../middleware/auth.js";
 import {
   adminUpdateTimeOffStatusController,
+  getEmployeePendingTimeOffController,
   getTimeOffRequestsController,
   getTimeOffRequestsForAdminController,
   getUsersWithApprovedTimeOffController,
@@ -19,6 +20,7 @@ import {
 } from "../controllers/workTimeController.js";
 import { getCurrentCompanyController } from "../controllers/employeesController.js";
 import {  getEmployeeNotificationsController, getNotificationsController, markEmployeeNotificationsReadController, updateStatusNotificationController } from "../controllers/notificationController.js";
+import { getEmployeePendingTimeOffModel } from "../models/requestTimeOffModel.js";
 
 const router = Router();
 
@@ -26,10 +28,9 @@ const router = Router();
 router.post("/sendinvite", protect, sendInviteController);
 router.get("/all-invitecodes",protect,getInviteCodesForEmployeesController)
 
+//Abscence managment routes
 router.post("/requesttimeoff", protect, requestTimeOffController);
 router.get("/requesttimeoff", protect, getTimeOffRequestsController);
-
-//ADMIN ROUTES
 router.get(
   "/requesttimeoff/admin",
   protect,
@@ -40,6 +41,8 @@ router.patch(
   protect,
   adminUpdateTimeOffStatusController,
 );
+router.get("/abscence-availability",protect,getEmployeePendingTimeOffController)
+
 // routes for approved for employee time off
 router.get(
   "/users/approved-timeoff",
@@ -47,6 +50,7 @@ router.get(
   getUsersWithApprovedTimeOffController,
 );
 
+//Measure time api's 
 router.post("/start", protect, startWorkController);
 router.patch("/break-start/:id", protect, breakStartController);
 router.patch("/break-end/:id", protect, breakEndController);

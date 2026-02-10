@@ -73,18 +73,14 @@ export const getTodayController = async (req, res) => {
   }
 };
 
-// Previous Month Work Entries
 export const previousMonthWorkController = async (req, res) => {
   try {
     const user_id = req.user.id;
     const company_id = req.user.company_id;
 
-    // Current month range
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth(), 1); 
     const end = new Date(now.getFullYear(), now.getMonth() + 1, 0); 
-
-    console.log("Fetching previous month work:", start, end);
 
     const entries = await getEntriesForPeriod(user_id, company_id, start, end);
     res.json(entries);

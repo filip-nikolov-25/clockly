@@ -15,61 +15,71 @@ const TimeOffRequestForm = ({
   const [leaveType, setLeaveType] = useState("");
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const todayStr = today.toISOString().split("T")[0];
 
   const handleSubmit = async () => {
-    if (!leaveStart || !leaveEnd || !leaveType) {
-      setMessage("Please fill all required fields!");
-      return;
-    }
+  if (!leaveStart || !leaveEnd || !leaveType) {
+    setErrorMessage("Please fill all required fields!");
+    return;
+  }
 
-    const start = new Date(leaveStart);
-    const end = new Date(leaveEnd);
+  const start = new Date(leaveStart);
+  const end = new Date(leaveEnd);
 
-    if (start.getTime() < today.getTime()) {
-      setMessage("Start date cannot be in the past!");
-      return;
-    }
+  if (start.getTime() < today.getTime()) {
+    setErrorMessage("Start date cannot be in the past!");
+    return;
+  }
 
-    if (end.getTime() < start.getTime()) {
-      setMessage("End date cannot be before start date!");
-      return;
-    }
+  if (end.getTime() < start.getTime()) {
+    setErrorMessage("End date cannot be before start date!");
+    return;
+  }
 
-    setLoading(true);
-    setMessage("");
+  setLoading(true);
+  setErrorMessage("");
 
-    try {
-      await axios.post("http://localhost:5000/api/requesttimeoff", {
-        start_date: leaveStart,
-        end_date: leaveEnd,
-        leave_type: leaveType,
-        reason: reason,
-      });
+  try {
+    const { data } = await axios.get(
+      "http://localhost:5000/api/abscence-availability"
+    );
 
-      setMessage("Request submitted successfully!");
-      setLeaveStart("");
-      setLeaveEnd("");
-      setLeaveType("");
-      setReason("");
-
-      if (onSubmitted) onSubmitted();
-      onClose();
-    } catch (err: any) {
-      console.error(err);
-      setMessage(err.response?.data?.message || "Error submitting request.");
-    } finally {
+    if (data.userRequestedAbscence) {
+      setErrorMessage("You already have an active absence request.");
       setLoading(false);
+      return;
     }
-  };
-    console.log(leaveType,"LEAVE TYPE")
+
+    await axios.post("http://localhost:5000/api/requesttimeoff", {
+      start_date: leaveStart,
+      end_date: leaveEnd,
+      leave_type: leaveType,
+      reason,
+    });
+
+    setSuccessMessage("Request submitted successfully!");
+    setLeaveStart("");
+    setLeaveEnd("");
+    setLeaveType("");
+    setReason("");
+
+    if (onSubmitted) onSubmitted();
+    onClose();
+  } catch (err: any) {
+    console.error(err);
+    setErrorMessage(err.response?.data?.message || "Error submitting request.");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="bg-[#202020] mt-4 p-6 rounded-xl ">
-      <h2 className="text-white text-2xl font-bold mb-4">New Leave Request</h2>
+      <h2 className="text-white text-2xl font-bold mb-4">New Absence Request</h2>
 
       <div className="flex gap-4">
         <div className="flex-1 flex flex-col text-white">
@@ -134,7 +144,8 @@ const TimeOffRequestForm = ({
           {loading ? "Submitting..." : "Submit Request"}
         </button>
       </div>
-      {message && <p className="text-white mt-2">{message}</p>}
+      {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
+      {successMessage && <p className="text-green-500 mt-2">{successMessage}</p>}
     </div>
   );
 };

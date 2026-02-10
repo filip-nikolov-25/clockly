@@ -36,3 +36,29 @@ export const formatMinutesToTime = (minutes?: string | number) => {
 // 2026-01-28 -- LOCAL, timezone-safe
 export const toLocalISODate = (date: string | Date) =>
   new Date(date).toLocaleDateString("en-CA");
+
+
+export const getBreakMinutes = (
+  breakStart?: string | null,
+  breakEnd?: string | null
+) => {
+  if (!breakStart || !breakEnd) return 0;
+
+  const start = new Date(breakStart).getTime();
+  const end = new Date(breakEnd).getTime();
+
+  if (isNaN(start) || isNaN(end) || end <= start) return 0;
+
+  return Math.round((end - start) / 60000);
+};
+
+export const convertMonSunWeekDaysFormat = (date: Date) => {
+  const d = new Date(date);
+  let day = d.getDay(); 
+  day = day === 0 ? 6 : day - 1;
+
+  d.setDate(d.getDate() - day);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+

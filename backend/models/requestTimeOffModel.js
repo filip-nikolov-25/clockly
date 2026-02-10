@@ -39,7 +39,7 @@ export const getTimeOffRequestsForAdminModel = async (company_id) => {
     FROM leave_requests lr
     JOIN users u ON lr.user_id = u.id
     WHERE lr.company_id = $1
-    ORDER BY lr.start_date DESC
+    ORDER BY lr.requested_at DESC
     `,
     [company_id],
   );
@@ -97,5 +97,15 @@ export const getUsersWithApprovedTimeOffModel = async (company_id) => {
   );
 
   return result.rows;
+};
+export const getEmployeePendingTimeOffModel = async (user_id) => {
+  const res = await db.query(
+    "SELECT 1 FROM leave_requests WHERE user_id = $1 AND status = 'pending' LIMIT 1",
+    [user_id]
+  );
+
+  return {
+    userRequestedAbscence : res.rowCount > 0 
+  }
 };
 

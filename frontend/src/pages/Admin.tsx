@@ -164,7 +164,7 @@ const Admin = ({ user }: Props) => {
                 return (
                   <div
                     key={request.id}
-                    className="bg-[#202020] border border-white/10 rounded-2xl p-5 hover:scale-[1.02] transition-transform duration-200"
+                    className={`bg-[#202020] ${request.status === "pending" && "shadow-2xl shadow-orange-100"} border border-white/10 rounded-2xl p-5 hover:scale-[1.02] transition-transform duration-200`}
                   >
                     <p className="text-2xl font-extrabold mb-2">{request.leave_type}</p>
                     <p className="font-semibold">{request.username}</p>

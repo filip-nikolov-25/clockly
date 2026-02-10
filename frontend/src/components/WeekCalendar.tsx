@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import type { Employee, PublicHolidayType, TimeOff } from "../interfaces/types";
 import {
+  convertMonSunWeekDaysFormat,
   formatDateToISO,
   formatMinutesToTime,
   toLocalISODate,
@@ -20,16 +21,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-
-  const getStartOfWeek = (date: Date) => {
-    const d = new Date(date);
-    const day = d.getDay();
-    d.setDate(d.getDate() - day);
-    d.setHours(0, 0, 0, 0);
-    return d;
-  };
-
-  const [startDate, setStartDate] = useState(getStartOfWeek(new Date()));
+  const [startDate, setStartDate] = useState(convertMonSunWeekDaysFormat(new Date()));
 
   const next7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(startDate);
@@ -40,13 +32,13 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
   const handlePrevWeek = () => {
     const newDate = new Date(startDate);
     newDate.setDate(newDate.getDate() - 7);
-    setStartDate(getStartOfWeek(newDate));
+    setStartDate(convertMonSunWeekDaysFormat(newDate));
   };
 
   const handleNextWeek = () => {
     const newDate = new Date(startDate);
     newDate.setDate(newDate.getDate() + 7);
-    setStartDate(getStartOfWeek(newDate));
+    setStartDate(convertMonSunWeekDaysFormat(newDate));
   };
 
   const formatLeavesToDays = (leaves: TimeOff[] = []) => {

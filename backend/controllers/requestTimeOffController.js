@@ -5,12 +5,21 @@ import {
   getTimeOffRequestsForAdminModel,
   adminUpdateTimeOffStatusModel,
   getUsersWithApprovedTimeOffModel,
+  getEmployeePendingTimeOffModel,
 } from "../models/requestTimeOffModel.js";
 import { format } from "date-fns";
 export const requestTimeOffController = async (req, res) => {
   const { start_date, end_date, reason, leave_type } = req.body;
   const user_id = req.user.id;
   const company_id = req.user.company_id;
+
+      const { userRequestedAbscence } = await getEmployeePendingTimeOffModel(user_id);
+    if (userRequestedAbscence) {
+      return res.status(400).json({
+        message: "You already have an active absence request.",
+      });
+    }
+
 
   try {
     const result = await sendLeaveRequest(
@@ -125,5 +134,16 @@ export const getUsersWithApprovedTimeOffController = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: err.message });
+  }
+};
+export const getEmployeePendingTimeOffController = async (req, res) => {
+  const user_id = req.user.id;
+
+  try {
+    const response = await getEmployeePendingTimeOffModel(user_id);
+    res.status(200).json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
   }
 };

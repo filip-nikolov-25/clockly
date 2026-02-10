@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Wrapper from "../components/base/Wrapper";
 import axios from "axios";
-import { formatDateDisplay, formatTimeDisplay } from "../helperFunctions";
+import { formatDateDisplay, formatTimeDisplay, getBreakMinutes } from "../helperFunctions";
 import type { TimeOffRequest, UserType } from "../interfaces/types";
 interface Props {
   user: UserType | null;
@@ -10,7 +10,7 @@ const AboutMe = ({ user }: Props) => {
   const [todayWork, setTodayWork] = useState<any>(null);
   const [previousMonthWork, setPreviousMonthWork] = useState<any[]>([]);
   const [requestTimeOff, setRequestTimeOff] = useState<TimeOffRequest[]>([]);
-  console.log(requestTimeOff,"requestTimeOff")
+  console.log(requestTimeOff, "requestTimeOff");
 
   const formatWorkedTime = (minutes: number) => {
     if (!minutes) return "0h 0m";
@@ -19,29 +19,34 @@ const AboutMe = ({ user }: Props) => {
     return `${hrs}h ${mins}m`;
   };
 
-  useEffect(() => {
-    const fetchTodayWork = async () => {
-      try {
-        const { data } = await axios.get("http://localhost:5000/api/today");
-        if (data) {
-          setTodayWork({
-            ...data,
-            workedMinutes: data.total_minutes
-              ? data.total_minutes -
-                (data.break_end && data.break_start
-                  ? (new Date(data.break_end).getTime() -
-                      new Date(data.break_start).getTime()) /
-                    60000
-                  : 0)
-              : 0,
-          });
-        }
-      } catch (err) {
-        console.error("Fetch today work failed", err);
-      }
-    };
-    fetchTodayWork();
-  }, []);
+useEffect(() => {
+  const fetchTodayWork = async () => {
+    try {
+      const { data } = await axios.get("http://localhost:5000/api/today");
+
+      if (!data) return;
+
+      const breakMinutes = getBreakMinutes(
+        data.break_start,
+        data.break_end
+      );
+
+      setTodayWork({
+        ...data,
+        totalBreak: breakMinutes,
+        workedMinutes: Math.max(
+          0,
+          (data.total_minutes ?? 0) - breakMinutes
+        ),
+      });
+    } catch (err) {
+      console.error("Fetch today work failed", err);
+    }
+  };
+
+  fetchTodayWork();
+}, []);
+
 
   useEffect(() => {
     const fetchPreviousMonthWork = async () => {
@@ -75,6 +80,7 @@ const AboutMe = ({ user }: Props) => {
     fetchRequestTimeOff();
   }, []);
 
+  console.log(previousMonthWork, "previousMonthWork");
   return (
     <Wrapper>
       <div className="flex justify-between mt-10 mb-10">
@@ -100,11 +106,10 @@ const AboutMe = ({ user }: Props) => {
           <div className="flex justify-between text-gray-400">
             <span>Total Break:</span>
             <span className="text-white">
-              {todayWork.breakMinutes
-                ? `${todayWork.break_minutes} min`
-                : "- min"}{" "}
+              {`${todayWork.totalBreak  ?? "-"} min`}
             </span>
           </div>
+
           <div className="flex justify-between text-gray-400">
             <span>Worked Time:</span>
             <span className="text-white">
@@ -146,7 +151,7 @@ const AboutMe = ({ user }: Props) => {
               </div>
               <div className="flex justify-between text-gray-400">
                 <span>Break:</span>
-                <span className="text-white">{entry.break_minutes} min</span>
+                <span className="text-white">{formatWorkedTime(entry.break_minutes)} min</span>
               </div>
               <div className="flex justify-between text-gray-400">
                 <span>Worked Time:</span>
@@ -181,17 +186,16 @@ const AboutMe = ({ user }: Props) => {
               >
                 <h2 className="text-center">STATUS</h2>
                 <div className="flex justify-between items-center mb-4">
-                  
-                  <span className={`px-3 py-1 text-xs rounded-full border ${statusColor}`}>
+                  <span
+                    className={`px-3 py-1 text-xs rounded-full border ${statusColor}`}
+                  >
                     {request.status.toUpperCase()}
                   </span>
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between text-gray-400">
                     <span>Abscence Type</span>
-                    <span className="text-white">
-                      {request.leave_type}
-                    </span>
+                    <span className="text-white">{request.leave_type}</span>
                   </div>
                   <div className="flex justify-between text-gray-400">
                     <span>Reason</span>
