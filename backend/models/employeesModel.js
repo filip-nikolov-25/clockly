@@ -1,11 +1,5 @@
 import db from "../db.js";
 
-// GET ALL
-export const getAllEmployees = async () => {
-  const result = await db.query("SELECT * FROM users RETURNING *");
-  return result.rows;
-};
-
 // GET ONE
 export const getEmployeeById = async (id) => {
   const result = await db.query("SELECT * FROM users WHERE id = $1", [id]);
@@ -35,10 +29,6 @@ export const deleteEmployee = async (id) => {
   await db.query("DELETE FROM users WHERE id = $1", [id]);
 };
 
-// DELETE ALL
-export const deleteAllEmployees = async () => {
-  await db.query("DELETE FROM users");
-};
 // Get current comppany
 export const getCurrentCompanyModel = async (id) => {
  const res= await db.query("SELECT name FROM companies WHERE id = $1 ",[id])

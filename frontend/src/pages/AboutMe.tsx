@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import Wrapper from "../components/base/Wrapper";
 import axios from "axios";
-import { formatDateDisplay, formatTimeDisplay, getBreakMinutes } from "../helperFunctions";
+import {
+  formatDateDisplay,
+  formatTimeDisplay,
+  getBreakMinutes,
+} from "../helperFunctions";
 import type { TimeOffRequest, UserType } from "../interfaces/types";
 interface Props {
   user: UserType | null;
@@ -19,34 +23,27 @@ const AboutMe = ({ user }: Props) => {
     return `${hrs}h ${mins}m`;
   };
 
-useEffect(() => {
-  const fetchTodayWork = async () => {
-    try {
-      const { data } = await axios.get("http://localhost:5000/api/today");
+  useEffect(() => {
+    const fetchTodayWork = async () => {
+      try {
+        const { data } = await axios.get("http://localhost:5000/api/today");
 
-      if (!data) return;
+        if (!data) return;
 
-      const breakMinutes = getBreakMinutes(
-        data.break_start,
-        data.break_end
-      );
+        const breakMinutes = getBreakMinutes(data.break_start, data.break_end);
 
-      setTodayWork({
-        ...data,
-        totalBreak: breakMinutes,
-        workedMinutes: Math.max(
-          0,
-          (data.total_minutes ?? 0) - breakMinutes
-        ),
-      });
-    } catch (err) {
-      console.error("Fetch today work failed", err);
-    }
-  };
+        setTodayWork({
+          ...data,
+          totalBreak: breakMinutes,
+          workedMinutes: Math.max(0, (data.total_minutes ?? 0) - breakMinutes),
+        });
+      } catch (err) {
+        console.error("Fetch today work failed", err);
+      }
+    };
 
-  fetchTodayWork();
-}, []);
-
+    fetchTodayWork();
+  }, []);
 
   useEffect(() => {
     const fetchPreviousMonthWork = async () => {
@@ -57,7 +54,6 @@ useEffect(() => {
             params: { t: new Date().getTime() },
           },
         );
-        console.log(data, "DATA ");
         setPreviousMonthWork(data);
       } catch (err) {
         console.error("Fetch previous month work failed", err);
@@ -80,7 +76,6 @@ useEffect(() => {
     fetchRequestTimeOff();
   }, []);
 
-  console.log(previousMonthWork, "previousMonthWork");
   return (
     <Wrapper>
       <div className="flex justify-between mt-10 mb-10">
@@ -106,7 +101,7 @@ useEffect(() => {
           <div className="flex justify-between text-gray-400">
             <span>Total Break:</span>
             <span className="text-white">
-              {`${todayWork.totalBreak  ?? "-"} min`}
+              {`${todayWork.totalBreak ?? "-"} min`}
             </span>
           </div>
 
@@ -131,6 +126,14 @@ useEffect(() => {
               key={entry.id}
               className="bg-[#202020] border border-white/10 rounded-2xl p-5"
             >
+              <div className="flex justify-center  text-gray-400">
+                <span className="text-center text-xl  text-orange-400">
+                  Worked Time:
+                </span>
+                <span className="text-white text-xl ms-2 text-center">
+                  {formatWorkedTime(entry.worked_minutes)}
+                </span>
+              </div>
               <div className="flex justify-between text-gray-400">
                 <span>Date:</span>
                 <span className="text-white">
@@ -151,12 +154,8 @@ useEffect(() => {
               </div>
               <div className="flex justify-between text-gray-400">
                 <span>Break:</span>
-                <span className="text-white">{formatWorkedTime(entry.break_minutes)} min</span>
-              </div>
-              <div className="flex justify-between text-gray-400">
-                <span>Worked Time:</span>
                 <span className="text-white">
-                  {formatWorkedTime(entry.worked_minutes)}
+                  {formatWorkedTime(entry.break_minutes)} min
                 </span>
               </div>
             </div>
@@ -185,14 +184,28 @@ useEffect(() => {
                 className="bg-[#202020] border border-white/10 rounded-2xl p-5 hover:scale-[1.02] transition-transform duration-200"
               >
                 <h2 className="text-center">STATUS</h2>
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex justify-between items-center mb-3">
                   <span
                     className={`px-3 py-1 text-xs rounded-full border ${statusColor}`}
                   >
                     {request.status.toUpperCase()}
                   </span>
                 </div>
-                <div className="space-y-2 text-sm">
+                <div className="flex justify-between text-lg">
+                  <div className="flex text-gray-400">
+                    <span className="mr-2">From</span>
+                    <span className="text-white">
+                      {formatDateDisplay(request.start_date)}
+                    </span>
+                  </div>
+                  <div className="flex text-gray-400">
+                    <span className="mr-2">To</span>
+                    <span className="text-white">
+                      {formatDateDisplay(request.end_date)}
+                    </span>
+                  </div>
+                </div>
+                <div className="space-y-2 mt-2 text-sm">
                   <div className="flex justify-between text-gray-400">
                     <span>Abscence Type</span>
                     <span className="text-white">{request.leave_type}</span>
@@ -201,18 +214,6 @@ useEffect(() => {
                     <span>Reason</span>
                     <span className="text-white">
                       {request.reason ? request.reason : "Unknown"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-gray-400">
-                    <span>From</span>
-                    <span className="text-white">
-                      {formatDateDisplay(request.start_date)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-gray-400">
-                    <span>To</span>
-                    <span className="text-white">
-                      {formatDateDisplay(request.end_date)}
                     </span>
                   </div>
                 </div>

@@ -15,12 +15,12 @@ import {
   endWorkController,
   getTodayController,
   getWorkTimeForAllUsersForWeekCalendarController,
-  previousMonthWorkController,
+  currentMonthWorkController,
   startWorkController,
+  getMonthlyHoursEmployeeController,
 } from "../controllers/workTimeController.js";
 import { getCurrentCompanyController } from "../controllers/employeesController.js";
 import {  getEmployeeNotificationsController, getNotificationsController, markEmployeeNotificationsReadController, updateStatusNotificationController } from "../controllers/notificationController.js";
-import { getEmployeePendingTimeOffModel } from "../models/requestTimeOffModel.js";
 
 const router = Router();
 
@@ -58,7 +58,8 @@ router.patch("/end/:id", protect, endWorkController);
 router.get("/today", protect, getTodayController);
 
 //get all work time for past month
-router.get("/work/previous-month", protect, previousMonthWorkController);
+router.get("/work/previous-month", protect, currentMonthWorkController);
+router.get("/work/montly-hours-employees", protect, getMonthlyHoursEmployeeController);
 
 //get all work time for employyes in week calendar
 router.get(
@@ -69,11 +70,7 @@ router.get(
 
 router.get("/current-company",protect,getCurrentCompanyController);
 
-//MOTIFICATIONS
-// router.get("/notifications", protect,getNotificationsController)
-// router.get("/admin-notifications", protect,getNotificationsController)
-// router.patch('/notifications/read',protect,updateStatusNotificationController)
-
+//notifications 
 router.get("/notifications", protect, getEmployeeNotificationsController);
 router.patch("/notifications/read", protect, markEmployeeNotificationsReadController);
 

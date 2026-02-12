@@ -16,7 +16,6 @@ const Admin = ({ user }: Props) => {
 
   const [requests, setRequests] = useState<TimeOffRequest[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
-  console.log(inviteCodes,"inv codes all")
   // time off requests for admin
   useEffect(() => {
     const fetchRequests = async () => {
@@ -79,16 +78,19 @@ const Admin = ({ user }: Props) => {
   };
 
   useEffect(() => {
-    const fetchRemainingInviteCodes = async  () => {
+    const fetchRemainingInviteCodes = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/all-invitecodes")
-        console.log(res.data.codes,"RESPONSE Inv code")
-        setInviteCodes(res.data.codes)
+        const res = await axios.get(
+          "http://localhost:5000/api/all-invitecodes",
+        );
+        console.log(res.data.codes, "RESPONSE Inv code");
+        setInviteCodes(res.data.codes);
       } catch (error) {
-              console.error("Error getting all inv codes:", error);
-      }}
-      fetchRemainingInviteCodes()
-  },[])//count
+        console.error("Error getting all inv codes:", error);
+      }
+    };
+    fetchRemainingInviteCodes();
+  }, []); //count
 
   return (
     <Wrapper>
@@ -166,13 +168,17 @@ const Admin = ({ user }: Props) => {
                     key={request.id}
                     className={`bg-[#202020] ${request.status === "pending" && "shadow-2xl shadow-orange-100"} border border-white/10 rounded-2xl p-5 hover:scale-[1.02] transition-transform duration-200`}
                   >
-                    <p className="text-2xl font-extrabold mb-2">{request.leave_type}</p>
+                    <p className="text-2xl font-extrabold mb-2">
+                      {request.leave_type}
+                    </p>
                     <p className="font-semibold">{request.username}</p>
                     <p className="text-sm text-gray-400">{request.email}</p>
                     <p className="text-sm text-gray-400">{request.reason}</p>
 
                     <div className="mt-2 flex  justify-between  text-sm">
-                      <span className="mr-5 mb-2">Start:  {formatDateDisplay(request.start_date)}</span> 
+                      <span className="mr-5 mb-2">
+                        Start: {formatDateDisplay(request.start_date)}
+                      </span>
                       <span>End: {formatDateDisplay(request.end_date)}</span>
                     </div>
 

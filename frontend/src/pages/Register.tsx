@@ -97,13 +97,8 @@ const Register = ({ setUser }: Props) => {
               <option value="">Select your country</option>
               {[
                 { name: "Switzerland", code: "CH" },
-                { name: "Canada", code: "CA" },
                 { name: "North Macedonia", code: "MK" },
                 { name: "Germany", code: "DE" },
-                { name: "France", code: "FR" },
-                { name: "Italy", code: "IT" },
-                { name: "Spain", code: "ES" },
-                { name: "Australia", code: "AU" },
               ].map((country) => (
                 <option key={country.code} value={country.code}>
                   {country.name}

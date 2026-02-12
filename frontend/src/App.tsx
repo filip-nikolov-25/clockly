@@ -5,20 +5,21 @@ import Register from "./pages/Register";
 import Homepage from "./pages/Homepage";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import type { CurrentCompanyType, UserType } from "./interfaces/types";
+import type { UserType } from "./interfaces/types";
 import Admin from "./pages/Admin";
 import CalendarPage from "./pages/CalendarPage";
 import AboutMe from "./pages/AboutMe";
 import TimeManagment from "./pages/TimeManagment";
+import EmployeePage from "./pages/EmployeePage";
 
 const App = () => {
   axios.defaults.withCredentials = true;
   const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [currentCompany, setCurrentCompany] = useState('');
+  const [currentCompany, setCurrentCompany] = useState("");
 
-  console.log(currentCompany,"CURENT COMPANY")
+  console.log(currentCompany, "CURENT COMPANY");
   useEffect(() => {
     const fetchUser = async () => {
       setLoading(true);
@@ -48,7 +49,6 @@ const App = () => {
         Loading...
       </div>
     );
-
   return (
     <BrowserRouter>
       <NavBar
@@ -62,7 +62,13 @@ const App = () => {
         <Route path="/" element={<Homepage />} />
         <Route
           path="/login"
-          element={<Login user={user} setCurrentCompany={setCurrentCompany} setUser={setUser} />}
+          element={
+            <Login
+              user={user}
+              setCurrentCompany={setCurrentCompany}
+              setUser={setUser}
+            />
+          }
         />
         <Route
           path="/register"
@@ -70,10 +76,7 @@ const App = () => {
         />
         <Route path="/admin" element={<Admin user={user} />} />
         <Route path="/calendar" element={<CalendarPage />} />
-        <Route
-          path="/employees"
-          element={<div className="text-white p-10">Employees Page</div>}
-        />
+        <Route path="/employees" element={<EmployeePage  currentCompany={currentCompany} />} />
         <Route path="/aboutme" element={<AboutMe user={user} />} />
         <Route path="/time" element={<TimeManagment />} />
         <Route

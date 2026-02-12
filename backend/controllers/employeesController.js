@@ -1,22 +1,10 @@
 import {
-  getAllEmployees,
   getEmployeeById,
   createEmployee,
   updateEmployee,
   deleteEmployee,
-  deleteAllEmployees,
   getCurrentCompanyModel,
 } from "../models/employeesModel.js";
-
-// GET ALL
-export const getEmployeesController = async (req, res) => {
-  try {
-    const employees = await getAllEmployees();
-    res.json(employees);
-  } catch (error) {
-    res.status(500).json({ error: "Server error" });
-  }
-};
 
 // GET ONE
 export const getEmployeeByIdController = async (req, res) => {
@@ -61,15 +49,6 @@ export const deleteEmployeeController = async (req, res) => {
   }
 };
 
-// DELETE ALL
-export const deleteAllEmployeesController = async (req, res) => {
-  try {
-    await deleteAllEmployees();
-    res.json({ message: "All employees deleted" });
-  } catch (error) {
-    res.status(500).json({ error: "Server error" });
-  }
-};
 
 //Get current company
 export const getCurrentCompanyController = async (req,res) => {

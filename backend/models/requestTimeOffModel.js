@@ -19,7 +19,7 @@ export const sendLeaveRequest = async (
 
 export const getLeaveRequests = async (user_id, company_id) => {
   const result = await db.query(
-    "SELECT status, start_date, end_date, leave_type,reason FROM leave_requests WHERE user_id = $1 AND company_id = $2",
+    "SELECT status, start_date, end_date, leave_type,reason FROM leave_requests WHERE user_id = $1 AND company_id = $2  ORDER BY requested_at DESC",
     [user_id, company_id],
   );
   return result.rows;

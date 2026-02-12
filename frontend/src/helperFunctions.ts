@@ -62,3 +62,14 @@ export const convertMonSunWeekDaysFormat = (date: Date) => {
   return d;
 };
 
+export const formatMinutesToHoursAndMinutes = (minutes?: string | number) => {
+  const mins = Number(minutes || 0);
+  const h = Math.floor(mins / 60);
+  const m = Math.round(mins % 60);
+
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+};
+
+

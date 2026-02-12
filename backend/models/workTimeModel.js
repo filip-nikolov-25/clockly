@@ -1,7 +1,7 @@
-import pool from "../db.js";
+import db from "../db.js";
 
 export const createEntry = async (userId, companyId) => {
-  const result = await pool.query(
+  const result = await db.query(
     `
     INSERT INTO worktime_employees (user_id, company_id, start_time, work_date)
     VALUES ($1, $2, NOW(), CURRENT_DATE)
@@ -14,7 +14,7 @@ export const createEntry = async (userId, companyId) => {
 };
 //start break
 export const startBreak = async (entryId) => {
-  await pool.query(
+  await db.query(
     `
     UPDATE worktime_employees
     SET break_start = NOW()
@@ -25,7 +25,7 @@ export const startBreak = async (entryId) => {
 };
 //end break
 export const endBreak = async (entryId) => {
-  await pool.query(
+  await db.query(
     `
     UPDATE worktime_employees
     SET break_end = NOW()
@@ -36,7 +36,7 @@ export const endBreak = async (entryId) => {
 };
 // end work
 export const endWork = async (entryId) => {
-  const result = await pool.query(
+  const result = await db.query(
     `
     UPDATE worktime_employees
     SET end_time = NOW(),
@@ -55,7 +55,7 @@ export const endWork = async (entryId) => {
 };
 // Get this for my status to fetch the today work and for clock when starting to work aka onClick START
 export const getTodayEntry = async (userId, companyId) => {
-  const result = await pool.query(
+  const result = await db.query(
     `
     SELECT *
     FROM worktime_employees
@@ -94,7 +94,7 @@ WHERE user_id = $1
 ORDER BY work_date DESC, created_at DESC
   `;
   const values = [user_id, company_id, startDate, endDate];
-  const result = await pool.query(query, values);
+  const result = await db.query(query, values);
   return result.rows;
 };
 
@@ -116,6 +116,35 @@ export const getWorkTimeForAllUsersForWeekCalendarModel = async (
     ORDER BY work_date ASC
   `;
 
-  const result = await pool.query(query, [startDate, endDate]);
+  const result = await db.query(query, [startDate, endDate]);
+  return result.rows;
+};
+
+export const getMonthlyHoursEmployeeModel = async (
+  company_id,
+  startDate,
+  endDate,
+) => {
+const query = `
+  SELECT
+    u.id AS user_id,
+    u.username,
+    u.email,
+    u.role,
+    u.country_code,
+    SUM(
+      w.total_minutes
+      - COALESCE(EXTRACT(EPOCH FROM (w.break_end - w.break_start)) / 60, 0)
+    ) AS worked_minutes
+  FROM worktime_employees w
+  JOIN users u ON u.id = w.user_id
+  WHERE w.company_id = $1
+    AND w.work_date BETWEEN $2 AND $3
+  GROUP BY u.id, u.username, u.email, u.role, u.country_code
+  ORDER BY worked_minutes DESC
+`;
+
+  const result = await db.query(query, [company_id, startDate, endDate]);
+
   return result.rows;
 };

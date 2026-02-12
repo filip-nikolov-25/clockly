@@ -7,7 +7,7 @@ export interface UserType {
   religion?: string;
   code?: string;
   country_code: string;
-  id:string
+  id: string;
 }
 export type LoginType = {
   email: string;
@@ -59,4 +59,11 @@ export interface PublicHolidayType {
 export interface CurrentCompanyType {
   name: string;
 }
-
+export interface AllEmployeeType {
+  user_id: string
+  username: string
+  email: string
+  role: string
+  country_code:string
+  worked_minutes: string
+}

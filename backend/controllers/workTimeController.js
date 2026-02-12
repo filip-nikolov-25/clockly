@@ -3,6 +3,7 @@ import {
   endBreak,
   endWork,
   getEntriesForPeriod,
+  getMonthlyHoursEmployeeModel,
   getTodayEntry,
   getWorkTimeForAllUsersForWeekCalendarModel,
   startBreak,
@@ -60,7 +61,7 @@ export const endWorkController = async (req, res) => {
   }
 };
 
-//* GET TODAY 
+//* GET TODAY
 export const getTodayController = async (req, res) => {
   try {
     const company_id = req.user.company_id;
@@ -73,14 +74,14 @@ export const getTodayController = async (req, res) => {
   }
 };
 
-export const previousMonthWorkController = async (req, res) => {
+export const currentMonthWorkController = async (req, res) => {
   try {
     const user_id = req.user.id;
     const company_id = req.user.company_id;
 
     const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), 1); 
-    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0); 
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
     const entries = await getEntriesForPeriod(user_id, company_id, start, end);
     res.json(entries);
@@ -90,15 +91,35 @@ export const previousMonthWorkController = async (req, res) => {
   }
 };
 
-
-export const getWorkTimeForAllUsersForWeekCalendarController = async (req, res) => {
+export const getWorkTimeForAllUsersForWeekCalendarController = async (
+  req,
+  res,
+) => {
   try {
-    const { startDate, endDate } = req.query; 
-    const entries = await getWorkTimeForAllUsersForWeekCalendarModel(startDate, endDate);
+    const { startDate, endDate } = req.query;
+    const entries = await getWorkTimeForAllUsersForWeekCalendarModel(
+      startDate,
+      endDate,
+    );
     res.json(entries);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch work entries" });
   }
 };
+export const getMonthlyHoursEmployeeController = async (req, res) => {
+  try {
+    const company_id = req.user.company_id;
 
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    const data = await getMonthlyHoursEmployeeModel(company_id, start, end);
+
+    res.json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch monthly hours" });
+  }
+};
