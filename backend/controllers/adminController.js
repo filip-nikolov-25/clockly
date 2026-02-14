@@ -68,7 +68,6 @@ export const sendInviteController = async (req, res) => {
 
 export const getInviteCodesForEmployeesController = async (req,res) => {
   const company_id = req.user.company_id
-  console.log(company_id,"comp id")
   try {
     const inviteCodes = await getInviteCodesForEmployeesModel(company_id)
 

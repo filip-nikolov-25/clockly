@@ -74,7 +74,7 @@ router.get("/current-company",protect,getCurrentCompanyController);
 router.get("/notifications", protect, getEmployeeNotificationsController);
 router.patch("/notifications/read", protect, markEmployeeNotificationsReadController);
 
-// Admin notifications
+// admin notifications
 router.get("/admin-notifications", protect, getNotificationsController);
 router.patch("/admin-notifications/read", protect, updateStatusNotificationController);
 

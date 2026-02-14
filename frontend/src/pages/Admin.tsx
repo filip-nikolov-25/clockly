@@ -10,7 +10,6 @@ interface Props {
 
 const Admin = ({ user }: Props) => {
   const [inviteCodes, setInviteCodes] = useState<string[]>([]);
-  const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [count, setCount] = useState(0);
 
@@ -39,10 +38,14 @@ const Admin = ({ user }: Props) => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
+    if (inviteCodes.length > 0) {
+      setErrorMessage(
+        `You still have ${inviteCodes.length} unused invite code(s).`,
+      );
+      return;
+    }
     if (!count || count < 1) {
       setErrorMessage("Please enter an invite code");
-      setSuccessMessage("");
       return;
     }
 
@@ -127,23 +130,23 @@ const Admin = ({ user }: Props) => {
           >
             Create Invite Codes
           </button>
-
+     {errorMessage && <p className="text-red-500 mt-3">{errorMessage}</p>}
           {inviteCodes?.length > 0 && (
-            <div className="bg-gray-700 p-10 rounded mt-5">
+            <div className="bg-[#202020] p-7 rounded-xl mt-5">
               <h2 className="text-2xl mb-2">
                 Your invite codes for the employees:
               </h2>
               <ul>
                 {inviteCodes?.map((code, index) => (
-                  <li key={index} className="text-lg">
-                    {index + 1}. {code}
+                  <li key={index} className="text-lg text-red-500">
+                    <span className="text-white">{index + 1} - </span> {code}
                   </li>
                 ))}
               </ul>
             </div>
           )}
 
-          {errorMessage && <p className="text-red-500 mt-3">{errorMessage}</p>}
+         
         </form>
 
         <div className="mt-16">

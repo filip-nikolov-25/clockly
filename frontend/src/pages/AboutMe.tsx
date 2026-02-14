@@ -78,9 +78,31 @@ const AboutMe = ({ user }: Props) => {
 
   return (
     <Wrapper>
-      <div className="flex justify-between mt-10 mb-10">
+      {/* <div className="flex justify-between mt-10 mb-10">
         <h1 className="text-5xl font-bold  mb-3">About Me</h1>
         <h2 className=" text-5xl font-bold">{user?.username}</h2>
+      </div> */}
+      <h1 className="text-5xl font-bold mt-10  mb-10">{user?.username}</h1>
+      <div>
+        <h2>Remaining from this month</h2>
+          <div>
+        <h2>HERE LOADING bar </h2>
+        DAYS: 5/20
+          </div>
+      </div>
+      <div>
+        <h2>Remaining working days from this year</h2>
+        <div>
+          <h2>HERE LOADING bar </h2>
+          DAYS: 10/261
+        </div>
+      </div>
+      <div>
+        <h2>Remaining Days VACATION this year</h2>
+        <div>
+          <h2>HERE LOADING bar </h2>
+          DAYS: 10/261
+        </div>
       </div>
 
       <h2 className="text-lg text-gray-400 mb-3">Today's Work</h2>

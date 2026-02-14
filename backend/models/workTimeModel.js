@@ -123,28 +123,32 @@ export const getWorkTimeForAllUsersForWeekCalendarModel = async (
 export const getMonthlyHoursEmployeeModel = async (
   company_id,
   startDate,
-  endDate,
+  endDate
 ) => {
-const query = `
-  SELECT
-    u.id AS user_id,
-    u.username,
-    u.email,
-    u.role,
-    u.country_code,
-    SUM(
-      w.total_minutes
-      - COALESCE(EXTRACT(EPOCH FROM (w.break_end - w.break_start)) / 60, 0)
-    ) AS worked_minutes
-  FROM worktime_employees w
-  JOIN users u ON u.id = w.user_id
-  WHERE w.company_id = $1
-    AND w.work_date BETWEEN $2 AND $3
-  GROUP BY u.id, u.username, u.email, u.role, u.country_code
-  ORDER BY worked_minutes DESC
-`;
+  const query = `
+    SELECT
+      u.id AS user_id,
+      u.username,
+      u.email,
+      u.role,
+      u.country_code,
+      COALESCE(
+        SUM(
+          w.total_minutes
+          - COALESCE(EXTRACT(EPOCH FROM (w.break_end - w.break_start)) / 60, 0)
+        ),
+        0
+      ) AS worked_minutes
+    FROM users u
+    LEFT JOIN worktime_employees w
+      ON u.id = w.user_id
+      AND w.company_id = $1
+      AND w.work_date BETWEEN $2 AND $3
+    WHERE u.company_id = $1
+    GROUP BY u.id, u.username, u.email, u.role, u.country_code
+    ORDER BY worked_minutes DESC;
+  `;
 
   const result = await db.query(query, [company_id, startDate, endDate]);
-
   return result.rows;
 };
