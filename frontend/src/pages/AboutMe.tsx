@@ -7,14 +7,15 @@ import {
   getBreakMinutes,
 } from "../helperFunctions";
 import type { TimeOffRequest, UserType } from "../interfaces/types";
+
 interface Props {
   user: UserType | null;
 }
+
 const AboutMe = ({ user }: Props) => {
   const [todayWork, setTodayWork] = useState<any>(null);
   const [previousMonthWork, setPreviousMonthWork] = useState<any[]>([]);
   const [requestTimeOff, setRequestTimeOff] = useState<TimeOffRequest[]>([]);
-  console.log(requestTimeOff, "requestTimeOff");
 
   const formatWorkedTime = (minutes: number) => {
     if (!minutes) return "0h 0m";
@@ -27,7 +28,6 @@ const AboutMe = ({ user }: Props) => {
     const fetchTodayWork = async () => {
       try {
         const { data } = await axios.get("http://localhost:5000/api/today");
-
         if (!data) return;
 
         const breakMinutes = getBreakMinutes(data.break_start, data.break_end);
@@ -52,7 +52,7 @@ const AboutMe = ({ user }: Props) => {
           "http://localhost:5000/api/work/previous-month",
           {
             params: { t: new Date().getTime() },
-          },
+          }
         );
         setPreviousMonthWork(data);
       } catch (err) {
@@ -66,7 +66,7 @@ const AboutMe = ({ user }: Props) => {
     const fetchRequestTimeOff = async () => {
       try {
         const { data } = await axios.get(
-          "http://localhost:5000/api/requesttimeoff",
+          "http://localhost:5000/api/requesttimeoff"
         );
         setRequestTimeOff(data);
       } catch (err) {
@@ -75,28 +75,56 @@ const AboutMe = ({ user }: Props) => {
     };
     fetchRequestTimeOff();
   }, []);
+  const totalPreviousMonthMinutes = previousMonthWork.reduce(
+    (sum, entry) => sum + Number(entry.worked_minutes || 0),
+    0
+  );
+
+  const workedHours = Math.floor(totalPreviousMonthMinutes / 60);
+  const totalMonthlyHours = 160; 
+
+  const progressPercent = Math.min(
+    (workedHours / totalMonthlyHours) * 100,
+    100
+  );
+
+const totalYearWorkingDays = 250; 
+const dailyWorkingMinutes = 8 * 60; 
+
+const totalWorkedMinutes = previousMonthWork.reduce(
+  (sum, entry) => sum + Number(entry.worked_minutes),
+  0
+);
+
+
+const workedYearDays = totalWorkedMinutes / dailyWorkingMinutes;
+
+
+const yearDaysProgressPercent = Math.min(
+  (workedYearDays / totalYearWorkingDays) * 100,
+  100
+);
+
+
 
   return (
     <Wrapper>
-      {/* <div className="flex justify-between mt-10 mb-10">
-        <h1 className="text-5xl font-bold  mb-3">About Me</h1>
-        <h2 className=" text-5xl font-bold">{user?.username}</h2>
-      </div> */}
       <h1 className="text-5xl font-bold mt-10  mb-10">{user?.username}</h1>
-      <div>
-        <h2>Remaining from this month</h2>
-          <div>
-        <h2>HERE LOADING bar </h2>
-        DAYS: 5/20
-          </div>
-      </div>
-      <div>
-        <h2>Remaining working days from this year</h2>
-        <div>
-          <h2>HERE LOADING bar </h2>
-          DAYS: 10/261
-        </div>
-      </div>
+
+<div className="mb-10">
+  <h2 className="text-lg text-gray-400 mb-2">Year Working Days</h2>
+  <p>
+    {workedYearDays.toFixed(1)}/{totalYearWorkingDays} days
+  </p>
+  <div className="w-full bg-gray-700 h-2 rounded-xl mt-2">
+    <div
+      className="bg-blue-500 h-2 rounded-xl transition-all duration-300"
+      style={{ width: `${yearDaysProgressPercent}%` }}
+    />
+  </div>
+</div>
+
+
       <div>
         <h2>Remaining Days VACATION this year</h2>
         <div>
@@ -141,6 +169,20 @@ const AboutMe = ({ user }: Props) => {
       )}
 
       <h2 className="text-lg text-gray-400 mb-3">Previous Month</h2>
+      <div className="mb-10">
+        <div>
+          <p>
+            Logged hours: <strong>{workedHours}</strong>/{totalMonthlyHours}
+          </p>
+          <div className="w-full bg-gray-700 h-2 rounded-xl mt-4">
+            <div
+              className="bg-orange-400 h-2 rounded-xl transition-all duration-300 ease-in-out"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
       {previousMonthWork.length > 0 ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 mb-8">
           {previousMonthWork.map((entry: any) => (
