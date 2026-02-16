@@ -124,15 +124,6 @@ const yearDaysProgressPercent = Math.min(
   </div>
 </div>
 
-
-      <div>
-        <h2>Remaining Days VACATION this year</h2>
-        <div>
-          <h2>HERE LOADING bar </h2>
-          DAYS: 10/261
-        </div>
-      </div>
-
       <h2 className="text-lg text-gray-400 mb-3">Today's Work</h2>
       {todayWork ? (
         <div className="bg-[#202020] border border-white/10 rounded-2xl p-5 mb-8">

@@ -157,8 +157,8 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
               );
             })}
           </div>
-          ``
-          <div className="mt-4 flex flex-col gap-3">
+          
+          <div className="mt-7 flex flex-col gap-3">
             {employees.map((emp) => (
               <div
                 key={emp.user_id}
@@ -175,6 +175,8 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                   const entry = workEntries[key];
 
                   const isPast = d < today;
+                  const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+
 
                   const leaveType = emp.daysOff?.[dateStr];
                   const isOff = leaveType;
@@ -184,16 +186,16 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                       formatDateToISO(h.date) === dateStr &&
                       h.countryCode === emp.country_code,
                   );
-
                   let label: string | number = "Working";
-                  console.log(entry, "ENTRY");
-                  if (dayHolidayList.length > 0) label = "Holiday";
-                  else if (isOff) label = leaveType;
-                  else if (isPast) {
-                    label = entry
-                      ? formatMinutesToTime(entry.worked_minutes)
-                      : "0 h";
-                  }
+
+if (dayHolidayList.length > 0) label = "Holiday";
+else if (isOff) label = leaveType;
+else if (isWeekend) label = "Weekend";
+else if (isPast) {
+  label = entry
+    ? formatMinutesToTime(entry.worked_minutes)
+    : "0 h";
+}
 
                   let bgClass =
                     dayHolidayList.length > 0
