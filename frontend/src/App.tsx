@@ -11,6 +11,7 @@ import CalendarPage from "./pages/CalendarPage";
 import AboutMe from "./pages/AboutMe";
 import TimeManagment from "./pages/TimeManagment";
 import EmployeePage from "./pages/EmployeePage";
+import Footer from "./components/Footer";
 
 const App = () => {
   axios.defaults.withCredentials = true;
@@ -76,7 +77,10 @@ const App = () => {
         />
         <Route path="/admin" element={<Admin user={user} />} />
         <Route path="/calendar" element={<CalendarPage />} />
-        <Route path="/employees" element={<EmployeePage  currentCompany={currentCompany} />} />
+        <Route
+          path="/employees"
+          element={<EmployeePage currentCompany={currentCompany} />}
+        />
         <Route path="/aboutme" element={<AboutMe user={user} />} />
         <Route path="/time" element={<TimeManagment />} />
         <Route
@@ -84,6 +88,7 @@ const App = () => {
           element={<div className="text-white p-10">NOT FOUND PAGE</div>}
         />
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 };
