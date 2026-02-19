@@ -20,8 +20,8 @@ const CalendarPage = () => {
         const requests = countries.map((c) =>
           axios.get(
             `https://date.nager.at/api/v3/PublicHolidays/${year}/${c}`,
-            { withCredentials: false }
-          )
+            { withCredentials: false },
+          ),
         );
         const responses = await Promise.all(requests);
         const merged = responses.flatMap((r) => r.data);
@@ -35,7 +35,9 @@ const CalendarPage = () => {
 
   return (
     <Wrapper>
-      <header className="text-6xl mt-14 font-extrabold text-white">Calendar</header>
+      <header className="text-6xl mt-14 font-extrabold text-white">
+        Calendar
+      </header>
 
       <div className="flex justify-between items-center mb-6 mt-6">
         <div className="flex items-center space-x-3">

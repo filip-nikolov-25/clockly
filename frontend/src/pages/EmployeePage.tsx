@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import Wrapper from "../components/base/Wrapper";
 import axios from "axios";
 import type { AllEmployeeType } from "../interfaces/types";
-import { formatMinutesToHoursAndMinutes, formatMinutesToTime } from "../helperFunctions";
+import {
+  formatMinutesToHoursAndMinutes,
+} from "../helperFunctions";
 
 interface Props {
   currentCompany: string;
@@ -13,7 +15,9 @@ const EmployeePage = ({ currentCompany }: Props) => {
   console.log(employees, "asd");
   useEffect(() => {
     const getAllEmployees = async () => {
-      const result = await axios.get("http://localhost:5000/api/work/montly-hours-employees");
+      const result = await axios.get(
+        "http://localhost:5000/api/work/montly-hours-employees",
+      );
       setEmployees(result.data);
     };
 
@@ -23,7 +27,7 @@ const EmployeePage = ({ currentCompany }: Props) => {
   return (
     <Wrapper>
       <h1 className=" text-5xl font-extrabold mt-20">
-       <span className="text-orange-400">{currentCompany}'s</span> Employees
+        <span className="text-orange-400">{currentCompany}'s</span> Employees
       </h1>
 
       <div className="grid grid-cols-3 gap-3 mt-20">
@@ -34,7 +38,10 @@ const EmployeePage = ({ currentCompany }: Props) => {
           >
             <p className="text-3xl font-extrabold mb-2">{employee.username}</p>
             <p className="text-lg text-gray-400">
-              Worked this month : <span className="text-orange-400 font-bold">{formatMinutesToHoursAndMinutes(employee.worked_minutes)}</span> 
+              Worked this month :{" "}
+              <span className="text-orange-400 font-bold">
+                {formatMinutesToHoursAndMinutes(employee.worked_minutes)}
+              </span>
             </p>
 
             <p className="text-sm text-gray-400">Email: {employee.email}</p>

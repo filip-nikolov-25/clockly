@@ -25,7 +25,6 @@ const NavBar = ({
   setCurrentCompany,
 }: Props) => {
   const navigate = useNavigate();
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -237,12 +236,6 @@ const NavBar = ({
           </div>
         </div>
       </div>
-      {/* <div className="w-full h-1 bg-[#101010]">
-        <div
-          className="h-full bg-orange-50 transition-all duration-300 ease-in-out"
-          style={{ width: `${scrollProgress}%` }}
-        />// this can cause unesecary rerenders, DELETE IT 
-      </div> */}
     </div>
   );
 };

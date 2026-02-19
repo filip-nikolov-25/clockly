@@ -21,7 +21,9 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const [startDate, setStartDate] = useState(convertMonSunWeekDaysFormat(new Date()));
+  const [startDate, setStartDate] = useState(
+    convertMonSunWeekDaysFormat(new Date()),
+  );
 
   const next7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(startDate);
@@ -157,7 +159,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
               );
             })}
           </div>
-          
+
           <div className="mt-7 flex flex-col gap-3">
             {employees.map((emp) => (
               <div
@@ -177,7 +179,6 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                   const isPast = d < today;
                   const isWeekend = d.getDay() === 0 || d.getDay() === 6;
 
-
                   const leaveType = emp.daysOff?.[dateStr];
                   const isOff = leaveType;
 
@@ -188,14 +189,14 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                   );
                   let label: string | number = "Working";
 
-if (dayHolidayList.length > 0) label = "Holiday";
-else if (isOff) label = leaveType;
-else if (isWeekend) label = "Weekend";
-else if (isPast) {
-  label = entry
-    ? formatMinutesToTime(entry.worked_minutes)
-    : "0 h";
-}
+                  if (dayHolidayList.length > 0) label = "Holiday";
+                  else if (isOff) label = leaveType;
+                  else if (isWeekend) label = "Weekend";
+                  else if (isPast) {
+                    label = entry
+                      ? formatMinutesToTime(entry.worked_minutes)
+                      : "0 h";
+                  }
 
                   let bgClass =
                     dayHolidayList.length > 0

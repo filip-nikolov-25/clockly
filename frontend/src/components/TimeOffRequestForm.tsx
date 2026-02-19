@@ -23,63 +23,67 @@ const TimeOffRequestForm = ({
   const todayStr = today.toISOString().split("T")[0];
 
   const handleSubmit = async () => {
-  if (!leaveStart || !leaveEnd || !leaveType) {
-    setErrorMessage("Please fill all required fields!");
-    return;
-  }
-
-  const start = new Date(leaveStart);
-  const end = new Date(leaveEnd);
-
-  if (start.getTime() < today.getTime()) {
-    setErrorMessage("Start date cannot be in the past!");
-    return;
-  }
-
-  if (end.getTime() < start.getTime()) {
-    setErrorMessage("End date cannot be before start date!");
-    return;
-  }
-
-  setLoading(true);
-  setErrorMessage("");
-
-  try {
-    const { data } = await axios.get(
-      "http://localhost:5000/api/abscence-availability"
-    );
-
-    if (data.userRequestedAbscence) {
-      setErrorMessage("You already have an active absence request.");
-      setLoading(false);
+    if (!leaveStart || !leaveEnd || !leaveType) {
+      setErrorMessage("Please fill all required fields!");
       return;
     }
 
-    await axios.post("http://localhost:5000/api/requesttimeoff", {
-      start_date: leaveStart,
-      end_date: leaveEnd,
-      leave_type: leaveType,
-      reason,
-    });
+    const start = new Date(leaveStart);
+    const end = new Date(leaveEnd);
 
-    setSuccessMessage("Request submitted successfully!");
-    setLeaveStart("");
-    setLeaveEnd("");
-    setLeaveType("");
-    setReason("");
+    if (start.getTime() < today.getTime()) {
+      setErrorMessage("Start date cannot be in the past!");
+      return;
+    }
 
-    if (onSubmitted) onSubmitted();
-    onClose();
-  } catch (err: any) {
-    console.error(err);
-    setErrorMessage(err.response?.data?.message || "Error submitting request.");
-  } finally {
-    setLoading(false);
-  }
-};
+    if (end.getTime() < start.getTime()) {
+      setErrorMessage("End date cannot be before start date!");
+      return;
+    }
+
+    setLoading(true);
+    setErrorMessage("");
+
+    try {
+      const { data } = await axios.get(
+        "http://localhost:5000/api/abscence-availability",
+      );
+
+      if (data.userRequestedAbscence) {
+        setErrorMessage("You already have an active absence request.");
+        setLoading(false);
+        return;
+      }
+
+      await axios.post("http://localhost:5000/api/requesttimeoff", {
+        start_date: leaveStart,
+        end_date: leaveEnd,
+        leave_type: leaveType,
+        reason,
+      });
+
+      setSuccessMessage("Request submitted successfully!");
+      setLeaveStart("");
+      setLeaveEnd("");
+      setLeaveType("");
+      setReason("");
+
+      if (onSubmitted) onSubmitted();
+      onClose();
+    } catch (err: any) {
+      console.error(err);
+      setErrorMessage(
+        err.response?.data?.message || "Error submitting request.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="bg-[#202020] mt-4 p-6 rounded-xl ">
-      <h2 className="text-white text-2xl font-bold mb-4">New Absence Request</h2>
+      <h2 className="text-white text-2xl font-bold mb-4">
+        New Absence Request
+      </h2>
 
       <div className="flex gap-4">
         <div className="flex-1 flex flex-col text-white">
@@ -96,15 +100,15 @@ const TimeOffRequestForm = ({
         </div>
         <div className="flex-1 flex flex-col text-white">
           <label>End Date:</label>
-      <input
-  type="date"
-  value={leaveEnd}
-  onChange={(e) => setLeaveEnd(e.target.value)}
-  min={leaveStart || todayStr}
-  className="bg-black border-2 px-2 py-1 rounded
+          <input
+            type="date"
+            value={leaveEnd}
+            onChange={(e) => setLeaveEnd(e.target.value)}
+            min={leaveStart || todayStr}
+            className="bg-black border-2 px-2 py-1 rounded
              [&::-webkit-calendar-picker-indicator]:invert
              [&::-webkit-calendar-picker-indicator]:cursor-pointer"
-/>
+          />
         </div>
       </div>
 
@@ -145,7 +149,9 @@ const TimeOffRequestForm = ({
         </button>
       </div>
       {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
-      {successMessage && <p className="text-green-500 mt-2">{successMessage}</p>}
+      {successMessage && (
+        <p className="text-green-500 mt-2">{successMessage}</p>
+      )}
     </div>
   );
 };

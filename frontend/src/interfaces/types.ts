@@ -60,10 +60,10 @@ export interface CurrentCompanyType {
   name: string;
 }
 export interface AllEmployeeType {
-  user_id: string
-  username: string
-  email: string
-  role: string
-  country_code:string
-  worked_minutes: string
+  user_id: string;
+  username: string;
+  email: string;
+  role: string;
+  country_code: string;
+  worked_minutes: string;
 }

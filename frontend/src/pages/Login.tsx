@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 interface props {
   user: UserType | null;
   setUser: (user: UserType | null) => void;
-  setCurrentCompany:(companyName:string) => void
+  setCurrentCompany: (companyName: string) => void;
 }
 
 const Login = ({ setUser }: props) => {

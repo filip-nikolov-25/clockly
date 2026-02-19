@@ -6,7 +6,9 @@ const TimeManagment = () => {
   const [seconds, setSeconds] = useState(0);
   const [running, setRunning] = useState(false);
   const [entry, setEntry] = useState<any>(null);
-  const [timerInterval, setTimerInterval] = useState<ReturnType<typeof setInterval> | null>(null);
+  const [timerInterval, setTimerInterval] = useState<ReturnType<
+    typeof setInterval
+  > | null>(null);
 
   const fetchToday = async () => {
     try {
@@ -19,7 +21,9 @@ const TimeManagment = () => {
         let breakDuration = 0;
         if (data.break_start) {
           const breakStart = new Date(data.break_start).getTime();
-          const breakEnd = data.break_end ? new Date(data.break_end).getTime() : now;
+          const breakEnd = data.break_end
+            ? new Date(data.break_end).getTime()
+            : now;
           breakDuration = breakEnd - breakStart;
         }
 
@@ -37,7 +41,7 @@ const TimeManagment = () => {
 
   useEffect(() => {
     if (running) {
-      const interval = setInterval(() => setSeconds(prev => prev + 1), 1000);
+      const interval = setInterval(() => setSeconds((prev) => prev + 1), 1000);
       setTimerInterval(interval);
       return () => clearInterval(interval);
     } else {
@@ -71,7 +75,11 @@ const TimeManagment = () => {
     if (!entry) return;
     try {
       await axios.patch(`http://localhost:5000/api/break-start/${entry.id}`);
-      setEntry({ ...entry, break_start: new Date().toISOString(), break_end: null });
+      setEntry({
+        ...entry,
+        break_start: new Date().toISOString(),
+        break_end: null,
+      });
       setRunning(false);
     } catch (err) {
       console.error(err);
@@ -92,7 +100,6 @@ const TimeManagment = () => {
 
   const onBreak = entry?.break_start && !entry?.break_end;
 
-  
   const TOTAL_SECONDS = 8 * 60 * 60;
   const progress = Math.min(seconds / TOTAL_SECONDS, 1);
   const radius = 100;

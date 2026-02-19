@@ -52,7 +52,7 @@ const AboutMe = ({ user }: Props) => {
           "http://localhost:5000/api/work/previous-month",
           {
             params: { t: new Date().getTime() },
-          }
+          },
         );
         setPreviousMonthWork(data);
       } catch (err) {
@@ -66,7 +66,7 @@ const AboutMe = ({ user }: Props) => {
     const fetchRequestTimeOff = async () => {
       try {
         const { data } = await axios.get(
-          "http://localhost:5000/api/requesttimeoff"
+          "http://localhost:5000/api/requesttimeoff",
         );
         setRequestTimeOff(data);
       } catch (err) {
@@ -77,52 +77,48 @@ const AboutMe = ({ user }: Props) => {
   }, []);
   const totalPreviousMonthMinutes = previousMonthWork.reduce(
     (sum, entry) => sum + Number(entry.worked_minutes || 0),
-    0
+    0,
   );
 
   const workedHours = Math.floor(totalPreviousMonthMinutes / 60);
-  const totalMonthlyHours = 160; 
+  const totalMonthlyHours = 160;
 
   const progressPercent = Math.min(
     (workedHours / totalMonthlyHours) * 100,
-    100
+    100,
   );
 
-const totalYearWorkingDays = 250; 
-const dailyWorkingMinutes = 8 * 60; 
+  const totalYearWorkingDays = 250;
+  const dailyWorkingMinutes = 8 * 60;
 
-const totalWorkedMinutes = previousMonthWork.reduce(
-  (sum, entry) => sum + Number(entry.worked_minutes),
-  0
-);
+  const totalWorkedMinutes = previousMonthWork.reduce(
+    (sum, entry) => sum + Number(entry.worked_minutes),
+    0,
+  );
 
+  const workedYearDays = totalWorkedMinutes / dailyWorkingMinutes;
 
-const workedYearDays = totalWorkedMinutes / dailyWorkingMinutes;
-
-
-const yearDaysProgressPercent = Math.min(
-  (workedYearDays / totalYearWorkingDays) * 100,
-  100
-);
-
-
+  const yearDaysProgressPercent = Math.min(
+    (workedYearDays / totalYearWorkingDays) * 100,
+    100,
+  );
 
   return (
     <Wrapper>
       <h1 className="text-5xl font-bold mt-10  mb-10">{user?.username}</h1>
 
-<div className="mb-10">
-  <h2 className="text-lg text-gray-400 mb-2">Year Working Days</h2>
-  <p>
-    {workedYearDays.toFixed(1)}/{totalYearWorkingDays} days
-  </p>
-  <div className="w-full bg-gray-700 h-2 rounded-xl mt-2">
-    <div
-      className="bg-blue-500 h-2 rounded-xl transition-all duration-300"
-      style={{ width: `${yearDaysProgressPercent}%` }}
-    />
-  </div>
-</div>
+      <div className="mb-10">
+        <h2 className="text-lg text-gray-400 mb-2">Year Working Days</h2>
+        <p>
+          {workedYearDays.toFixed(1)}/{totalYearWorkingDays} days
+        </p>
+        <div className="w-full bg-gray-700 h-2 rounded-xl mt-2">
+          <div
+            className="bg-blue-500 h-2 rounded-xl transition-all duration-300"
+            style={{ width: `${yearDaysProgressPercent}%` }}
+          />
+        </div>
+      </div>
 
       <h2 className="text-lg text-gray-400 mb-3">Today's Work</h2>
       {todayWork ? (

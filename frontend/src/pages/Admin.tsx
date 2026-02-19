@@ -130,7 +130,7 @@ const Admin = ({ user }: Props) => {
           >
             Create Invite Codes
           </button>
-     {errorMessage && <p className="text-red-500 mt-3">{errorMessage}</p>}
+          {errorMessage && <p className="text-red-500 mt-3">{errorMessage}</p>}
           {inviteCodes?.length > 0 && (
             <div className="bg-[#202020] p-7 rounded-xl mt-5">
               <h2 className="text-2xl mb-2">
@@ -145,8 +145,6 @@ const Admin = ({ user }: Props) => {
               </ul>
             </div>
           )}
-
-         
         </form>
 
         <div className="mt-16">
