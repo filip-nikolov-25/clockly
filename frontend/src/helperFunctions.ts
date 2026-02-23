@@ -71,5 +71,20 @@ export const formatMinutesToHoursAndMinutes = (minutes?: string | number) => {
   if (m === 0) return `${h}h`;
   return `${h}h ${m}m`;
 };
+export const countWorkingDaysInWeek = (startDate:string, endDate:string) => {
+  let count = 0;
+  const current = new Date(startDate);
+  const end = new Date(endDate);
+
+  while (current <= end) {
+    const day = current.getDay(); 
+    if (day !== 0 && day !== 6) {
+      count++;
+    }
+    current.setDate(current.getDate() + 1);
+  }
+
+  return count;
+};
 
 

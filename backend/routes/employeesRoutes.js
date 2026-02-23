@@ -18,6 +18,7 @@ import {
   currentMonthWorkController,
   startWorkController,
   getMonthlyHoursEmployeeController,
+  getPublicHolidaysController,
 } from "../controllers/workTimeController.js";
 import { getCurrentCompanyController } from "../controllers/employeesController.js";
 import {  getEmployeeNotificationsController, getNotificationsController, markEmployeeNotificationsReadController, updateStatusNotificationController } from "../controllers/notificationController.js";
@@ -78,4 +79,7 @@ router.patch("/notifications/read", protect, markEmployeeNotificationsReadContro
 router.get("/admin-notifications", protect, getNotificationsController);
 router.patch("/admin-notifications/read", protect, updateStatusNotificationController);
 
+
+// public holidays 
+router.get("/public-holidays", protect, getPublicHolidaysController);
 export default router;

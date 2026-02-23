@@ -4,6 +4,7 @@ import {
   endWork,
   getEntriesForPeriod,
   getMonthlyHoursEmployeeModel,
+  getPublicHolidaysModel,
   getTodayEntry,
   getWorkTimeForAllUsersForWeekCalendarModel,
   startBreak,
@@ -121,5 +122,19 @@ export const getMonthlyHoursEmployeeController = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch monthly hours" });
+  }
+};
+export const getPublicHolidaysController = async (req, res) => {
+  try {
+    const { country_code, start_date, end_date } = req.query;
+    if (!country_code || !start_date || !end_date) {
+      return res.status(400).json({ message: "Missing required parameters" });
+    }
+
+    const holidays = await getPublicHolidaysModel(country_code, start_date, end_date);
+    res.status(200).json(holidays);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching public holidays" });
   }
 };

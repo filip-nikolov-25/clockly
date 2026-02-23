@@ -14,24 +14,33 @@ const CalendarPage = () => {
   const countries = ["CH", "DE", "MK"];
   const year = new Date().getFullYear();
 
-  useEffect(() => {
-    const fetchPublicHolidays = async () => {
-      try {
-        const requests = countries.map((c) =>
-          axios.get(
-            `https://date.nager.at/api/v3/PublicHolidays/${year}/${c}`,
-            { withCredentials: false },
-          ),
-        );
-        const responses = await Promise.all(requests);
-        const merged = responses.flatMap((r) => r.data);
-        setPublicHolidays(merged);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchPublicHolidays();
-  }, []);
+useEffect(() => {
+  const fetchPublicHolidays = async () => {
+    try {
+      const requests = countries.map((c) =>
+        axios.get(`http://localhost:5000/api/public-holidays`, {
+          params: {
+            country_code: c,
+            start_date: `${year}-01-01`,
+            end_date: `${year}-12-31`,
+          },
+        })
+      );
+
+      const responses = await Promise.all(requests);
+      const merged = responses.flatMap((r) => r.data); 
+      
+
+      const formatted = merged.map(dateStr => ({ date: dateStr, name: '' }));
+      
+      setPublicHolidays(formatted as any);
+    } catch (error) {
+      console.error("Error fetching holidays:", error);
+    }
+  };
+
+  fetchPublicHolidays();
+}, []);
 
   return (
     <Wrapper>

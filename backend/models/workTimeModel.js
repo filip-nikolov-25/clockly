@@ -152,3 +152,34 @@ export const getMonthlyHoursEmployeeModel = async (
   const result = await db.query(query, [company_id, startDate, endDate]);
   return result.rows;
 };
+
+
+export const updateUserRemainingLeaveModel = async (user_id, newRemainingLeave) => {
+  try {
+    const query = `
+      UPDATE users
+      SET free_days = $1
+      WHERE id = $2
+      RETURNING free_days
+    `;
+    const values = [newRemainingLeave, user_id];
+
+    const result = await db.query(query, values);
+    return result.rows[0]; 
+  } catch (error) {
+    console.error("Error updating user remaining leave:", error);
+    throw error;
+  }
+};
+
+export const getPublicHolidaysModel = async (country_code, startDate, endDate) => {
+  const result = await db.query(
+    `SELECT date
+     FROM public_holidays
+     WHERE country_code = $1
+       AND date BETWEEN $2 AND $3
+     ORDER BY date ASC`,
+    [country_code, startDate, endDate]
+  );
+  return result.rows.map(r => r.date.toISOString().split("T")[0]);
+};
