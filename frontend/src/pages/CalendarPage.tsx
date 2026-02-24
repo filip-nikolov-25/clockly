@@ -13,7 +13,6 @@ const CalendarPage = () => {
 
   const countries = ["CH", "DE", "MK"];
   const year = new Date().getFullYear();
-
 useEffect(() => {
   const fetchPublicHolidays = async () => {
     try {
@@ -28,12 +27,16 @@ useEffect(() => {
       );
 
       const responses = await Promise.all(requests);
-      const merged = responses.flatMap((r) => r.data); 
-      
 
-      const formatted = merged.map(dateStr => ({ date: dateStr, name: '' }));
-      
-      setPublicHolidays(formatted as any);
+      const merged = responses.flatMap((res, i) =>
+        res.data.map((holiday: any) => ({
+          date: holiday.date,
+          localName: holiday.local_name, 
+          countryCode: holiday.country_code,
+        }))
+      );
+
+      setPublicHolidays(merged);
     } catch (error) {
       console.error("Error fetching holidays:", error);
     }
@@ -41,7 +44,6 @@ useEffect(() => {
 
   fetchPublicHolidays();
 }, []);
-
   return (
     <Wrapper>
       <header className="text-6xl mt-14 font-extrabold text-white">

@@ -174,12 +174,12 @@ export const updateUserRemainingLeaveModel = async (user_id, newRemainingLeave) 
 
 export const getPublicHolidaysModel = async (country_code, startDate, endDate) => {
   const result = await db.query(
-    `SELECT date
+    `SELECT date, country_code, name AS local_name
      FROM public_holidays
      WHERE country_code = $1
        AND date BETWEEN $2 AND $3
      ORDER BY date ASC`,
     [country_code, startDate, endDate]
   );
-  return result.rows.map(r => r.date.toISOString().split("T")[0]);
+  return result.rows;
 };

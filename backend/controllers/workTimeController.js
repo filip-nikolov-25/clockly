@@ -124,6 +124,7 @@ export const getMonthlyHoursEmployeeController = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch monthly hours" });
   }
 };
+
 export const getPublicHolidaysController = async (req, res) => {
   try {
     const { country_code, start_date, end_date } = req.query;
