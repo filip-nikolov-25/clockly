@@ -52,7 +52,7 @@ useEffect(() => {
 
       <div className="flex justify-between items-center mb-6 mt-6">
         <div className="flex items-center space-x-3">
-          <span className="text-gray-300 font-semibold">Month View</span>
+          <span className={`text-gray-300 font-semibold ${!weekView ? "text-orange-400" : ""}`}>Month View</span>
           <button
             onClick={() => setWeekView(!weekView)}
             className={`w-14 h-8 flex items-center bg-gray-600 rounded-full p-1 cursor-pointer transition-colors duration-300 ${
@@ -65,7 +65,7 @@ useEffect(() => {
               }`}
             />
           </button>
-          <span className="text-gray-300 font-semibold">Week View</span>
+          <span className={`text-gray-300 ${weekView ? "text-orange-400" : ""} font-semibold`}>Week View</span>
         </div>
 
         <button
