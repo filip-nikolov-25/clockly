@@ -1,9 +1,11 @@
 import { useState } from "react";
 import axios from "axios";
+import type { UserType } from "../interfaces/types";
 
 interface TimeOffRequestFormProps {
   onClose: () => void;
   onSubmitted?: () => void;
+  user: UserType | null;
 }
 
 const TimeOffRequestForm = ({

@@ -76,7 +76,7 @@ const App = () => {
           element={<Register user={user} setUser={setUser} />}
         />
         <Route path="/admin" element={<Admin user={user} />} />
-        <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/calendar" element={<CalendarPage user={user} />} />
         <Route
           path="/employees"
           element={<EmployeePage currentCompany={currentCompany} />}

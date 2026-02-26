@@ -4,46 +4,50 @@ import Wrapper from "../components/base/Wrapper";
 import WeekCalendar from "../components/WeekCalendar";
 import TimeOffRequestForm from "../components/TimeOffRequestForm";
 import axios from "axios";
-import type { PublicHolidayType } from "../interfaces/types";
+import type { PublicHolidayType, UserType } from "../interfaces/types";
 
-const CalendarPage = () => {
+interface Props {
+  user: UserType | null;
+}
+
+const CalendarPage = ({ user }: Props) => {
   const [weekView, setWeekView] = useState(false);
   const [publicHolidays, setPublicHolidays] = useState<PublicHolidayType[]>([]);
   const [showRequestModal, setShowRequestModal] = useState(false);
 
   const countries = ["CH", "DE", "MK"];
   const year = new Date().getFullYear();
-useEffect(() => {
-  const fetchPublicHolidays = async () => {
-    try {
-      const requests = countries.map((c) =>
-        axios.get(`http://localhost:5000/api/public-holidays`, {
-          params: {
-            country_code: c,
-            start_date: `${year}-01-01`,
-            end_date: `${year}-12-31`,
-          },
-        })
-      );
+  useEffect(() => {
+    const fetchPublicHolidays = async () => {
+      try {
+        const requests = countries.map((c) =>
+          axios.get(`http://localhost:5000/api/public-holidays`, {
+            params: {
+              country_code: c,
+              start_date: `${year}-01-01`,
+              end_date: `${year}-12-31`,
+            },
+          }),
+        );
 
-      const responses = await Promise.all(requests);
+        const responses = await Promise.all(requests);
 
-      const merged = responses.flatMap((res, i) =>
-        res.data.map((holiday: any) => ({
-          date: holiday.date,
-          localName: holiday.local_name, 
-          countryCode: holiday.country_code,
-        }))
-      );
+        const merged = responses.flatMap((res) =>
+          res.data.map((holiday: any) => ({
+            date: holiday.date,
+            localName: holiday.local_name,
+            countryCode: holiday.country_code,
+          })),
+        );
 
-      setPublicHolidays(merged);
-    } catch (error) {
-      console.error("Error fetching holidays:", error);
-    }
-  };
+        setPublicHolidays(merged);
+      } catch (error) {
+        console.error("Error fetching holidays:", error);
+      }
+    };
 
-  fetchPublicHolidays();
-}, []);
+    fetchPublicHolidays();
+  }, []);
   return (
     <Wrapper>
       <header className="text-6xl mt-14 font-extrabold text-white">
@@ -52,7 +56,11 @@ useEffect(() => {
 
       <div className="flex justify-between items-center mb-6 mt-6">
         <div className="flex items-center space-x-3">
-          <span className={`text-gray-300 font-semibold ${!weekView ? "text-orange-400" : ""}`}>Month View</span>
+          <span
+            className={`text-gray-300 font-semibold ${!weekView ? "text-orange-400" : ""}`}
+          >
+            Month View
+          </span>
           <button
             onClick={() => setWeekView(!weekView)}
             className={`w-14 h-8 flex items-center bg-gray-600 rounded-full p-1 cursor-pointer transition-colors duration-300 ${
@@ -65,7 +73,11 @@ useEffect(() => {
               }`}
             />
           </button>
-          <span className={`text-gray-300 ${weekView ? "text-orange-400" : ""} font-semibold`}>Week View</span>
+          <span
+            className={`text-gray-300 ${weekView ? "text-orange-400" : ""} font-semibold`}
+          >
+            Week View
+          </span>
         </div>
 
         <button
@@ -80,6 +92,7 @@ useEffect(() => {
         <TimeOffRequestForm
           onClose={() => setShowRequestModal(false)}
           onSubmitted={() => setShowRequestModal(false)}
+          user={user}
         />
       )}
 

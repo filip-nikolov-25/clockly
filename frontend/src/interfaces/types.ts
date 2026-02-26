@@ -67,3 +67,8 @@ export interface AllEmployeeType {
   country_code: string;
   worked_minutes: string;
 }
+export interface EmployeeCountryHolidayType {
+  countryCode: string;
+  date: string;
+  localName: string;
+}

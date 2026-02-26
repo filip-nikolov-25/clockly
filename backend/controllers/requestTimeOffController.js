@@ -1,4 +1,7 @@
-import { createNotificationModel, updateAdminNotificationsModel, updateEmployeeNotificationsModel } from "../models/notificationModel.js";
+import {
+  createNotificationModel,
+  updateAdminNotificationsModel,
+} from "../models/notificationModel.js";
 import {
   sendLeaveRequest,
   getLeaveRequests,
@@ -8,17 +11,20 @@ import {
   getEmployeePendingTimeOffModel,
 } from "../models/requestTimeOffModel.js";
 import { format } from "date-fns";
-import { updateUserRemainingLeaveModel } from "../models/workTimeModel.js";
+import {
+  getPublicHolidaysModel,
+  updateUserRemainingLeaveModel,
+} from "../models/workTimeModel.js";
+import { getEmployeeById } from "../models/employeesModel.js";
 
-
- const countLeaveDays = (startDate, endDate, holidays = []) => {
+export const countLeaveDays = (startDate, endDate, holidays = []) => {
   let count = 0;
   const current = new Date(startDate);
   const end = new Date(endDate);
   const holidaySet = new Set(holidays);
 
   while (current <= end) {
-    const day = current.getDay(); 
+    const day = current.getDay();
     const dateStr = current.toISOString().split("T")[0];
 
     const isWeekend = day === 0 || day === 6;
@@ -37,54 +43,17 @@ export const requestTimeOffController = async (req, res) => {
   const { start_date, end_date, reason, leave_type } = req.body;
   const user_id = req.user.id;
   const company_id = req.user.company_id;
-  const employeeCountry = req.user.country_code;
-
-  const { userRequestedAbscence } = await getEmployeePendingTimeOffModel(user_id);
-  if (userRequestedAbscence) {
-    return res.status(400).json({
-      message: "You already have an active absence request.",
-    });
-  }
-
+  const user = req.user;
+  if (!user) throw new Error("User not found");
   try {
-const year = new Date(start_date).getFullYear();
+    const { userRequestedAbscence } =
+      await getEmployeePendingTimeOffModel(user_id);
 
-const holidayResponses = await Promise.all(
-  targetCountries.map(async (c) => {
-    const res = await fetch(
-      `https://date.nager.at/api/v3/PublicHolidays/${year}/${c}`
-    );
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch holidays for ${c}`);
-    }
-
-    return res.json();
-  })
-);
-
-const allHolidays = holidayResponses.flat();
-
-    const employeeHolidays = allHolidays
-      .filter((h) => h.countryCode === employeeCountry)
-      .map((h) => h.date); 
-
-
-    const totalLeaveDays = countLeaveDays(start_date, end_date, employeeHolidays);
-    console.log(`Total leave days counted (working days only): ${totalLeaveDays}`);
-
-    
-    const user = await getUserById(user_id); 
-    if (!user) throw new Error("User not found");
-
-    if (totalLeaveDays > user.remaining_leave) {
+    if (userRequestedAbscence) {
       return res.status(400).json({
-        message: `You only have ${user.remaining_leave} leave days remaining.`,
+        message: "You already have an active absence request.",
       });
     }
-
-    await updateUserRemainingLeaveModel(user_id, user.remaining_leave - totalLeaveDays);
-
 
     const result = await sendLeaveRequest(
       start_date,
@@ -92,30 +61,28 @@ const allHolidays = holidayResponses.flat();
       reason,
       user_id,
       company_id,
-      leave_type
+      leave_type,
     );
 
     const startStr = format(new Date(start_date), "dd MMM yyyy");
     const endStr = format(new Date(end_date), "dd MMM yyyy");
 
-    const title = "New Time Off Request";
-    const message = `${req.user.username} requested time off from ${startStr} to ${endStr}.`;
-
     await createNotificationModel({
       user_id: null,
-      title,
-      message,
+      title: "New Time Off Request",
+      message: `${req.user.username} requested time off from ${startStr} to ${endStr}.`,
       company_id,
       target_role: "admin",
     });
 
-    res.status(201).json(result);
+    res.status(201).json({
+      result,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
   }
 };
-
 
 export const getTimeOffRequestsController = async (req, res) => {
   const user_id = req.user.id;
@@ -128,8 +95,6 @@ export const getTimeOffRequestsController = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-
 
 export const getTimeOffRequestsForAdminController = async (req, res) => {
   const company_id = req.user.company_id;
@@ -152,17 +117,63 @@ export const adminUpdateTimeOffStatusController = async (req, res) => {
   }
 
   try {
-    const updatedRequest = await adminUpdateTimeOffStatusModel(id, status, company_id);
+    const updatedRequest = await adminUpdateTimeOffStatusModel(
+      id,
+      status,
+      company_id,
+    );
 
     if (!updatedRequest) {
       return res.status(404).json({ message: "Request not found" });
     }
+
+    if (status === "accepted") {
+      const { user_id, start_date, end_date } = updatedRequest;
+
+      const user = await getEmployeeById(user_id);
+      if (!user) throw new Error("User not found");
+
+      const employeeCountry = user.country_code;
+
+      const publicHolidays = await getPublicHolidaysModel(
+        employeeCountry,
+        start_date,
+        end_date,
+      );
+
+      const holidayDates = publicHolidays.map((h) => h.date);
+
+      const totalRequestedLeaveDays = countLeaveDays(
+        start_date,
+        end_date,
+        holidayDates,
+      );
+
+      const freeDays = Number(user.free_days);
+
+      if (!Number.isFinite(freeDays)) {
+        throw new Error("Invalid free_days value");
+      }
+
+      if (totalRequestedLeaveDays > freeDays) {
+        return res.status(400).json({
+          message: `User only has ${freeDays} leave days remaining.`,
+        });
+      }
+
+      await updateUserRemainingLeaveModel(
+        user_id,
+        freeDays - totalRequestedLeaveDays,
+      );
+    }
+
     const startStr = format(new Date(updatedRequest.start_date), "dd MMM yyyy");
     const endStr = format(new Date(updatedRequest.end_date), "dd MMM yyyy");
 
-    const title = status === "accepted" ? "Time Off Approved" : "Time Off Rejected";
-    const message = `Your time off request from ${startStr} to ${endStr} has been ${status}.`;
+    const title =
+      status === "accepted" ? "Time Off Approved" : "Time Off Rejected";
 
+    const message = `Your time off request from ${startStr} to ${endStr} has been ${status}.`;
 
     await createNotificationModel({
       user_id: updatedRequest.user_id,
@@ -172,9 +183,7 @@ export const adminUpdateTimeOffStatusController = async (req, res) => {
       target_role: "employee",
     });
 
- 
     await updateAdminNotificationsModel(company_id);
-
 
     res.status(200).json({
       ...updatedRequest,
@@ -187,7 +196,6 @@ export const adminUpdateTimeOffStatusController = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
 export const getUsersWithApprovedTimeOffController = async (req, res) => {
   const company_id = req.user.company_id;
 
