@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import employeesRoutes from "./routes/employeesRoutes.js";
+import employeesRoutes from "./routes/routes.js";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.js";

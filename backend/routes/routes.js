@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { getInviteCodesForEmployeesController, sendInviteController } from "../controllers/adminController.js";
+import {
+  getInviteCodesForEmployeesController,
+  sendInviteController,
+} from "../controllers/adminController.js";
 import { protect } from "../middleware/auth.js";
 import {
   adminUpdateTimeOffStatusController,
@@ -21,13 +24,18 @@ import {
   getPublicHolidaysController,
 } from "../controllers/workTimeController.js";
 import { getCurrentCompanyController } from "../controllers/employeesController.js";
-import {  getEmployeeNotificationsController, getNotificationsController, markEmployeeNotificationsReadController, updateStatusNotificationController } from "../controllers/notificationController.js";
+import {
+  getEmployeeNotificationsController,
+  getNotificationsController,
+  markEmployeeNotificationsReadController,
+  updateStatusNotificationController,
+} from "../controllers/notificationController.js";
 
 const router = Router();
 
 // invite routes
 router.post("/sendinvite", protect, sendInviteController);
-router.get("/all-invitecodes",protect,getInviteCodesForEmployeesController)
+router.get("/all-invitecodes", protect, getInviteCodesForEmployeesController);
 
 //Abscence managment routes
 router.post("/requesttimeoff", protect, requestTimeOffController);
@@ -42,7 +50,11 @@ router.patch(
   protect,
   adminUpdateTimeOffStatusController,
 );
-router.get("/abscence-availability",protect,getEmployeePendingTimeOffController)
+router.get(
+  "/abscence-availability",
+  protect,
+  getEmployeePendingTimeOffController,
+);
 
 // routes for approved for employee time off
 router.get(
@@ -51,7 +63,7 @@ router.get(
   getUsersWithApprovedTimeOffController,
 );
 
-//Measure time api's 
+//Measure time api's
 router.post("/start", protect, startWorkController);
 router.patch("/break-start/:id", protect, breakStartController);
 router.patch("/break-end/:id", protect, breakEndController);
@@ -60,7 +72,11 @@ router.get("/today", protect, getTodayController);
 
 //get all work time for past month
 router.get("/work/previous-month", protect, currentMonthWorkController);
-router.get("/work/montly-hours-employees", protect, getMonthlyHoursEmployeeController);
+router.get(
+  "/work/montly-hours-employees",
+  protect,
+  getMonthlyHoursEmployeeController,
+);
 
 //get all work time for employyes in week calendar
 router.get(
@@ -69,17 +85,24 @@ router.get(
   getWorkTimeForAllUsersForWeekCalendarController,
 );
 
-router.get("/current-company",protect,getCurrentCompanyController);
+router.get("/current-company", protect, getCurrentCompanyController);
 
-//notifications 
+//notifications
 router.get("/notifications", protect, getEmployeeNotificationsController);
-router.patch("/notifications/read", protect, markEmployeeNotificationsReadController);
+router.patch(
+  "/notifications/read",
+  protect,
+  markEmployeeNotificationsReadController,
+);
 
 // admin notifications
 router.get("/admin-notifications", protect, getNotificationsController);
-router.patch("/admin-notifications/read", protect, updateStatusNotificationController);
+router.patch(
+  "/admin-notifications/read",
+  protect,
+  updateStatusNotificationController,
+);
 
-
-// public holidays 
+// public holidays
 router.get("/public-holidays", protect, getPublicHolidaysController);
 export default router;

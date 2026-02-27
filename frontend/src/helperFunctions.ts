@@ -37,10 +37,9 @@ export const formatMinutesToTime = (minutes?: string | number) => {
 export const toLocalISODate = (date: string | Date) =>
   new Date(date).toLocaleDateString("en-CA");
 
-
 export const getBreakMinutes = (
   breakStart?: string | null,
-  breakEnd?: string | null
+  breakEnd?: string | null,
 ) => {
   if (!breakStart || !breakEnd) return 0;
 
@@ -54,7 +53,7 @@ export const getBreakMinutes = (
 
 export const convertMonSunWeekDaysFormat = (date: Date) => {
   const d = new Date(date);
-  let day = d.getDay(); 
+  let day = d.getDay();
   day = day === 0 ? 6 : day - 1;
 
   d.setDate(d.getDate() - day);
@@ -71,13 +70,13 @@ export const formatMinutesToHoursAndMinutes = (minutes?: string | number) => {
   if (m === 0) return `${h}h`;
   return `${h}h ${m}m`;
 };
-export const countWorkingDaysInWeek = (startDate:string, endDate:string) => {
+export const countWorkingDaysInWeek = (startDate: string, endDate: string) => {
   let count = 0;
   const current = new Date(startDate);
   const end = new Date(endDate);
 
   while (current <= end) {
-    const day = current.getDay(); 
+    const day = current.getDay();
     if (day !== 0 && day !== 6) {
       count++;
     }
@@ -86,5 +85,3 @@ export const countWorkingDaysInWeek = (startDate:string, endDate:string) => {
 
   return count;
 };
-
-

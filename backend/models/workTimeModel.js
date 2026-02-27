@@ -123,7 +123,7 @@ export const getWorkTimeForAllUsersForWeekCalendarModel = async (
 export const getMonthlyHoursEmployeeModel = async (
   company_id,
   startDate,
-  endDate
+  endDate,
 ) => {
   const query = `
     SELECT
@@ -153,8 +153,10 @@ export const getMonthlyHoursEmployeeModel = async (
   return result.rows;
 };
 
-
-export const updateUserRemainingLeaveModel = async (user_id, newRemainingLeave) => {
+export const updateUserRemainingLeaveModel = async (
+  user_id,
+  newRemainingLeave,
+) => {
   try {
     const query = `
       UPDATE users
@@ -165,21 +167,25 @@ export const updateUserRemainingLeaveModel = async (user_id, newRemainingLeave) 
     const values = [newRemainingLeave, user_id];
 
     const result = await db.query(query, values);
-    return result.rows[0]; 
+    return result.rows[0];
   } catch (error) {
     console.error("Error updating user remaining leave:", error);
     throw error;
   }
 };
 
-export const getPublicHolidaysModel = async (country_code, startDate, endDate) => {
+export const getPublicHolidaysModel = async (
+  country_code,
+  startDate,
+  endDate,
+) => {
   const result = await db.query(
     `SELECT date, country_code, name AS local_name
      FROM public_holidays
      WHERE country_code = $1
        AND date BETWEEN $2 AND $3
      ORDER BY date ASC`,
-    [country_code, startDate, endDate]
+    [country_code, startDate, endDate],
   );
   return result.rows;
 };

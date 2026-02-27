@@ -1,12 +1,11 @@
 import db from "../db.js";
 
-
 export const createNotificationModel = async ({
   user_id = null,
   title,
   message,
   company_id,
-  target_role, 
+  target_role,
 }) => {
   const result = await db.query(
     `
@@ -20,14 +19,14 @@ export const createNotificationModel = async ({
     VALUES ($1, $2, $3, $4, $5)
     RETURNING id, title, message, target_role
     `,
-    [user_id, title, message, company_id, target_role]
+    [user_id, title, message, company_id, target_role],
   );
 
   return result.rows[0];
 };
 
 export const getNotificationsModel = async ({ role, user_id, company_id }) => {
-  console.log("GOES HERE ",role)
+  console.log("GOES HERE ", role);
   if (role === "admin") {
     const res = await db.query(
       `
@@ -43,7 +42,7 @@ export const getNotificationsModel = async ({ role, user_id, company_id }) => {
         )
       ORDER BY is_read ASC, created_at DESC
       `,
-      [company_id]
+      [company_id],
     );
 
     return res.rows;
@@ -58,12 +57,11 @@ export const getNotificationsModel = async ({ role, user_id, company_id }) => {
       AND user_id = $2
     ORDER BY is_read ASC, created_at DESC
     `,
-    [company_id, user_id]
+    [company_id, user_id],
   );
 
   return res.rows;
 };
-
 
 export const updateStatusNotificationModel = async ({
   role,
@@ -83,7 +81,7 @@ export const updateStatusNotificationModel = async ({
       )
     RETURNING id, title, target_role
     `,
-    [company_id, role, user_id]
+    [company_id, role, user_id],
   );
   return res.rows;
 };
@@ -99,7 +97,7 @@ export const getNotificationsForEmployeeModel = async (user_id, company_id) => {
       AND lr.status != 'pending'
     ORDER BY n.is_read ASC, n.created_at DESC
     `,
-    [user_id, company_id]
+    [user_id, company_id],
   );
 
   return res.rows;
@@ -114,7 +112,7 @@ export const updateEmployeeNotificationsModel = async (user_id, company_id) => {
       AND is_read = false
     RETURNING id
     `,
-    [user_id, company_id]
+    [user_id, company_id],
   );
   return res.rows;
 };
@@ -126,8 +124,7 @@ export const updateAdminNotificationsModel = async (company_id) => {
      WHERE company_id = $1
        AND target_role = 'admin'
      RETURNING id`,
-    [company_id]
+    [company_id],
   );
   return res.rows;
 };
-

@@ -132,7 +132,11 @@ export const getPublicHolidaysController = async (req, res) => {
       return res.status(400).json({ message: "Missing required parameters" });
     }
 
-    const holidays = await getPublicHolidaysModel(country_code, start_date, end_date);
+    const holidays = await getPublicHolidaysModel(
+      country_code,
+      start_date,
+      end_date,
+    );
     res.status(200).json(holidays);
   } catch (error) {
     console.error(error);

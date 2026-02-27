@@ -1,6 +1,4 @@
 import {
-
-  
   getNotificationsForEmployeeModel,
   getNotificationsModel,
   updateEmployeeNotificationsModel,
@@ -9,7 +7,7 @@ import {
 
 export const getNotificationsController = async (req, res) => {
   const user_id = req.user.id;
-  const role = req.user.role; // 'admin' or 'employee'
+  const role = req.user.role;
   const company_id = req.user.company_id;
 
   try {
@@ -41,7 +39,10 @@ export const getEmployeeNotificationsController = async (req, res) => {
   const company_id = req.user.company_id;
 
   try {
-    const notifications = await getNotificationsForEmployeeModel(user_id, company_id);
+    const notifications = await getNotificationsForEmployeeModel(
+      user_id,
+      company_id,
+    );
     res.json(notifications);
   } catch (error) {
     console.error(error);

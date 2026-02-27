@@ -41,7 +41,7 @@ const NavBar = ({
 
         const res = await axios.get(url);
         const uniqueNotifications = Array.from(
-          new Map(res.data.map((n : any) => [n.id, n])).values(),
+          new Map(res.data.map((n: any) => [n.id, n])).values(),
         );
         setNotifications(uniqueNotifications as any);
       } catch (err) {
@@ -51,7 +51,6 @@ const NavBar = ({
 
     fetchNotifications();
   }, [user]);
-
 
   const updateNotificationStatus = async () => {
     try {
@@ -203,21 +202,21 @@ const NavBar = ({
                                 </Link>
                               )
                             : notifications.map((n, index) => (
-                           <Link to={"/aboutme"}>
-                                 <li
-                                  key={`${n.id}-${index}`} 
-                                  className={`p-3 border-b border-white/5 text-sm cursor-pointer ${
-                                    !n.is_read
-                                      ? "bg-orange-500/10"
-                                      : "hover:bg-white/5"
-                                  }`}
-                                >
-                                  <p className="font-semibold">{n.title}</p>
-                                  <p className="text-gray-400 text-xs mt-2">
-                                    {n.message}
-                                  </p>
-                                </li>
-                           </Link>
+                                <Link to={"/aboutme"}>
+                                  <li
+                                    key={`${n.id}-${index}`}
+                                    className={`p-3 border-b border-white/5 text-sm cursor-pointer ${
+                                      !n.is_read
+                                        ? "bg-orange-500/10"
+                                        : "hover:bg-white/5"
+                                    }`}
+                                  >
+                                    <p className="font-semibold">{n.title}</p>
+                                    <p className="text-gray-400 text-xs mt-2">
+                                      {n.message}
+                                    </p>
+                                  </li>
+                                </Link>
                               ))}
                         </ul>
                       )}

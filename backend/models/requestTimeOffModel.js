@@ -6,13 +6,13 @@ export const sendLeaveRequest = async (
   reason,
   user_id,
   company_id,
-  leave_type
+  leave_type,
 ) => {
   const result = await db.query(
     `INSERT INTO leave_requests (start_date, end_date, reason, user_id, company_id, status,leave_type)
      VALUES ($1, $2, $3, $4, $5, $6,$7)
      RETURNING status,leave_type,reason,start_date,end_date`,
-    [start_date, end_date, reason, user_id, company_id, "pending",leave_type],
+    [start_date, end_date, reason, user_id, company_id, "pending", leave_type],
   );
   return result.rows[0];
 };
@@ -101,11 +101,10 @@ export const getUsersWithApprovedTimeOffModel = async (company_id) => {
 export const getEmployeePendingTimeOffModel = async (user_id) => {
   const res = await db.query(
     "SELECT 1 FROM leave_requests WHERE user_id = $1 AND status = 'pending' LIMIT 1",
-    [user_id]
+    [user_id],
   );
 
   return {
-    userRequestedAbscence : res.rowCount > 0 
-  }
+    userRequestedAbscence: res.rowCount > 0,
+  };
 };
-

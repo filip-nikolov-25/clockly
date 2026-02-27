@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import Wrapper from "../components/base/Wrapper";
 import axios from "axios";
 import type { AllEmployeeType } from "../interfaces/types";
-import {
-  formatMinutesToHoursAndMinutes,
-} from "../helperFunctions";
+import { formatMinutesToHoursAndMinutes } from "../helperFunctions";
 
 interface Props {
   currentCompany: string;
