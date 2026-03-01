@@ -98,11 +98,23 @@ const AboutMe = ({ user }: Props) => {
 
   const workedYearDays = totalWorkedMinutes / dailyWorkingMinutes;
 
-  const yearDaysProgressPercent = Math.min(
-    (workedYearDays / totalYearWorkingDays) * 100,
-    100,
-  );
+  const calculateProgressBarPercentage = (value: number, total: number) => {
+    if (!total) return 0;
 
+    return Math.min((value / total) * 100, 100);
+  };
+  const yearDaysProgressPercent = calculateProgressBarPercentage(
+    workedYearDays,
+    totalYearWorkingDays,
+  );
+// ffor off days
+  const TOTAL_DAYS_OFF = 24;
+  const remainingDays = user?.free_days ?? 0;
+
+  const yearDaysProgressPercentOffDays = calculateProgressBarPercentage(
+    remainingDays,
+    TOTAL_DAYS_OFF,
+  );
   return (
     <Wrapper>
       <h1 className="text-5xl font-bold mt-10  mb-10">{user?.username}</h1>
@@ -217,6 +229,18 @@ const AboutMe = ({ user }: Props) => {
           No work entries for previous month.
         </div>
       )}
+      <div className="mb-10">
+        <h2 className="text-lg text-gray-400 mb-2">Your Remaining Off Days</h2>
+
+        <p>{remainingDays} days</p>
+
+        <div className="w-full bg-gray-700 h-2 rounded-xl mt-2">
+          <div
+            className="bg-blue-500 h-2 rounded-xl transition-all duration-300"
+            style={{ width: `${yearDaysProgressPercentOffDays}%` }}
+          />
+        </div>
+      </div>
 
       <h2 className="text-lg text-gray-400 mb-3">Your Requests for Off Days</h2>
       {requestTimeOff.length > 0 ? (

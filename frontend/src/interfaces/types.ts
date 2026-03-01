@@ -8,6 +8,7 @@ export interface UserType {
   code?: string;
   country_code: string;
   id: string;
+  free_days?: number;
 }
 export type LoginType = {
   email: string;

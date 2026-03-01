@@ -27,7 +27,7 @@ const Login = ({ setUser }: props) => {
         userInfo,
       );
       setUser(response.data.user);
-      navigate("/");
+      navigate("/calendar");
     } catch (err: any) {
       setError(err.response?.data?.message || "Login failed");
     }
