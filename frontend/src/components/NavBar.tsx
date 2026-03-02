@@ -85,7 +85,7 @@ const NavBar = ({
   return (
     <div className="sticky top-0 z-50">
       <div className="bg-[#101010]/60 backdrop-blur-md shadow-lg border-b border-white/20">
-        <div className="w-10/12 mx-auto">
+        <div className="w-11/12 mx-auto">
           <div
             className={`flex justify-between items-center ${
               currentCompany ? "py-6" : "py-3"
