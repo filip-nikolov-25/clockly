@@ -23,7 +23,6 @@ const Admin = ({ user }: Props) => {
         const res = await axios.get(
           "http://localhost:5000/api/requesttimeoff/admin",
         );
-        console.log("Admin Time Off Requests:", res.data);
         setRequests(res.data);
       } catch (err) {
         console.error("Error fetching admin requests:", err);
@@ -31,8 +30,6 @@ const Admin = ({ user }: Props) => {
         setLoadingRequests(false);
       }
     };
-    console.log("Fetching admin time off requests...");
-
     fetchRequests();
   }, []);
 
@@ -86,7 +83,6 @@ const Admin = ({ user }: Props) => {
         const res = await axios.get(
           "http://localhost:5000/api/all-invitecodes",
         );
-        console.log(res.data.codes, "RESPONSE Inv code");
         setInviteCodes(res.data.codes);
       } catch (error) {
         console.error("Error getting all inv codes:", error);

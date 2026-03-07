@@ -93,7 +93,6 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
           params: { startDate: startStr, endDate: endStr },
         },
       );
-      console.log(res, "REPSONSE");
 
       const entriesMap: { [key: string]: any } = {};
       res.data.forEach((entry: any) => {
@@ -115,7 +114,6 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
   useEffect(() => {
     fetchWorkHoursForEmployees();
   }, [startDate]);
-  console.log(employees);
   return (
     <div className="mt-8 pb-40 ">
       {loading ? (

@@ -25,7 +25,7 @@ export const createNotificationModel = async ({
   return result.rows[0];
 };
 
-export const getNotificationsModel = async ({ role, user_id, company_id }) => {
+export const getNotificationsForAdminModel = async ({ role, user_id, company_id }) => {
   console.log("GOES HERE ", role);
   if (role === "admin") {
     const res = await db.query(
@@ -62,6 +62,22 @@ export const getNotificationsModel = async ({ role, user_id, company_id }) => {
 
   return res.rows;
 };
+export const getNotificationsForEmployeeModel = async (user_id, company_id) => {
+  const res = await db.query(
+    `
+    SELECT n.id, n.title, n.message, n.is_read, n.created_at
+    FROM notifications n
+    JOIN leave_requests lr ON lr.user_id = n.user_id
+    WHERE n.user_id = $1
+      AND n.company_id = $2
+      AND lr.status != 'pending'
+    ORDER BY n.is_read ASC, n.created_at DESC
+    `,
+    [user_id, company_id],
+  );
+
+  return res.rows;
+};
 
 export const updateStatusNotificationModel = async ({
   role,
@@ -86,23 +102,7 @@ export const updateStatusNotificationModel = async ({
   return res.rows;
 };
 
-export const getNotificationsForEmployeeModel = async (user_id, company_id) => {
-  const res = await db.query(
-    `
-    SELECT n.id, n.title, n.message, n.is_read, n.created_at
-    FROM notifications n
-    JOIN leave_requests lr ON lr.user_id = n.user_id
-    WHERE n.user_id = $1
-      AND n.company_id = $2
-      AND lr.status != 'pending'
-    ORDER BY n.is_read ASC, n.created_at DESC
-    `,
-    [user_id, company_id],
-  );
-
-  return res.rows;
-};
-export const updateEmployeeNotificationsModel = async (user_id, company_id) => {
+export const updateEmployeeNotificationsStatusModel = async (user_id, company_id) => {
   const res = await db.query(
     `
     UPDATE notifications

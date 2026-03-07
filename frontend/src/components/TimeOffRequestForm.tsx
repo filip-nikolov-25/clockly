@@ -10,7 +10,7 @@ interface TimeOffRequestFormProps {
 
 const TimeOffRequestForm = ({
   onClose,
-  onSubmitted,
+  onSubmitted,user
 }: TimeOffRequestFormProps) => {
   const [leaveStart, setLeaveStart] = useState("");
   const [leaveEnd, setLeaveEnd] = useState("");
@@ -25,6 +25,10 @@ const TimeOffRequestForm = ({
   const todayStr = today.toISOString().split("T")[0];
 
   const handleSubmit = async () => {
+    if(user?.free_days === 0){
+      setErrorMessage("You don't have any free days left!");
+      return;
+    }
     if (!leaveStart || !leaveEnd || !leaveType) {
       setErrorMessage("Please fill all required fields!");
       return;
@@ -32,6 +36,13 @@ const TimeOffRequestForm = ({
 
     const start = new Date(leaveStart);
     const end = new Date(leaveEnd);
+  
+    
+const diffTime = end.getTime() - start.getTime();
+const requestedDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+
+
 
     if (start.getTime() < today.getTime()) {
       setErrorMessage("Start date cannot be in the past!");
@@ -43,6 +54,12 @@ const TimeOffRequestForm = ({
       return;
     }
 
+    if (requestedDays > user!.free_days! ) {
+      setErrorMessage(
+        `You only have ${user!.free_days} free days left, but you requested ${requestedDays} days!`,
+      );
+      return;
+    }
     setLoading(true);
     setErrorMessage("");
 
@@ -62,6 +79,7 @@ const TimeOffRequestForm = ({
         end_date: leaveEnd,
         leave_type: leaveType,
         reason,
+
       });
 
       setSuccessMessage("Request submitted successfully!");

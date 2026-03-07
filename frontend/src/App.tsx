@@ -3,7 +3,7 @@ import NavBar from "./components/NavBar";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Homepage from "./pages/Homepage";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import axios from "axios";
 import type { UserType } from "./interfaces/types";
 import Admin from "./pages/Admin";
@@ -20,7 +20,6 @@ const App = () => {
   const [error, setError] = useState("");
   const [currentCompany, setCurrentCompany] = useState("");
 
-  console.log(currentCompany, "CURENT COMPANY");
   useEffect(() => {
     const fetchUser = async () => {
       setLoading(true);
@@ -79,7 +78,7 @@ const App = () => {
         <Route path="/calendar" element={<CalendarPage user={user} />} />
         <Route
           path="/employees"
-          element={<EmployeePage currentCompany={currentCompany} />}
+          element={<EmployeePage currentCompany={currentCompany} user={user} />}
         />
         <Route path="/aboutme" element={<AboutMe user={user} />} />
         <Route path="/time" element={<TimeManagment />} />

@@ -132,6 +132,7 @@ export const getMonthlyHoursEmployeeModel = async (
       u.email,
       u.role,
       u.country_code,
+      u.free_days,
       COALESCE(
         SUM(
           w.total_minutes
@@ -173,7 +174,7 @@ export const updateUserRemainingLeaveModel = async (
     throw error;
   }
 };
-
+//CALENDAR PUBLIC HOLIDAYS
 export const getPublicHolidaysModel = async (
   country_code,
   startDate,
@@ -188,4 +189,11 @@ export const getPublicHolidaysModel = async (
     [country_code, startDate, endDate],
   );
   return result.rows;
+};
+export const updateUserFreeDaysModel = async (user_id, free_days) => {
+  const result = await db.query(
+    "UPDATE users SET free_days = $1 WHERE id = $2 RETURNING free_days",
+    [free_days, user_id],
+  );
+  return result.rows[0];
 };

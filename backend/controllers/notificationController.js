@@ -1,17 +1,17 @@
 import {
+  getNotificationsForAdminModel,
   getNotificationsForEmployeeModel,
-  getNotificationsModel,
-  updateEmployeeNotificationsModel,
+  updateEmployeeNotificationsStatusModel,
   updateStatusNotificationModel,
 } from "../models/notificationModel.js";
 
-export const getNotificationsController = async (req, res) => {
+export const getNotificationsForAdminController = async (req, res) => {
   const user_id = req.user.id;
   const role = req.user.role;
   const company_id = req.user.company_id;
 
   try {
-    const notifications = await getNotificationsModel({
+    const notifications = await getNotificationsForAdminModel({
       role,
       user_id,
       company_id,
@@ -55,7 +55,10 @@ export const markEmployeeNotificationsReadController = async (req, res) => {
   const company_id = req.user.company_id;
 
   try {
-    const updated = await updateEmployeeNotificationsModel(user_id, company_id);
+    const updated = await updateEmployeeNotificationsStatusModel(
+      user_id,
+      company_id,
+    );
     res.json({ updated });
   } catch (error) {
     console.error(error);

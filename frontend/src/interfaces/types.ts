@@ -67,6 +67,7 @@ export interface AllEmployeeType {
   role: string;
   country_code: string;
   worked_minutes: string;
+  free_days: number;
 }
 export interface EmployeeCountryHolidayType {
   countryCode: string;

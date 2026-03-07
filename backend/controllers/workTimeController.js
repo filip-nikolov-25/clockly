@@ -8,6 +8,7 @@ import {
   getTodayEntry,
   getWorkTimeForAllUsersForWeekCalendarModel,
   startBreak,
+  updateUserFreeDaysModel,
 } from "../models/workTimeModel.js";
 
 /* START WORK */
@@ -143,3 +144,16 @@ export const getPublicHolidaysController = async (req, res) => {
     res.status(500).json({ message: "Error fetching public holidays" });
   }
 };
+
+export const updateUserFreeDaysController = async (req,res) => {
+  try {
+    const { user_id, free_days } = req.body;
+    console.log(free_days, "FREE DAYS IN CONTROLLER");
+    const updatedUser = await updateUserFreeDaysModel(user_id, free_days);
+    console.log(updatedUser, "UPDATED USER IN CONTROLLER");
+    res.json(updatedUser);
+  } catch (error) {
+    console.error("Error updating user free days:", error);
+    res.status(500).json({ message: "Error updating user free days" });
+  }
+}

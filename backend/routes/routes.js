@@ -22,11 +22,12 @@ import {
   startWorkController,
   getMonthlyHoursEmployeeController,
   getPublicHolidaysController,
+  updateUserFreeDaysController,
 } from "../controllers/workTimeController.js";
 import { getCurrentCompanyController } from "../controllers/employeesController.js";
 import {
   getEmployeeNotificationsController,
-  getNotificationsController,
+  getNotificationsForAdminController,
   markEmployeeNotificationsReadController,
   updateStatusNotificationController,
 } from "../controllers/notificationController.js";
@@ -54,6 +55,11 @@ router.get(
   "/abscence-availability",
   protect,
   getEmployeePendingTimeOffController,
+);
+router.post(
+  "/users/update-free-days",
+  protect,
+  updateUserFreeDaysController,
 );
 
 // routes for approved for employee time off
@@ -96,7 +102,7 @@ router.patch(
 );
 
 // admin notifications
-router.get("/admin-notifications", protect, getNotificationsController);
+router.get("/admin-notifications", protect, getNotificationsForAdminController);
 router.patch(
   "/admin-notifications/read",
   protect,

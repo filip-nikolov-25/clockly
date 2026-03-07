@@ -43,8 +43,6 @@ const Register = ({ setUser }: Props) => {
     }
   };
 
-  console.log(userInfo, "user sasd");
-
   return (
     <div className="flex justify-center items-center pt-20 pb-20 bg-linear-to-b from-black via-gray-700 to-orange-300 p-4">
       <div className="bg-gray-900 border border-gray-700 rounded-xl shadow-xl p-10 max-w-md w-full">
