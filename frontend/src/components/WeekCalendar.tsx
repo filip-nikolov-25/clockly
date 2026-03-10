@@ -10,11 +10,14 @@ import type { Employee, PublicHolidayType, TimeOff } from "../interfaces/types";
 import {
   convertMonSunWeekDaysFormat,
   formatDateToISO,
-  formatMinutesToTime,
+  formatMinutesToHoursAndMinutes,
 } from "../helperFunctions";
 
-const toUTCDateKey = (date: Date) => {
-  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
+const toDateKey = (date: Date) => {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+    2,
+    "0",
+  )}-${String(date.getDate()).padStart(2, "0")}`;
 };
 
 const TODAY_AT_MIDNIGHT = new Date();
@@ -64,7 +67,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
       let current = new Date(leave.start_date);
       const end = new Date(leave.end_date);
       while (current <= end) {
-        days[toUTCDateKey(current)] = leave.leave_type;
+        days[toDateKey(current)] = leave.leave_type;
         current.setDate(current.getDate() + 1);
       }
     });
@@ -100,7 +103,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
       );
       const entriesMap: { [key: string]: any } = {};
       res.data.forEach((entry: any) => {
-        const dateKey = entry.work_date.split("T")[0];
+        const dateKey = toDateKey(new Date(entry.work_date));
 
         const key = `${entry.user_id}_${dateKey}`;
         entriesMap[key] = entry;
@@ -122,7 +125,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
 
   console.log(
     workEntries["5b352d6d-c9f3-4eda-ae44-96f055ea1b5b_2026-03-09"],
-    "workEntries",
+    "workEntries CUSTOM TAKEN",
   );
 
   return (
@@ -204,17 +207,17 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                   </span>
                 </div>
                 {next7Days.map((d, i) => {
-                  const dateKey = toUTCDateKey(d);
+                  const dateKey = toDateKey(d);
                   const key = `${emp.user_id}_${dateKey}`;
                   const entry = workEntries[key];
-                  console.log(entry, "entry for", key);
+                  console.log(entry, "entry for INSIDE", key);
 
                   const isPast = d.getTime() < TODAY_AT_MIDNIGHT.getTime();
                   const isWeekend = d.getDay() === 0 || d.getDay() === 6;
                   const leaveType = emp.daysOff?.[dateKey];
                   const dayHolidayList = publicHolidays.filter(
                     (h) =>
-                      toUTCDateKey(new Date(h.date)) === dateKey &&
+                      toDateKey(new Date(h.date)) === dateKey &&
                       h.countryCode === emp.country_code,
                   );
 
@@ -236,16 +239,13 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                     cellBg = "bg-zinc-950/40";
                   } else if (isPast) {
                     label = entry
-                      ? formatMinutesToTime(entry.worked_minutes)
+                      ? formatMinutesToHoursAndMinutes(entry.worked_minutes)
                       : "0h 00m";
                     styleClass = entry
                       ? "text-emerald-400 font-mono font-bold"
                       : "text-zinc-700 font-mono";
-                    console.log(
-                      `Entry for ${emp.username} on ${dateKey}:`,
-                      entry,
-                    );
-                    console.log(isPast, "isPast");
+                    console.log(entry);
+                    console.log(label, "LABEL ", emp.username, dateKey);
                   } else {
                     label = "Scheduled";
                     styleClass = "text-zinc-500 font-medium";

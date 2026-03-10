@@ -62,7 +62,7 @@ export const getTodayEntry = async (userId, companyId) => {
     WHERE user_id = $1
       AND company_id = $2
       AND work_date = CURRENT_DATE
-    ORDER BY created_at DESC
+    ORDER BY work_date DESC
     LIMIT 1
     `,
     [userId, companyId],
@@ -91,7 +91,7 @@ FROM worktime_employees
 WHERE user_id = $1
   AND company_id = $2
   AND work_date BETWEEN $3 AND $4
-ORDER BY work_date DESC, created_at DESC
+ORDER BY work_date DESC
   `;
   const values = [user_id, company_id, startDate, endDate];
   const result = await db.query(query, values);
