@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import type { UserType } from "../interfaces/types";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
+import { Bell, LogOut, ShieldCheck, User as UserIcon, Calendar, Briefcase, Clock, Menu, X } from "lucide-react";
 
 interface Props {
   user?: UserType | null;
@@ -18,51 +19,30 @@ interface NotificationType {
   created_at: string;
 }
 
-const NavBar = ({
-  user,
-  setUser,
-  currentCompany,
-  setCurrentCompany,
-}: Props) => {
+const NavBar = ({ user, setUser, currentCompany, setCurrentCompany }: Props) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     if (!user) return;
-
     const fetchNotifications = async () => {
       try {
-        const url =
-          user.role === "admin"
-            ? "http://localhost:5000/api/admin-notifications"
-            : "http://localhost:5000/api/notifications";
-
+        const url = user.role === "admin" ? "http://localhost:5000/api/admin-notifications" : "http://localhost:5000/api/notifications";
         const res = await axios.get(url);
-        const uniqueNotifications = Array.from(
-          new Map(res.data.map((n: any) => [n.id, n])).values(),
-        );
-        setNotifications(uniqueNotifications as any);
-      } catch (err) {
-        console.error("Failed to fetch notifications:", err);
-      }
+        setNotifications(res.data);
+      } catch (err) { console.error("Failed to fetch notifications:", err); }
     };
-
     fetchNotifications();
   }, [user]);
 
   const updateNotificationStatus = async () => {
     try {
-      await axios.patch(
-        user?.role === "admin"
-          ? "http://localhost:5000/api/admin-notifications/read"
-          : "http://localhost:5000/api/notifications/read",
-      );
+      await axios.patch(user?.role === "admin" ? "http://localhost:5000/api/admin-notifications/read" : "http://localhost:5000/api/notifications/read");
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-    } catch (error) {
-      console.error(error);
-    }
+    } catch (error) { console.error(error); }
   };
 
   const unreadCount = notifications.filter((n) => !n.is_read).length;
@@ -76,163 +56,85 @@ const NavBar = ({
   };
 
   useEffect(() => {
-    if (!showNotifications) return;
-    if (unreadCount === 0) return;
-
-    updateNotificationStatus();
+    if (showNotifications && unreadCount > 0) updateNotificationStatus();
   }, [showNotifications]);
+
+  const navLinks = [
+    { name: "Calendar", path: "/calendar", icon: <Calendar size={16} /> },
+    { name: "Employees", path: "/employees", icon: <Briefcase size={16} /> },
+    { name: "Time", path: "/time", icon: <Clock size={16} /> },
+    { name: "My Status", path: "/aboutme", icon: <UserIcon size={16} /> },
+  ];
 
   return (
     <div className="sticky top-0 z-50">
-      <div className="bg-[#101010]/60 backdrop-blur-md shadow-lg border-b border-white/20">
-        <div className="w-11/12 mx-auto">
-          <div
-            className={`flex justify-between items-center ${
-              currentCompany ? "py-6" : "py-3"
-            } text-white`}
-          >
-            {!currentCompany ? (
-              <Link to="/" onClick={() => setMenuOpen(false)}>
-                <img
-                  src="/img/LOGO-1.png"
-                  alt="Logo"
-                  className="h-14 sm:h-20 w-auto rounded-3xl border-2 border-orange-300 transition-transform duration-300 ease-out hover:scale-[1.06]"
-                />
-              </Link>
-            ) : (
-              <Link to="/calendar">
-                <span className="text-orange-400 border-2 p-2 rounded-md font-extrabold">
-                  {currentCompany.toLocaleUpperCase()}
+      <div className="bg-[#101010]/80 backdrop-blur-2xl border-b border-white/5">
+        <div className="w-11/12 mx-auto flex justify-between items-center py-4 text-white">
+          
+          <Link to={currentCompany ? "/calendar" : "/"} className="flex items-center gap-3">
+            {currentCompany ? (
+                <span className="text-orange-500 border border-orange-500/30 bg-orange-500/5 px-4 py-1.5 rounded-full font-black text-xs uppercase tracking-[0.2em]">
+                    {currentCompany}
                 </span>
-              </Link>
+            ) : (
+                <img src="/img/LOGO-1.png" alt="Logo" className="h-10 w-auto rounded-xl border border-white/10" />
+            )}
+          </Link>
+
+          <ul className="hidden md:flex items-center gap-8">
+            {!currentCompany && <Link to="/" className="text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Home</Link>}
+            
+            {user && navLinks.map(link => (
+                <Link key={link.path} to={link.path} className={`text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-colors ${location.pathname === link.path ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>
+                    {link.name}
+                </Link>
+            ))}
+
+            {user && (
+                <>
+                    <div className="w-px h-4 bg-zinc-800" />
+                    {user.role === "admin" && (
+                        <Link to="/admin" className="text-emerald-500 hover:text-emerald-400"><ShieldCheck size={20} /></Link>
+                    )}
+                    
+                    <div className="relative mt-2">
+                        <button onClick={() => setShowNotifications(!showNotifications)} className="relative text-zinc-400 hover:text-white transition-colors">
+                            <Bell size={20} />
+                            {unreadCount > 0 && <span className="absolute -top-1 -right-1 w-2 h-2 bg-orange-500 rounded-full animate-pulse" />}
+                        </button>
+                        
+                        {showNotifications && (
+                            <div className="absolute right-0 mt-4 w-80 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-4">
+                                <div className="p-4 border-b border-zinc-800 text-[10px] font-black uppercase tracking-widest text-zinc-500">Notifications</div>
+                                <div className="max-h-80 overflow-y-auto">
+                                    {notifications.length === 0 ? <p className="p-6 text-center text-xs text-zinc-600">No new alerts</p> : 
+                                    notifications.map((n, i) => (
+                                        <div key={i} className="p-4 border-b border-zinc-800/50 hover:bg-zinc-800/30 cursor-pointer">
+                                            <p className="text-xs font-bold text-white">{n.title}</p>
+                                            <p className="text-[10px] text-zinc-500 mt-1">{n.message}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <button onClick={handleLogout} className="text-zinc-500 hover:text-red-500 transition-colors">
+                        <LogOut size={20} />
+                    </button>
+                </>
             )}
 
-            <ul className="hidden md:flex items-center gap-6">
-              {!currentCompany && (
-                <Link to="/">
-                  <li className="hover:text-orange-300">Home</li>
-                </Link>
-              )}
-
-              <Link to="/calendar">
-                <li className="hover:text-orange-300">Calendar</li>
-              </Link>
-              <Link to="/employees">
-                <li className="hover:text-orange-300">Employees</li>
-              </Link>
-              <Link to="/time">
-                <li className="hover:text-orange-300">Time</li>
-              </Link>
-              <Link to="/aboutme">
-                <li className="hover:text-orange-300">My Status</li>
-              </Link>
-
-              {user ? (
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-600 px-3 py-1 rounded hover:bg-red-500"
-                >
-                  Logout
-                </button>
-              ) : (
-                <>
-                  <Link to="/login">
-                    <li className="hover:text-orange-300">Login</li>
-                  </Link>
-                  <Link to="/register">
-                    <li className="hover:text-orange-300">Register</li>
-                  </Link>
-                </>
-              )}
-
-              {user && user.role === "admin" && (
-                <Link to="/admin">
-                  <li className="hover:text-yellow-400">Admin</li>
-                </Link>
-              )}
-              {user && (
-                <div className="relative">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowNotifications((prev) => !prev);
-                    }}
-                    className="relative hover:text-orange-300"
-                  >
-                    🔔
-                    {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-2 w-4 h-4 flex items-center justify-center text-[10px] text-white bg-red-500 rounded-full">
-                        {unreadCount}
-                      </span>
-                    )}
-                  </button>
-
-                  {showNotifications && (
-                    <div
-                      onClick={(e) => e.stopPropagation()}
-                      className="absolute right-0 mt-3 w-80 bg-[#111]/90 backdrop-blur-lg border border-white/10 rounded-xl shadow-xl z-50"
-                    >
-                      <div className="p-3 border-b border-white/10 text-sm font-semibold">
-                        Notifications
-                      </div>
-
-                      {notifications.length === 0 ? (
-                        <p className="p-4 text-gray-400 text-sm">
-                          No notifications
-                        </p>
-                      ) : (
-                        <ul className="max-h-80 overflow-y-auto">
-                          {user.role === "admin"
-                            ? notifications.length > 0 && (
-                                <Link to={"/admin"}>
-                                  <li className="p-3 border-b border-white/5 text-sm cursor-pointer bg-orange-500/10">
-                                    <p className="font-semibold">
-                                      You have{" "}
-                                      <span className="text-orange-400">
-                                        pending
-                                      </span>{" "}
-                                      absence request
-                                      {notifications.length > 1 ? "s" : ""} from
-                                      your employees
-                                    </p>
-                                    <p className="text-gray-400 text-xs mt-2">
-                                      Go to Admin Panel to view more details
-                                    </p>
-                                  </li>
-                                </Link>
-                              )
-                            : notifications.map((n, index) => (
-                                <Link to={"/aboutme"}>
-                                  <li
-                                    key={`${n.id}-${index}`}
-                                    className={`p-3 border-b border-white/5 text-sm cursor-pointer ${
-                                      !n.is_read
-                                        ? "bg-orange-500/10"
-                                        : "hover:bg-white/5"
-                                    }`}
-                                  >
-                                    <p className="font-semibold">{n.title}</p>
-                                    <p className="text-gray-400 text-xs mt-2">
-                                      {n.message}
-                                    </p>
-                                  </li>
-                                </Link>
-                              ))}
-                        </ul>
-                      )}
-                    </div>
-                  )}
+            {!user && (
+                <div className="flex gap-4">
+                    <Link to="/login" className="text-xs font-black uppercase tracking-widest text-white">Login</Link>
                 </div>
-              )}
-            </ul>
+            )}
+          </ul>
 
-            <button
-              onClick={() => setMenuOpen((p) => !p)}
-              className="md:hidden text-3xl"
-            >
-              ☰
-            </button>
-          </div>
+          <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden">
+            {menuOpen ? <X /> : <Menu />}
+          </button>
         </div>
       </div>
     </div>

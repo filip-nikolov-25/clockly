@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import type { UserType } from "../interfaces/types";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import { 
+  User, Mail, Lock, Globe, Building2, 
+  Key, ShieldCheck, UserCircle, ArrowRight, CheckCircle2 
+} from "lucide-react";
 
 interface Props {
   user?: UserType | null;
@@ -20,183 +24,210 @@ const Register = ({ setUser }: Props) => {
     country_code: "",
   });
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleRoleToggle = () => {
     const newRole = userInfo.role === "admin" ? "employee" : "admin";
-    setUserInfo({ ...userInfo, role: newRole });
+    setUserInfo({ ...userInfo, role: newRole, company_id: "", code: "" });
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
     try {
       const response = await axios.post(
         "http://localhost:5000/api/auth/register",
         userInfo,
       );
       setUser(response.data.user);
-      navigate("/");
+      navigate("/calendar");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Registration failed");
-      console.error(err);
+      setError(err.response?.data?.message || "Registration failed. Please check your details.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center pt-20 pb-20 bg-linear-to-b from-black via-gray-700 to-orange-300 p-4">
-      <div className="bg-gray-900 border border-gray-700 rounded-xl shadow-xl p-10 max-w-md w-full">
-        <h2 className="text-center mb-2 text-4xl font-extrabold text-white">
-          Get in Touch
-        </h2>
-        <p className="text-center mb-8 text-gray-400">We're here to help.</p>
+    <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center p-6 selection:bg-orange-500/30">
+      <div className="fixed top-0 left-0 w-full h-full overflow-hidden -z-10">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-orange-600/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-zinc-600/10 rounded-full blur-[120px]" />
+      </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-gray-300 mb-1 font-medium">Name</label>
-            <input
-              type="text"
-              value={userInfo.username}
-              placeholder="Your Name"
-              onChange={(e) =>
-                setUserInfo({ ...userInfo, username: e.target.value })
-              }
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-500 focus:outline-none transition-all"
-              required
-            />
+      <div className="w-full max-w-5xl grid lg:grid-cols-2 bg-zinc-900/50 border border-zinc-800 rounded-[2.5rem] overflow-hidden backdrop-blur-xl shadow-2xl">
+        
+        <div className="hidden lg:flex flex-col justify-between p-12 bg-linear-to-br from-zinc-900 to-black border-r border-zinc-800">
+          <div>
+            <div className="text-orange-500 font-black text-2xl mb-12">Clockly.</div>
+            <h2 className="text-5xl font-black leading-tight mb-6">
+              Start tracking <br />
+              <span className="text-zinc-500 italic">in seconds.</span>
+            </h2>
+            <div className="space-y-6">
+              <BenefitItem text="Role-based dashboard access" />
+              <BenefitItem text="Real-time shift analytics" />
+              <BenefitItem text="Automated leave management" />
+            </div>
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-300 mb-1 font-medium">
-              Email
-            </label>
-            <input
-              type="email"
-              value={userInfo.email}
-              placeholder="you@example.com"
-              onChange={(e) =>
-                setUserInfo({ ...userInfo, email: e.target.value })
-              }
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-500 focus:outline-none transition-all"
-              required
-            />
+          <div className="p-6 bg-zinc-800/50 rounded-3xl border border-zinc-700/50">
+            <p className="text-zinc-400 text-sm leading-relaxed italic">
+              "Clockly can completely transform how you manage your distributed team's hours."
+            </p>
+            {/* <p className="text-orange-500 font-bold text-xs mt-3 uppercase tracking-widest">— TechCorp Operations</p> */}
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-300 mb-1 font-medium">
-              Country
-            </label>
-            <select
-              value={userInfo.country_code}
-              onChange={(e) =>
-                setUserInfo({ ...userInfo, country_code: e.target.value })
-              }
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-500 focus:outline-none transition-all"
-              required
-            >
-              <option value="">Select your country</option>
-              {[
-                { name: "Switzerland", code: "CH" },
-                { name: "North Macedonia", code: "MK" },
-                { name: "Germany", code: "DE" },
-              ].map((country) => (
-                <option key={country.code} value={country.code}>
-                  {country.name}
-                </option>
-              ))}
-            </select>
+        </div>
+
+        <div className="p-8 md:p-12">
+          <div className="mb-10 text-center lg:text-left">
+            <h1 className="text-3xl font-bold mb-2">Create Account</h1>
+            <p className="text-zinc-500">Join the workforce operating system.</p>
           </div>
 
-          <div className="mb-6">
-            <label className="block text-gray-300 mb-1 font-medium">
-              Password
-            </label>
-            <input
-              type="password"
-              value={userInfo.password}
-              placeholder="Enter Password"
-              onChange={(e) =>
-                setUserInfo({ ...userInfo, password: e.target.value })
-              }
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-500 focus:outline-none transition-all"
-              required
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            
+            <div className="bg-black/40 p-1.5 rounded-2xl border border-zinc-800 flex mb-6">
+              <button
+                type="button"
+                onClick={() => userInfo.role !== 'employee' && handleRoleToggle()}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all ${userInfo.role === 'employee' ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
+              >
+                <UserCircle size={18} /> Employee
+              </button>
+              <button
+                type="button"
+                onClick={() => userInfo.role !== 'admin' && handleRoleToggle()}
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all ${userInfo.role === 'admin' ? 'bg-orange-500 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-300'}`}
+              >
+                <ShieldCheck size={18} /> Administrator
+              </button>
+            </div>
 
-          <div className=" flex items-center justify-end gap-3">
-            <span className="text-white font-medium">
-              Role: {userInfo.role}
-            </span>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                checked={userInfo.role === "admin"}
-                onChange={handleRoleToggle}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InputGroup 
+                icon={<User size={18}/>} 
+                label="Full Name" 
+                placeholder="John Doe" 
+                value={userInfo.username}
+                onChange={(v:any) => setUserInfo({...userInfo, username: v})}
               />
-              <div className="w-14 h-7 bg-gray-700 rounded-full peer-focus:ring-2 peer-focus:ring-orange-500 peer-checked:bg-orange-600 transition-all duration-200"></div>
-              <div
-                className={`absolute left-0.5 top-0.5 w-6 h-6 bg-white rounded-full shadow transform transition-all duration-200 ${
-                  userInfo.role === "admin"
-                    ? "translate-x-full"
-                    : "translate-x-0"
-                }`}
-              ></div>
-            </label>
-          </div>
+              <InputGroup 
+                icon={<Mail size={18}/>} 
+                label="Email" 
+                type="email" 
+                placeholder="john@example.com" 
+                value={userInfo.email}
+                onChange={(v:any) => setUserInfo({...userInfo, email: v})}
+              />
+            </div>
 
-          <div className="mb-6">
-            {userInfo.role === "admin" ? (
-              <>
-                <label className="block text-gray-300 mb-1 font-medium">
-                  Company ID
-                </label>
-                <input
-                  type="text"
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500 ml-1">Country</label>
+                <div className="relative group">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors">
+                    <Globe size={18} />
+                  </div>
+                  <select
+                    value={userInfo.country_code}
+                    onChange={(e) => setUserInfo({ ...userInfo, country_code: e.target.value })}
+                    className="w-full bg-zinc-800/50 text-white pl-12 pr-4 py-3 rounded-2xl border border-zinc-800 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all appearance-none"
+                    required
+                  >
+                    <option value="">Select Country</option>
+                    <option value="CH">Switzerland</option>
+                    <option value="MK">North Macedonia</option>
+                    <option value="DE">Germany</option>
+                  </select>
+                </div>
+              </div>
+
+              <InputGroup 
+                icon={<Lock size={18}/>} 
+                label="Password" 
+                type="password" 
+                placeholder="••••••••" 
+                value={userInfo.password}
+                onChange={(v:any) => setUserInfo({...userInfo, password: v})}
+              />
+            </div>
+
+            <div className="pt-2">
+              {userInfo.role === "admin" ? (
+                <InputGroup 
+                  icon={<Building2 size={18}/>} 
+                  label="Company ID" 
+                  placeholder="e.g. CLOCKLY_GLOBAL" 
                   value={userInfo.company_id}
-                  placeholder="Company ID"
-                  onChange={(e) =>
-                    setUserInfo({ ...userInfo, company_id: e.target.value })
-                  }
-                  className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-500 focus:outline-none transition-all"
-                  required
+                  onChange={(v:any) => setUserInfo({...userInfo, company_id: v})}
                 />
-              </>
-            ) : (
-              <>
-                <label className="block text-gray-300 mb-1 font-medium">
-                  Invite Code
-                </label>
-                <input
-                  type="text"
+              ) : (
+                <InputGroup 
+                  icon={<Key size={18}/>} 
+                  label="Invite Code" 
+                  placeholder="Enter 6-digit code" 
                   value={userInfo.code}
-                  placeholder="Invite Code"
-                  onChange={(e) =>
-                    setUserInfo({ ...userInfo, code: e.target.value })
-                  }
-                  className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg border border-gray-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-500 focus:outline-none transition-all"
-                  required
+                  onChange={(v:any) => setUserInfo({...userInfo, code: v})}
                 />
-              </>
+              )}
+            </div>
+
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-2xl text-sm font-medium">
+                {error}
+              </div>
             )}
-          </div>
 
-          <button
-            type="submit"
-            className="w-full bg-orange-500 text-white py-2 rounded-lg font-semibold hover:bg-orange-300 shadow-md hover:shadow-lg transition-all"
-          >
-            Register
-          </button>
-          {error && <p className="text-red-500 mt-3">{error}</p>}
-        </form>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-orange-500 hover:bg-orange-400 disabled:bg-zinc-700 text-white py-4 rounded-2xl font-bold text-lg shadow-[0_10px_20px_rgba(249,115,22,0.2)] hover:shadow-[0_10px_25px_rgba(249,115,22,0.3)] transition-all flex items-center justify-center gap-2 group mt-6"
+            >
+              {isLoading ? "Creating Account..." : "Complete Registration"}
+              {!isLoading && <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />}
+            </button>
+          </form>
 
-        <p className="text-center text-gray-500 text-sm mt-4">
-          Already have an account?{" "}
-          <span className="text-orange-500 hover:underline hover:text-orange-300 cursor-pointer">
-            Login
-          </span>
-        </p>
+          <p className="text-center text-zinc-500 mt-8 text-sm">
+            Already have an account?{" "}
+            <Link to="/login" className="text-orange-500 font-bold hover:text-orange-400 transition-colors">
+              Sign In
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
 };
+
+const InputGroup = ({ icon, label, type = "text", placeholder, value, onChange }: any) => (
+  <div className="space-y-1.5">
+    <label className="text-xs font-bold uppercase tracking-widest text-zinc-500 ml-1">{label}</label>
+    <div className="relative group">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors">
+        {icon}
+      </div>
+      <input
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full bg-zinc-800/50 text-white pl-12 pr-4 py-3 rounded-2xl border border-zinc-800 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all placeholder:text-zinc-600"
+        required
+      />
+    </div>
+  </div>
+);
+
+const BenefitItem = ({ text }: { text: string }) => (
+  <div className="flex items-center gap-3">
+    <div className="w-6 h-6 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500">
+      <CheckCircle2 size={16} />
+    </div>
+    <span className="text-zinc-300 font-medium">{text}</span>
+  </div>
+);
 
 export default Register;

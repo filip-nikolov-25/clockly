@@ -96,12 +96,9 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-10 border-t border-orange-400 pt-6 text-center text-gray-500 text-sm">
-          <p>
-            &copy; {new Date().getFullYear()} Clockly - All rights reserved.
-          </p>
-          <p>Created by Filip</p>
-        </div>
+           <div className="pt-12 text-center mt-10 text-zinc-500 font-medium border-t border-orange-500 bg-black">
+        <p>© 2026 Clockly Inc. Built for the modern workforce.</p>
+      </div>
       </div>
     </footer>
   );

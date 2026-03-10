@@ -3,6 +3,7 @@ import type { TimeOffRequest, UserType } from "../interfaces/types";
 import axios from "axios";
 import Wrapper from "../components/base/Wrapper";
 import { formatDateDisplay } from "../helperFunctions";
+import {  Ticket, CheckCircle2, XCircle, Clock3, UserPlus } from "lucide-react";
 
 interface Props {
   user: UserType | null;
@@ -12,213 +13,115 @@ const Admin = ({ user }: Props) => {
   const [inviteCodes, setInviteCodes] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [count, setCount] = useState(0);
-
   const [requests, setRequests] = useState<TimeOffRequest[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
-  // time off requests for admin
+
   useEffect(() => {
     const fetchRequests = async () => {
       try {
         setLoadingRequests(true);
-        const res = await axios.get(
-          "http://localhost:5000/api/requesttimeoff/admin",
-        );
+        const res = await axios.get("http://localhost:5000/api/requesttimeoff/admin");
         setRequests(res.data);
-      } catch (err) {
-        console.error("Error fetching admin requests:", err);
-      } finally {
-        setLoadingRequests(false);
-      }
+      } catch (err) { console.error("Error fetching admin requests:", err); } 
+      finally { setLoadingRequests(false); }
     };
     fetchRequests();
+    
+    const fetchInviteCodes = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/all-invitecodes");
+        setInviteCodes(res.data.codes);
+      } catch (error) { console.error("Error getting all inv codes:", error); }
+    };
+    fetchInviteCodes();
   }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (inviteCodes.length > 0) {
-      setErrorMessage(
-        `You still have ${inviteCodes.length} unused invite code(s).`,
-      );
+      setErrorMessage(`Existing codes present. Please distribute them first.`);
       return;
     }
-    if (!count || count < 1) {
-      setErrorMessage("Please enter an invite code");
-      return;
-    }
-
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/sendinvite",
-        { count },
-      );
+      const response = await axios.post("http://localhost:5000/api/sendinvite", { count });
       setInviteCodes(response.data.codes);
       setErrorMessage("");
-    } catch (err: any) {
-      console.error(err.response?.data || err);
-      setErrorMessage(err.response?.data?.message);
-    }
+    } catch (err: any) { setErrorMessage(err.response?.data?.message || "Failed to create codes"); }
   };
 
-  const updateRequestStatus = async (
-    id: string,
-    status: "accepted" | "rejected",
-  ) => {
+  const updateRequestStatus = async (id: string, status: "accepted" | "rejected") => {
     try {
-      const res = await axios.patch(
-        `http://localhost:5000/api/requesttimeoff/admin/${id}`,
-        { status },
-      );
-
-      setRequests((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, status: res.data.status } : r)),
-      );
-    } catch (err) {
-      console.error("Error updating request status:", err);
-    }
+      const res = await axios.patch(`http://localhost:5000/api/requesttimeoff/admin/${id}`, { status });
+      setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status: res.data.status } : r)));
+    } catch (err) { console.error("Error updating request status:", err); }
   };
-
-  useEffect(() => {
-    const fetchRemainingInviteCodes = async () => {
-      try {
-        const res = await axios.get(
-          "http://localhost:5000/api/all-invitecodes",
-        );
-        setInviteCodes(res.data.codes);
-      } catch (error) {
-        console.error("Error getting all inv codes:", error);
-      }
-    };
-    fetchRemainingInviteCodes();
-  }, []); //count
 
   return (
     <Wrapper>
-      <div className="text-white min-h-screen p-10">
-        <h1 className="text-6xl text-center">Admin Panel</h1>
-        <p className="text-center text-3xl mt-10">
-          Admin:{" "}
-          <span className="font-bold text-orange-400"> {user?.username} </span>
-        </p>
-
-        <form
-          className="mt-10 w-1/3 mx-auto flex flex-col gap-5"
-          onSubmit={handleSubmit}
-        >
-          <div className="flex flex-col">
-            <label htmlFor="invite" className="mb-3">
-              Invite Code:
-            </label>
-            <input
-              type="number"
-              min={1}
-              max={50}
-              placeholder="Enter invite code"
-              id="invite"
-              value={count}
-              onChange={(e) => setCount(Number(e.target.value))}
-              className="border-2 rounded p-2 text-white bg-[#202020] border-white/20"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="bg-red-500 hover:bg-red-700 p-3 cursor-pointer rounded text-xl"
-          >
-            Create Invite Codes
-          </button>
-          {errorMessage && <p className="text-red-500 mt-3">{errorMessage}</p>}
-          {inviteCodes?.length > 0 && (
-            <div className="bg-[#202020] p-7 rounded-xl mt-5">
-              <h2 className="text-2xl mb-2">
-                Your invite codes for the employees:
-              </h2>
-              <ul>
-                {inviteCodes?.map((code, index) => (
-                  <li key={index} className="text-lg text-red-500">
-                    <span className="text-white">{index + 1} - </span> {code}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </form>
-
-        <div className="mt-16">
-          <h2 className="text-4xl mb-10 text-start font-bold ">
-            Employee's Absence Requests
-          </h2>
-
-          {loadingRequests ? (
-            <p className="text-center text-gray-400">Loading requests...</p>
-          ) : requests.length > 0 ? (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {requests.map((request) => {
-                const statusColor =
-                  request.status === "accepted"
-                    ? "bg-green-500/15 text-green-400 border-green-500/30"
-                    : request.status === "rejected"
-                      ? "bg-red-500/15 text-red-400 border-red-500/30"
-                      : "bg-yellow-500/15 text-yellow-400 border-yellow-500/30";
-
-                return (
-                  <div
-                    key={request.id}
-                    className={`bg-[#202020] ${request.status === "pending" && "shadow-2xl shadow-orange-100"} border border-white/10 rounded-2xl p-5 hover:scale-[1.02] transition-transform duration-200`}
-                  >
-                    <p className="text-2xl font-extrabold mb-2">
-                      {request.leave_type}
-                    </p>
-                    <p className="font-semibold">{request.username}</p>
-                    <p className="text-sm text-gray-400">{request.email}</p>
-                    <p className="text-sm text-gray-400">{request.reason}</p>
-
-                    <div className="mt-2 flex  justify-between  text-sm">
-                      <span className="mr-5 mb-2">
-                        Start: {formatDateDisplay(request.start_date)}
-                      </span>
-                      <span>End: {formatDateDisplay(request.end_date)}</span>
-                    </div>
-
-                    <span
-                      className={`text-xs mt-2 inline-block px-2 py-1 rounded ${statusColor}`}
-                    >
-                      {request.status.toUpperCase()}
-                    </span>
-
-                    <div className="flex justify-end gap-2 mt-3">
-                      {request.status === "pending" && (
-                        <>
-                          <button
-                            onClick={() =>
-                              request.id &&
-                              updateRequestStatus(request.id, "accepted")
-                            }
-                            className="bg-green-500 hover:bg-green-700 px-3 py-1 rounded text-xs"
-                          >
-                            Approve
-                          </button>
-                          <button
-                            onClick={() =>
-                              request.id &&
-                              updateRequestStatus(request.id, "rejected")
-                            }
-                            className="bg-red-500 hover:bg-red-700 px-3 py-1 rounded text-xs"
-                          >
-                            Decline
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-center text-gray-400 mt-5">
-              No time off requests found.
-            </p>
-          )}
+      <div className="py-16">
+        <div className="mb-12">
+            <h1 className="text-6xl font-black text-white tracking-tighter">Admin <span className="text-orange-500">Console</span></h1>
+            <p className="text-zinc-500 mt-2 font-medium">Managing workforce operations for {user?.username}</p>
         </div>
+
+        <div className="bg-zinc-900/50 border border-zinc-800 rounded-4xl p-8 mb-16">
+            <div className="flex items-center gap-3 mb-6">
+                <UserPlus className="text-orange-500" />
+                <h2 className="text-xl font-bold text-white">Generate Access Invitations</h2>
+            </div>
+            <form onSubmit={handleSubmit} className="flex gap-4 items-end">
+                <div className="flex-1">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mb-2 block">Number of Codes</label>
+                    <input type="number" min={1} max={50} value={count} onChange={(e) => setCount(Number(e.target.value))} 
+                           className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white focus:border-orange-500/50 outline-none" />
+                </div>
+                <button type="submit" className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-2xl transition-all active:scale-95">
+                    Generate
+                </button>
+            </form>
+            
+            {inviteCodes.length > 0 && (
+                <div className="mt-8 bg-black/40 p-6 rounded-2xl border border-zinc-800">
+                    <h3 className="text-sm font-bold text-zinc-300 mb-4 flex items-center gap-2"><Ticket size={16}/> Active Invite Codes</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        {inviteCodes.map((code, i) => (
+                            <span key={i} className="font-mono text-xs bg-zinc-900 px-3 py-2 rounded-lg text-orange-400 border border-zinc-800 text-center">{code}</span>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+
+        <h2 className="text-3xl font-black text-white mb-8 tracking-tighter">Pending Absence Requests</h2>
+        {loadingRequests ? (
+            <p className="text-zinc-500">Synchronizing records...</p>
+        ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {requests.map((request) => (
+                    <div key={request.id} className="bg-zinc-900/40 border border-zinc-800 p-6 rounded-3xl group hover:border-zinc-700 transition-all">
+                        <div className="flex justify-between items-start mb-4">
+                            <span className="text-xs font-black uppercase tracking-widest text-zinc-500">{request.leave_type}</span>
+                            {request.status === 'pending' ? <Clock3 className="text-yellow-500" size={16}/> : 
+                             request.status === 'accepted' ? <CheckCircle2 className="text-emerald-500" size={16}/> : <XCircle className="text-red-500" size={16}/>}
+                        </div>
+                        <p className="text-lg font-bold text-white">{request.username}</p>
+                        <p className="text-xs text-zinc-500 mb-4">{request.email}</p>
+                        <p className="text-sm text-zinc-400 italic bg-black/20 p-3 rounded-xl mb-4">"{request.reason}"</p>
+                        
+                        <div className="text-[11px] font-bold text-zinc-400 mb-4">
+                            {formatDateDisplay(request.start_date)} — {formatDateDisplay(request.end_date)}
+                        </div>
+
+                        {request.status === "pending" && (
+                            <div className="flex gap-2">
+                                <button onClick={() => updateRequestStatus(request.id!, "accepted")} className="flex-1 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 py-2 rounded-xl text-xs font-bold transition-all">Approve</button>
+                                <button onClick={() => updateRequestStatus(request.id!, "rejected")} className="flex-1 bg-red-500/10 text-red-500 hover:bg-red-500/20 py-2 rounded-xl text-xs font-bold transition-all">Decline</button>
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+        )}
       </div>
     </Wrapper>
   );

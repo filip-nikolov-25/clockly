@@ -1,12 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar as CalendarIcon,
+  User as UserIcon,
+} from "lucide-react";
 import type { Employee, PublicHolidayType, TimeOff } from "../interfaces/types";
 import {
   convertMonSunWeekDaysFormat,
   formatDateToISO,
   formatMinutesToTime,
-  toLocalISODate,
 } from "../helperFunctions";
+
+const toUTCDateKey = (date: Date) => {
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
+};
+
+const TODAY_AT_MIDNIGHT = new Date();
+TODAY_AT_MIDNIGHT.setHours(0, 0, 0, 0);
 
 interface Props {
   publicHolidays: PublicHolidayType[];
@@ -19,17 +31,19 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
   const [loading, setLoading] = useState(false);
   const [workEntries, setWorkEntries] = useState<{ [key: string]: any }>({});
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const [startDate, setStartDate] = useState(
-    convertMonSunWeekDaysFormat(new Date()),
-  );
-
-  const next7Days = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(startDate);
-    d.setDate(startDate.getDate() + i);
+  const [startDate, setStartDate] = useState(() => {
+    const d = convertMonSunWeekDaysFormat(new Date());
+    d.setHours(0, 0, 0, 0);
     return d;
   });
+
+  const next7Days = useMemo(() => {
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(startDate);
+      d.setDate(startDate.getDate() + i);
+      return d;
+    });
+  }, [startDate]);
 
   const handlePrevWeek = () => {
     const newDate = new Date(startDate);
@@ -45,20 +59,15 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
 
   const formatLeavesToDays = (leaves: TimeOff[] = []) => {
     const days: Record<string, string> = {};
-
     leaves.forEach((leave) => {
       if (!leave.start_date || !leave.end_date) return;
-
       let current = new Date(leave.start_date);
       const end = new Date(leave.end_date);
-
       while (current <= end) {
-        const dateKey = current.toISOString().split("T")[0];
-        days[dateKey] = leave.leave_type; // 👈 store type
+        days[toUTCDateKey(current)] = leave.leave_type;
         current.setDate(current.getDate() + 1);
       }
     });
-
     return days;
   };
 
@@ -79,28 +88,24 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
       setLoading(false);
     }
   };
-  // ADD THIS FOR THE WEEK CALENDAR TO SHOW FOR PAST DAAYS HOW MANY HOURS EACH USER HAS WORKED
   const fetchWorkHoursForEmployees = async () => {
     try {
-      const startStr = startDate.toISOString().split("T")[0];
-      const endStr = next7Days[next7Days.length - 1]
-        .toISOString()
-        .split("T")[0];
-
+      const startStr = formatDateToISO(startDate);
+      const endStr = formatDateToISO(next7Days[next7Days.length - 1]);
       const res = await axios.get(
         "http://localhost:5000/api/weekcalendar/work-time",
         {
           params: { startDate: startStr, endDate: endStr },
         },
       );
-
       const entriesMap: { [key: string]: any } = {};
       res.data.forEach((entry: any) => {
-        const dateKey = toLocalISODate(entry.work_date);
+        const dateKey = entry.work_date.split("T")[0];
+
         const key = `${entry.user_id}_${dateKey}`;
         entriesMap[key] = entry;
       });
-
+      console.log("setched work entries:", entriesMap);
       setWorkEntries(entriesMap);
     } catch (err) {
       console.error("Failed to fetch work entries", err);
@@ -114,43 +119,69 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
   useEffect(() => {
     fetchWorkHoursForEmployees();
   }, [startDate]);
+
+  console.log(
+    workEntries["5b352d6d-c9f3-4eda-ae44-96f055ea1b5b_2026-03-09"],
+    "workEntries",
+  );
+
   return (
-    <div className="mt-8 pb-40 ">
+    <div className="mt-8 pb-40">
       {loading ? (
-        <p className="text-center text-gray-500 text-lg">
-          Loading employees...
-        </p>
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-zinc-500 font-medium">Syncing workforce data...</p>
+        </div>
       ) : (
-        <>
-          <div className="flex justify-end mb-6 ">
-            <button
-              onClick={handlePrevWeek}
-              className="py-2 px-5 border-2 mr-3 hover:bg-orange-400 transition-colors"
-            >
-              Previous
-            </button>
-            <button
-              onClick={handleNextWeek}
-              className="py-2 px-5 border-2 hover:bg-orange-400 transition-colors"
-            >
-              Next
-            </button>
+        <div className="bg-zinc-900/40 border border-zinc-800 rounded-4xl overflow-hidden backdrop-blur-sm">
+          <div className="flex items-center justify-between p-6 border-b border-zinc-800 bg-zinc-900/50">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-orange-500/10 text-orange-500 rounded-lg">
+                <CalendarIcon size={20} />
+              </div>
+              <h3 className="text-xl font-bold text-white tracking-tight">
+                Workforce Weekly
+              </h3>
+            </div>
+            <div className="flex items-center gap-2 bg-black/40 p-1.5 rounded-2xl border border-zinc-800">
+              <button
+                onClick={handlePrevWeek}
+                className="p-2 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-xl transition-all"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <div className="px-4 text-xs font-black uppercase tracking-widest text-zinc-500">
+                Navigation
+              </div>
+              <button
+                onClick={handleNextWeek}
+                className="p-2 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-xl transition-all"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
           </div>
-          <div className="grid grid-cols-8 text-center font-bold border-b-2 border-gray-200 pb-2">
-            <div className="text-left pl-2 text-white">Employee</div>
+
+          <div className="grid grid-cols-8 border-b border-zinc-800 bg-zinc-900/20">
+            <div className="p-4 text-xs font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2">
+              <UserIcon size={14} /> Member
+            </div>
             {next7Days.map((d, i) => {
-              const isToday = d.toDateString() === today.toDateString();
+              const isToday =
+                d.toDateString() === TODAY_AT_MIDNIGHT.toDateString();
               return (
                 <div
                   key={i}
-                  className={`text-gray-700 flex flex-col items-center ${
-                    isToday ? "bg-white text-black rounded-md px-2 py-1" : ""
-                  }`}
+                  className={`p-4 border-l border-zinc-800 flex flex-col items-center justify-center gap-1 ${isToday ? "bg-orange-500/5" : ""}`}
                 >
-                  <span className="block text-sm  text-gray-400">
+                  <span
+                    className={`text-[10px] font-black uppercase tracking-tighter ${isToday ? "text-orange-500" : "text-zinc-500"}`}
+                  >
                     {d.toLocaleString("default", { month: "short" })}
                   </span>
-                  <span className="block text-lg font-semibold">
+                  <span
+                    className={`text-sm font-bold ${isToday ? "text-white" : "text-zinc-300"}`}
+                  >
                     {daysOfWeek[d.getDay()]} {d.getDate()}
                   </span>
                 </div>
@@ -158,84 +189,94 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
             })}
           </div>
 
-          <div className="mt-7 flex flex-col gap-3">
+          <div className="divide-y divide-zinc-800">
             {employees.map((emp) => (
               <div
                 key={emp.user_id}
-                className="grid grid-cols-8 min-h-20 border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                className="grid grid-cols-8 group hover:bg-white/2 transition-colors"
               >
-                <div className="flex items-center pl-3 font-semibold text-gray-800 bg-gray-50">
-                  {emp.username}
+                <div className="p-4 flex items-center gap-3 bg-zinc-900/40 border-r border-zinc-800">
+                  <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-orange-500 border border-zinc-700 uppercase">
+                    {emp.username.slice(0, 2)}
+                  </div>
+                  <span className="text-sm font-semibold text-zinc-200 truncate">
+                    {emp.username}
+                  </span>
                 </div>
-
                 {next7Days.map((d, i) => {
-                  const dateStr = toLocalISODate(d);
-
-                  const key = `${emp.user_id}_${dateStr}`;
+                  const dateKey = toUTCDateKey(d);
+                  const key = `${emp.user_id}_${dateKey}`;
                   const entry = workEntries[key];
+                  console.log(entry, "entry for", key);
 
-                  const isPast = d < today;
+                  const isPast = d.getTime() < TODAY_AT_MIDNIGHT.getTime();
                   const isWeekend = d.getDay() === 0 || d.getDay() === 6;
-
-                  const leaveType = emp.daysOff?.[dateStr];
-                  const isOff = leaveType;
-
+                  const leaveType = emp.daysOff?.[dateKey];
                   const dayHolidayList = publicHolidays.filter(
                     (h) =>
-                      formatDateToISO(h.date) === dateStr &&
+                      toUTCDateKey(new Date(h.date)) === dateKey &&
                       h.countryCode === emp.country_code,
                   );
-                  let label: string | number = "Working";
 
-                  if (dayHolidayList.length > 0) label = "Holiday";
-                  else if (isOff) label = leaveType;
-                  else if (isWeekend) label = "Weekend";
-                  else if (isPast) {
+                  let label: string | number = "Work Day";
+                  let styleClass = "text-zinc-500";
+                  let cellBg = "";
+
+                  if (dayHolidayList.length > 0) {
+                    label = "Public Holiday";
+                    styleClass = "text-amber-400 font-bold";
+                    cellBg = "bg-amber-400/5";
+                  } else if (leaveType) {
+                    label = leaveType;
+                    styleClass = "text-rose-400 font-bold";
+                    cellBg = "bg-rose-500/10";
+                  } else if (isWeekend) {
+                    label = "Weekend";
+                    styleClass = "text-zinc-600 font-medium";
+                    cellBg = "bg-zinc-950/40";
+                  } else if (isPast) {
                     label = entry
                       ? formatMinutesToTime(entry.worked_minutes)
-                      : "0 h";
+                      : "0h 00m";
+                    styleClass = entry
+                      ? "text-emerald-400 font-mono font-bold"
+                      : "text-zinc-700 font-mono";
+                    console.log(
+                      `Entry for ${emp.username} on ${dateKey}:`,
+                      entry,
+                    );
+                    console.log(isPast, "isPast");
+                  } else {
+                    label = "Scheduled";
+                    styleClass = "text-zinc-500 font-medium";
                   }
-
-                  let bgClass =
-                    dayHolidayList.length > 0
-                      ? "text-white"
-                      : isOff
-                        ? "bg-red-500 text-white"
-                        : d.toDateString() === today.toDateString()
-                          ? "bg-gray-100 text-black font-bold"
-                          : d < today
-                            ? "bg-gray-900 text-green-400"
-                            : "bg-gray-900 text-white";
 
                   return (
                     <div
                       key={i}
-                      className={`flex flex-col items-center justify-center border-l text-xs p-1 ${bgClass}`}
+                      className={`relative p-3 border-l border-zinc-800 flex flex-col items-center justify-center text-center gap-1 min-h-20 transition-all group-hover:border-l-zinc-700 ${cellBg}`}
                     >
-                      <span className="font-medium">{label}</span>
-                      {dayHolidayList.length > 0 && (
-                        <div className="flex flex-col gap-1 mt-1">
-                          {dayHolidayList.map((h) => (
-                            <div
-                              key={h.countryCode + h.date}
-                              className="text-[10px] font-bold flex flex-col items-center"
-                              title={`${h.localName} (${h.countryCode})`}
-                            >
-                              <span>{h.localName}</span>
-                              <span className="text-gray-200">
-                                {h.countryCode}
-                              </span>
-                            </div>
-                          ))}
+                      <span
+                        className={`text-[10px] tracking-tight uppercase ${styleClass}`}
+                      >
+                        {label}
+                      </span>
+                      {dayHolidayList.map((h) => (
+                        <div
+                          key={h.localName}
+                          className="mt-1 px-1.5 py-0.5 bg-amber-400/20 rounded text-[9px] text-amber-200 font-medium border border-amber-400/20"
+                          title={h.localName}
+                        >
+                          {h.countryCode}
                         </div>
-                      )}
+                      ))}
                     </div>
                   );
                 })}
               </div>
             ))}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
