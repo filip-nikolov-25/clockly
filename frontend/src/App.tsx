@@ -12,6 +12,9 @@ import AboutMe from "./pages/AboutMe";
 import TimeManagment from "./pages/TimeManagment";
 import EmployeePage from "./pages/EmployeePage";
 import ProtectedRoute from "./components/ProtectedRoutes";
+import Spinner from "./components/Spinner";
+import ResetPassword from "./pages/ResetPassword";
+import ForgotPassword from "./pages/ForgotPassword";
 
 interface AppContentProps {
   user: UserType | null;
@@ -45,7 +48,8 @@ const AppContent = ({
         <Route path="/" element={<Homepage />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/register" element={<Register setUser={setUser} />} />
-
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route element={<ProtectedRoute user={user} />}>
           <Route
             path="/admin"
@@ -112,12 +116,7 @@ const App = () => {
     if (user) fetchCurrentCompany();
   }, [user]);
 
-  if (loading)
-    return (
-      <div className="text-white flex justify-center items-center min-h-screen bg-[#050505]">
-        Loading your workspace...
-      </div>
-    );
+  if (loading) return <Spinner />;
 
   return (
     <BrowserRouter>

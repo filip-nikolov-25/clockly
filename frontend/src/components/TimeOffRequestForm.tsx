@@ -10,7 +10,7 @@ interface Props {
   setUser: (user: UserType | null) => void;
 }
 
-const TimeOffRequestForm = ({ onClose, onSubmitted, user, setUser }: Props) => {
+const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
   const [leaveStart, setLeaveStart] = useState("");
   const [leaveEnd, setLeaveEnd] = useState("");
   const [leaveType, setLeaveType] = useState("");

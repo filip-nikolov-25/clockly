@@ -25,7 +25,7 @@ const Login = ({ setUser }: Props) => {
     try {
       const response = await axios.post(
         "http://localhost:5000/api/auth/login",
-        userInfo
+        userInfo,
       );
       setUser(response.data.user);
       navigate("/calendar");
@@ -52,13 +52,19 @@ const Login = ({ setUser }: Props) => {
 
         <div className="bg-zinc-900/50 border border-zinc-800 rounded-[2.5rem] p-8 md:p-10 backdrop-blur-xl shadow-2xl">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold mb-2 tracking-tight">Welcome Back</h2>
-            <p className="text-zinc-500 text-sm">Log in to manage your workspace</p>
+            <h2 className="text-3xl font-bold mb-2 tracking-tight">
+              Welcome Back
+            </h2>
+            <p className="text-zinc-500 text-sm">
+              Log in to manage your workspace
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-widest text-zinc-500 ml-1">Email Address</label>
+              <label className="text-xs font-bold uppercase tracking-widest text-zinc-500 ml-1">
+                Email Address
+              </label>
               <div className="relative group">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors">
                   <Mail size={18} />
@@ -67,7 +73,9 @@ const Login = ({ setUser }: Props) => {
                   type="email"
                   value={userInfo.email}
                   placeholder="name@company.com"
-                  onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
+                  onChange={(e) =>
+                    setUserInfo({ ...userInfo, email: e.target.value })
+                  }
                   className="w-full bg-zinc-800/50 text-white pl-12 pr-4 py-3.5 rounded-2xl border border-zinc-800 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all placeholder:text-zinc-600"
                   required
                 />
@@ -76,8 +84,16 @@ const Login = ({ setUser }: Props) => {
 
             <div className="space-y-1.5">
               <div className="flex justify-between items-center px-1">
-                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">Password</label>
-                <button type="button" className="text-[10px] font-bold text-orange-500 hover:text-orange-400 uppercase tracking-tighter">Forgot?</button>
+                <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">
+                  Password
+                </label>
+                <button
+                  type="button"
+                  onClick={() => navigate("/forgot-password")}
+                  className="text-[10px] font-bold text-orange-500 hover:text-orange-400 uppercase tracking-tighter"
+                >
+                  Forgot?
+                </button>
               </div>
               <div className="relative group">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors">
@@ -87,7 +103,9 @@ const Login = ({ setUser }: Props) => {
                   type="password"
                   value={userInfo.password}
                   placeholder="••••••••"
-                  onChange={(e) => setUserInfo({ ...userInfo, password: e.target.value })}
+                  onChange={(e) =>
+                    setUserInfo({ ...userInfo, password: e.target.value })
+                  }
                   className="w-full bg-zinc-800/50 text-white pl-12 pr-4 py-3.5 rounded-2xl border border-zinc-800 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all placeholder:text-zinc-600"
                   required
                 />
@@ -107,7 +125,12 @@ const Login = ({ setUser }: Props) => {
             >
               <span className="relative z-10 flex items-center gap-2">
                 {isLoading ? "Signing in..." : "Sign In"}
-                {!isLoading && <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />}
+                {!isLoading && (
+                  <ArrowRight
+                    size={20}
+                    className="group-hover:translate-x-1 transition-transform"
+                  />
+                )}
               </span>
               <div className="absolute inset-0 w-full h-full bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
             </button>
@@ -116,8 +139,15 @@ const Login = ({ setUser }: Props) => {
           <div className="mt-10 pt-8 border-t border-zinc-800/50 text-center">
             <p className="text-zinc-500 text-sm">
               Don't have an account?{" "}
-              <Link to="/register" className="text-orange-500 font-bold hover:text-orange-400 transition-colors inline-flex items-center gap-1 group">
-                Register <Sparkles size={14} className="group-hover:rotate-12 transition-transform" />
+              <Link
+                to="/register"
+                className="text-orange-500 font-bold hover:text-orange-400 transition-colors inline-flex items-center gap-1 group"
+              >
+                Register{" "}
+                <Sparkles
+                  size={14}
+                  className="group-hover:rotate-12 transition-transform"
+                />
               </Link>
             </p>
           </div>

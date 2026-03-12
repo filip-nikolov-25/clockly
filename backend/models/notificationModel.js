@@ -34,6 +34,7 @@ export const getNotificationsForAdminModel = async ({ role, user_id, company_id 
       FROM notifications
       WHERE company_id = $1
         AND target_role = 'admin'
+        AND created_at >= date_trunc('month', CURRENT_DATE) - interval '1 month'
         AND EXISTS (
           SELECT 1 
           FROM leave_requests lr
@@ -55,6 +56,7 @@ export const getNotificationsForAdminModel = async ({ role, user_id, company_id 
     WHERE company_id = $1
       AND target_role = 'employee'
       AND user_id = $2
+      AND created_at >= date_trunc('month', CURRENT_DATE) - interval '1 month'
     ORDER BY is_read ASC, created_at DESC
     `,
     [company_id, user_id],
@@ -71,6 +73,7 @@ export const getNotificationsForEmployeeModel = async (user_id, company_id) => {
     WHERE n.user_id = $1
       AND n.company_id = $2
       AND lr.status != 'pending'
+      AND n.created_at >= date_trunc('month', CURRENT_DATE) - interval '1 month'
     ORDER BY n.is_read ASC, n.created_at DESC
     `,
     [user_id, company_id],

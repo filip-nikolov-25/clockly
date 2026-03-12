@@ -5,6 +5,7 @@ import {
   ChevronRight,
   Calendar as CalendarIcon,
   User as UserIcon,
+  Clock3,
 } from "lucide-react";
 import type { Employee, PublicHolidayType } from "../interfaces/types";
 import {
@@ -110,7 +111,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
     <div className="mt-8 pb-40">
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
+           <Clock3 size={28} className="text-orange-500 animate-spin" />
           <p className="text-zinc-500 font-medium">Syncing workforce data...</p>
         </div>
       ) : (

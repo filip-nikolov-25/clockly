@@ -171,7 +171,10 @@ const Admin = ({ user, setUser }: Props) => {
           </p>
         </div>
         {loadingRequests ? (
-          <p className="text-zinc-500">Synchronizing records...</p>
+           <div className="flex flex-col items-center justify-center py-20 gap-4">
+           <Clock3 size={32} className="text-orange-500 animate-spin" />
+          <p className="text-zinc-500 font-medium">Syncing workforce data...</p>
+        </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {requests.map((request) => (
@@ -195,7 +198,9 @@ const Admin = ({ user, setUser }: Props) => {
                   {request.username}
                 </p>
                 <p className="text-xs text-zinc-500 mb-4">{request.email}</p>
+                <div className="text-center">
                 <ReasonToggle reason={request.reason} />
+                </div>
 
                 <div className="text-[11px] font-bold text-zinc-400 mb-4">
                   {formatDateDisplay(request.start_date)} —{" "}

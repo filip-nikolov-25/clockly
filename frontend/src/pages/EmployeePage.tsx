@@ -1,22 +1,23 @@
 import { useEffect, useState } from "react";
 import Wrapper from "../components/base/Wrapper";
 import axios from "axios";
-import { Users, Search, Filter, ShieldCheck } from "lucide-react";
+import { Users, Search, Filter, ShieldCheck, Clock3 } from "lucide-react";
 import type { AllEmployeeType, UserType } from "../interfaces/types";
 import EmployeeCard from "../components/EmployeeCard";
 
 interface Props {
   currentCompany: string;
   user: UserType | null;
-  // setUser: (user: UserType | null) => void;
 }
 
 const EmployeePage = ({ currentCompany, user }: Props) => {
   const [employees, setEmployees] = useState<AllEmployeeType[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getAllEmployees = async () => {
+      setLoading(true);
       try {
         const result = await axios.get(
           "http://localhost:5000/api/work/montly-hours-employees",
@@ -24,6 +25,8 @@ const EmployeePage = ({ currentCompany, user }: Props) => {
         setEmployees(result.data);
       } catch (error) {
         console.error("Failed to load employees", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -115,7 +118,12 @@ const EmployeePage = ({ currentCompany, user }: Props) => {
         </div>
       </div>
 
-      {filteredEmployees.length > 0 ? (
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <Clock3 size={28} className="text-orange-500 animate-spin" />
+          <p className="text-zinc-500 font-medium">Syncing workforce data...</p>
+        </div>
+      ) : filteredEmployees.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
           {filteredEmployees.map((employee: AllEmployeeType) => (
             <div
@@ -125,7 +133,6 @@ const EmployeePage = ({ currentCompany, user }: Props) => {
               <EmployeeCard
                 user={user}
                 employee={employee}
-                // setUser={setUser}
                 updateEmployeeFreeDays={updateEmployeeFreeDays}
               />
             </div>
