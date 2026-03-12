@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import {
   Calendar,
   Bell,
@@ -16,17 +16,25 @@ import {
 import Wrapper from "../components/base/Wrapper";
 import Footer from "../components/Footer";
 import { Link } from "react-router-dom";
+import type {
+  BentoItemProps,
+  CheckItemProps,
+  FeatureCardTypes,
+} from "../interfaces/types";
 
-const heroTextVariants = {
+const heroTextVariants: Variants = {
   hidden: { opacity: 0, y: 30 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
+    transition: {
+      duration: 0.8,
+      ease: [0.22, 1, 0.36, 1] as const, 
+    },
   },
 };
 
-const heroImageVariants = {
+const heroImageVariants: Variants = {
   hidden: { opacity: 0, scale: 0.9, y: 40 },
   visible: {
     opacity: 1,
@@ -34,8 +42,8 @@ const heroImageVariants = {
     y: 0,
     transition: {
       duration: 1,
-      delay: 0.3, 
-      ease: [0.22, 1, 0.36, 1],
+      delay: 0.3,
+      ease: [0.22, 1, 0.36, 1] as const, 
     },
   },
 };
@@ -79,14 +87,20 @@ const Homepage = () => {
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-5">
-                <Link to="/register" className="group px-10 py-5 bg-orange-500 text-white font-bold rounded-2xl shadow-[0_0_40px_rgba(249,115,22,0.3)] hover:bg-orange-400 transition-all flex items-center gap-3 text-lg">
+                <Link
+                  to="/register"
+                  className="group px-10 py-5 bg-orange-500 text-white font-bold rounded-2xl shadow-[0_0_40px_rgba(249,115,22,0.3)] hover:bg-orange-400 transition-all flex items-center gap-3 text-lg"
+                >
                   Get Started Free
                   <ArrowRight
                     size={20}
                     className="group-hover:translate-x-1 transition-transform"
                   />
                 </Link>
-                <Link to="/demo" className="px-10 py-5 bg-zinc-900 text-white font-bold rounded-2xl border border-zinc-800 hover:bg-zinc-800 transition-all text-lg">
+                <Link
+                  to="/"
+                  className="px-10 py-5 bg-zinc-900 text-white font-bold rounded-2xl border border-zinc-800 hover:bg-zinc-800 transition-all text-lg"
+                >
                   View Demo
                 </Link>
               </div>
@@ -105,7 +119,7 @@ const Homepage = () => {
                 </div>
 
                 <div className="relative aspect-16/10 overflow-hidden rounded-4xl bg-zinc-800 border-4 border-zinc-950 flex items-center justify-center group">
-                {/* ADD Img LAter */}
+                  {/* ADD Img LAter */}
 
                   <div className="absolute inset-0 bg-linear-to-br from-zinc-800 via-zinc-900 to-black p-8 text-center flex flex-col items-center justify-center text-zinc-600">
                     <BarChart3
@@ -315,8 +329,7 @@ const Homepage = () => {
   );
 };
 
-
-const FeatureCard = ({ icon, title, text }:any) => (
+const FeatureCard = ({ icon, title, text }: FeatureCardTypes) => (
   <div className="p-10 bg-zinc-900/40 rounded-[2.5rem] border border-zinc-800/50 hover:bg-zinc-900 transition-all group cursor-default shadow-xl">
     <div className="w-14 h-14 bg-orange-500/10 text-orange-500 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-orange-500 group-hover:text-white transition-all duration-500">
       {React.cloneElement(icon, { size: 28 })}
@@ -326,7 +339,7 @@ const FeatureCard = ({ icon, title, text }:any) => (
   </div>
 );
 
-const BentoItem = ({ icon, title, desc }:any) => (
+const BentoItem = ({ icon, title, desc }: BentoItemProps) => (
   <div className="p-8 bg-zinc-900/60 rounded-3xl border border-zinc-800/50 hover:border-orange-500/30 transition-all flex flex-col gap-3">
     <div className="text-orange-500">{icon}</div>
     <div>
@@ -336,7 +349,7 @@ const BentoItem = ({ icon, title, desc }:any) => (
   </div>
 );
 
-const CheckItem = ({ text, dark = false }:any) => (
+const CheckItem = ({ text, dark = false }: CheckItemProps) => (
   <li className="flex items-center gap-4 group cursor-default">
     <div
       className={`shrink-0 p-1 rounded-lg ${dark ? "bg-black/10 text-black group-hover:bg-black/20" : "bg-orange-500/10 text-orange-500 group-hover:bg-orange-500 group-hover:text-white"} transition-colors`}

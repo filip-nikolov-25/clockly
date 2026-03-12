@@ -3,13 +3,14 @@ import axios from "axios";
 import { Calendar, Info, X, Clock, AlertCircle, CheckCircle2 } from "lucide-react";
 import type { UserType } from "../interfaces/types";
 
-interface TimeOffRequestFormProps {
+interface Props {
   onClose: () => void;
   onSubmitted?: () => void;
   user: UserType | null;
+  setUser: (user: UserType | null) => void;
 }
 
-const TimeOffRequestForm = ({ onClose, onSubmitted, user }: TimeOffRequestFormProps) => {
+const TimeOffRequestForm = ({ onClose, onSubmitted, user, setUser }: Props) => {
   const [leaveStart, setLeaveStart] = useState("");
   const [leaveEnd, setLeaveEnd] = useState("");
   const [leaveType, setLeaveType] = useState("");

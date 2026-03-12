@@ -5,9 +5,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Mail, Lock, ArrowRight, LogIn, Sparkles } from "lucide-react";
 
 interface Props {
-  user: UserType | null;
   setUser: (user: UserType | null) => void;
-  setCurrentCompany: (companyName: string) => void;
 }
 
 const Login = ({ setUser }: Props) => {

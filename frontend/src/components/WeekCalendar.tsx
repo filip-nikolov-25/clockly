@@ -6,19 +6,14 @@ import {
   Calendar as CalendarIcon,
   User as UserIcon,
 } from "lucide-react";
-import type { Employee, PublicHolidayType, TimeOff } from "../interfaces/types";
+import type { Employee, PublicHolidayType } from "../interfaces/types";
 import {
   convertMonSunWeekDaysFormat,
   formatDateToISO,
+  formatLeavesToDays,
   formatMinutesToHoursAndMinutes,
+  toDateKey,
 } from "../helperFunctions";
-
-const toDateKey = (date: Date) => {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-    2,
-    "0",
-  )}-${String(date.getDate()).padStart(2, "0")}`;
-};
 
 const TODAY_AT_MIDNIGHT = new Date();
 TODAY_AT_MIDNIGHT.setHours(0, 0, 0, 0);
@@ -60,25 +55,16 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
     setStartDate(convertMonSunWeekDaysFormat(newDate));
   };
 
-  const formatLeavesToDays = (leaves: TimeOff[] = []) => {
-    const days: Record<string, string> = {};
-    leaves.forEach((leave) => {
-      if (!leave.start_date || !leave.end_date) return;
-      let current = new Date(leave.start_date);
-      const end = new Date(leave.end_date);
-      while (current <= end) {
-        days[toDateKey(current)] = leave.leave_type;
-        current.setDate(current.getDate() + 1);
-      }
-    });
-    return days;
-  };
-
-  const fetchEmployees = async () => {
+  const fetchEmployeesData = async (start: Date, end: Date) => {
     setLoading(true);
     try {
+      const startStr = formatDateToISO(start);
+      const endStr = formatDateToISO(end);
       const res = await axios.get(
         "http://localhost:5000/api/users/approved-timeoff",
+        {
+          params: { startDate: startStr, endDate: endStr },
+        },
       );
       const employeesWithDays = res.data.map((emp: Employee) => ({
         ...emp,
@@ -86,15 +72,16 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
       }));
       setEmployees(employeesWithDays);
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching filtered leaves:", err);
     } finally {
       setLoading(false);
     }
   };
-  const fetchWorkHoursForEmployees = async () => {
+
+  const fetchWorkHoursData = async (start: Date, end: Date) => {
     try {
-      const startStr = formatDateToISO(startDate);
-      const endStr = formatDateToISO(next7Days[next7Days.length - 1]);
+      const startStr = formatDateToISO(start);
+      const endStr = formatDateToISO(end);
       const res = await axios.get(
         "http://localhost:5000/api/weekcalendar/work-time",
         {
@@ -104,11 +91,9 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
       const entriesMap: { [key: string]: any } = {};
       res.data.forEach((entry: any) => {
         const dateKey = toDateKey(new Date(entry.work_date));
-
         const key = `${entry.user_id}_${dateKey}`;
         entriesMap[key] = entry;
       });
-      console.log("setched work entries:", entriesMap);
       setWorkEntries(entriesMap);
     } catch (err) {
       console.error("Failed to fetch work entries", err);
@@ -116,17 +101,10 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
   };
 
   useEffect(() => {
-    fetchEmployees();
-  }, []);
-
-  useEffect(() => {
-    fetchWorkHoursForEmployees();
+    const endDate = next7Days[6];
+    fetchEmployeesData(startDate, endDate);
+    fetchWorkHoursData(startDate, endDate);
   }, [startDate]);
-
-  console.log(
-    workEntries["5b352d6d-c9f3-4eda-ae44-96f055ea1b5b_2026-03-09"],
-    "workEntries CUSTOM TAKEN",
-  );
 
   return (
     <div className="mt-8 pb-40">
@@ -142,10 +120,16 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
               <div className="p-2 bg-orange-500/10 text-orange-500 rounded-lg">
                 <CalendarIcon size={20} />
               </div>
-              <h3 className="text-xl font-bold text-white tracking-tight">
-                Workforce Weekly
-              </h3>
+              <div>
+                <h3 className="text-xl font-bold text-white tracking-tight leading-none">
+                  Workforce Weekly
+                </h3>
+                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">
+                  Schedule Overview
+                </p>
+              </div>
             </div>
+
             <div className="flex items-center gap-2 bg-black/40 p-1.5 rounded-2xl border border-zinc-800">
               <button
                 onClick={handlePrevWeek}
@@ -153,8 +137,8 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
               >
                 <ChevronLeft size={20} />
               </button>
-              <div className="px-4 text-xs font-black uppercase tracking-widest text-zinc-500">
-                Navigation
+              <div className="px-4 text-xs font-black uppercase tracking-widest text-zinc-300">
+                {startDate.getFullYear()}
               </div>
               <button
                 onClick={handleNextWeek}
@@ -210,8 +194,8 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                   const dateKey = toDateKey(d);
                   const key = `${emp.user_id}_${dateKey}`;
                   const entry = workEntries[key];
-                  console.log(entry, "entry for INSIDE", key);
-
+                  const isToday =
+                    d.toDateString() === TODAY_AT_MIDNIGHT.toDateString();
                   const isPast = d.getTime() < TODAY_AT_MIDNIGHT.getTime();
                   const isWeekend = d.getDay() === 0 || d.getDay() === 6;
                   const leaveType = emp.daysOff?.[dateKey];
@@ -221,7 +205,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                       h.countryCode === emp.country_code,
                   );
 
-                  let label: string | number = "Work Day";
+                  let label: string = "Working";
                   let styleClass = "text-zinc-500";
                   let cellBg = "";
 
@@ -244,11 +228,11 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                     styleClass = entry
                       ? "text-emerald-400 font-mono font-bold"
                       : "text-zinc-700 font-mono";
-                    console.log(entry);
-                    console.log(label, "LABEL ", emp.username, dateKey);
                   } else {
-                    label = "Scheduled";
-                    styleClass = "text-zinc-500 font-medium";
+                    label = "Working";
+                    styleClass = isToday
+                      ? "text-zinc-400 font-bold"
+                      : "text-zinc-500 font-medium";
                   }
 
                   return (
@@ -256,11 +240,19 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                       key={i}
                       className={`relative p-3 border-l border-zinc-800 flex flex-col items-center justify-center text-center gap-1 min-h-20 transition-all group-hover:border-l-zinc-700 ${cellBg}`}
                     >
-                      <span
-                        className={`text-[10px] tracking-tight uppercase ${styleClass}`}
-                      >
-                        {label}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        {isToday && label === "Working" && (
+                          <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-200 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                          </span>
+                        )}
+                        <span
+                          className={`text-[10px] tracking-tight uppercase ${styleClass}`}
+                        >
+                          {label}
+                        </span>
+                      </div>
                       {dayHolidayList.map((h) => (
                         <div
                           key={h.localName}

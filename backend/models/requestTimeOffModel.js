@@ -19,12 +19,17 @@ export const sendLeaveRequest = async (
 
 export const getLeaveRequests = async (user_id, company_id) => {
   const result = await db.query(
-    "SELECT status, start_date, end_date, leave_type,reason FROM leave_requests WHERE user_id = $1 AND company_id = $2  ORDER BY requested_at DESC",
+    `SELECT status, start_date, end_date, leave_type, reason 
+     FROM leave_requests 
+     WHERE user_id = $1 
+     AND company_id = $2 
+     -- Filters for requests made in the last 2 months
+     AND requested_at >= NOW() - INTERVAL '2 months'
+     ORDER BY requested_at DESC`,
     [user_id, company_id],
   );
   return result.rows;
 };
-
 export const getTimeOffRequestsForAdminModel = async (company_id) => {
   const result = await db.query(
     `
@@ -34,12 +39,24 @@ export const getTimeOffRequestsForAdminModel = async (company_id) => {
       lr.start_date,
       lr.end_date,
       lr.leave_type,
+      lr.reason,
       u.username,
-      u.email
+      u.email,
+      lr.requested_at
     FROM leave_requests lr
     JOIN users u ON lr.user_id = u.id
     WHERE lr.company_id = $1
-    ORDER BY lr.requested_at DESC
+    AND (
+      lr.status = 'pending' 
+      OR 
+      (
+        lr.status IN ('accepted', 'rejected') 
+        AND lr.requested_at >= CURRENT_TIMESTAMP - INTERVAL '1 month'
+      )
+    )
+    ORDER BY 
+      CASE WHEN lr.status = 'pending' THEN 1 ELSE 2 END, -- Pending on top
+      lr.requested_at DESC
     `,
     [company_id],
   );
@@ -67,7 +84,11 @@ export const adminUpdateTimeOffStatusModel = async (id, status, company_id) => {
   return result.rows[0];
 };
 
-export const getUsersWithApprovedTimeOffModel = async (company_id) => {
+export const getUsersWithApprovedTimeOffModel = async (
+  company_id,
+  startDate,
+  endDate,
+) => {
   const result = await db.query(
     `
     SELECT 
@@ -83,19 +104,21 @@ export const getUsersWithApprovedTimeOffModel = async (company_id) => {
             'status', lr.status,
             'leave_type', lr.leave_type  
           )
-        ) FILTER (WHERE lr.status = 'accepted'),
+        ) FILTER (WHERE lr.id IS NOT NULL),
         '[]'
       ) AS leaves
     FROM users u
     LEFT JOIN leave_requests lr 
-      ON lr.user_id = u.id AND lr.company_id = $1
+      ON lr.user_id = u.id 
+      AND lr.company_id = $1
+      AND lr.status = 'accepted'
+      AND (lr.start_date <= $3 AND lr.end_date >= $2) 
     WHERE u.company_id = $1
     GROUP BY u.id, u.username, u.email, u.country_code
     ORDER BY u.username
     `,
-    [company_id],
+    [company_id, startDate, endDate],
   );
-
   return result.rows;
 };
 export const getEmployeePendingTimeOffModel = async (user_id) => {

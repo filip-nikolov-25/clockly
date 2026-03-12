@@ -39,18 +39,17 @@ export const endWork = async (entryId) => {
   const result = await db.query(
     `
     UPDATE worktime_employees
-    SET end_time = NOW(),
-        total_minutes =
-          EXTRACT(EPOCH FROM (
-            NOW() - start_time
-            - COALESCE(break_end - break_start, '0')
+    SET 
+        end_time = NOW(),
+        work_date = start_time::date, 
+        total_minutes = EXTRACT(EPOCH FROM (
+            NOW() - start_time - COALESCE(break_end - break_start, '0 seconds'::interval)
           )) / 60
     WHERE id = $1
     RETURNING total_minutes
     `,
     [entryId],
   );
-
   return result.rows[0];
 };
 // Get this for my status to fetch the today work and for clock when starting to work aka onClick START

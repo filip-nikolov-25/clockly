@@ -127,6 +127,8 @@ export const adminUpdateTimeOffStatusController = async (req, res) => {
       return res.status(404).json({ message: "Request not found" });
     }
 
+    let calculateTotalLeaveDays;
+
     if (status === "accepted") {
       const { user_id, start_date, end_date } = updatedRequest;
 
@@ -149,7 +151,8 @@ export const adminUpdateTimeOffStatusController = async (req, res) => {
         holidayDates,
       );
 
-      const freeDays = Number(user.free_days);
+      const freeDays = Number(user.free_days || 0);
+      calculateTotalLeaveDays = freeDays - totalRequestedLeaveDays;
 
       if (!Number.isFinite(freeDays)) {
         throw new Error("Invalid free_days value");
@@ -163,7 +166,7 @@ export const adminUpdateTimeOffStatusController = async (req, res) => {
 
       await updateUserRemainingLeaveModel(
         user_id,
-        freeDays - totalRequestedLeaveDays,
+        calculateTotalLeaveDays,
       );
     }
 
@@ -185,12 +188,19 @@ export const adminUpdateTimeOffStatusController = async (req, res) => {
 
     await updateAdminNotificationsModel(company_id);
 
-    res.status(200).json({
+    const responsePayload = {
       ...updatedRequest,
       start_date_formatted: startStr,
       end_date_formatted: endStr,
       notification_message: message,
-    });
+    };
+
+    if (status === "accepted") {
+      responsePayload.free_days = calculateTotalLeaveDays;
+    }
+
+    return res.status(200).json(responsePayload);
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: err.message });
@@ -198,9 +208,9 @@ export const adminUpdateTimeOffStatusController = async (req, res) => {
 };
 export const getUsersWithApprovedTimeOffController = async (req, res) => {
   const company_id = req.user.company_id;
-
+  const {startDate,endDate} = req.query;
   try {
-    const users = await getUsersWithApprovedTimeOffModel(company_id);
+    const users = await getUsersWithApprovedTimeOffModel(company_id,startDate,endDate);
     res.status(200).json(users);
   } catch (err) {
     console.error(err);

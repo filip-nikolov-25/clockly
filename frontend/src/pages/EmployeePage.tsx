@@ -8,6 +8,7 @@ import EmployeeCard from "../components/EmployeeCard";
 interface Props {
   currentCompany: string;
   user: UserType | null;
+  // setUser: (user: UserType | null) => void;
 }
 
 const EmployeePage = ({ currentCompany, user }: Props) => {
@@ -124,6 +125,7 @@ const EmployeePage = ({ currentCompany, user }: Props) => {
               <EmployeeCard
                 user={user}
                 employee={employee}
+                // setUser={setUser}
                 updateEmployeeFreeDays={updateEmployeeFreeDays}
               />
             </div>

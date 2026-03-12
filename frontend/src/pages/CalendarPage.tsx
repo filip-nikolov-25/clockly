@@ -8,9 +8,10 @@ import type { PublicHolidayType, UserType } from "../interfaces/types";
 
 interface Props {
   user: UserType | null;
+  setUser: (user: UserType | null) => void;
 }
 
-const CalendarPage = ({ user }: Props) => {
+const CalendarPage = ({ user, setUser }: Props) => {
   const [weekView, setWeekView] = useState(false);
   const [publicHolidays, setPublicHolidays] = useState<PublicHolidayType[]>([]);
   const [showRequestModal, setShowRequestModal] = useState(false);
@@ -93,6 +94,7 @@ const CalendarPage = ({ user }: Props) => {
           onClose={() => setShowRequestModal(false)}
           onSubmitted={() => setShowRequestModal(false)}
           user={user}
+          setUser={setUser}
         />
       )}
 

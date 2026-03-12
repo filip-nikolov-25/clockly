@@ -1,3 +1,4 @@
+import type { TimeOff } from "./interfaces/types";
 // 28 Jan 2026
 export const formatDateDisplay = (dateString: string) => {
   return new Date(dateString).toLocaleDateString("en-GB", {
@@ -85,3 +86,26 @@ export const countWorkingDaysInWeek = (startDate: string, endDate: string) => {
 
   return count;
 };
+
+export const toDateKey = (date: Date) => {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+    2,
+    "0",
+  )}-${String(date.getDate()).padStart(2, "0")}`;
+};
+
+
+  export const formatLeavesToDays = (leaves: TimeOff[] = []) => {
+    const days: Record<string, string> = {};
+    leaves.forEach((leave) => {
+      if (!leave.start_date || !leave.end_date) return;
+      let current = new Date(leave.start_date);
+      const end = new Date(leave.end_date);
+      while (current <= end) {
+        days[toDateKey(current)] = leave.leave_type;
+        current.setDate(current.getDate() + 1);
+      }
+    });
+    return days;
+  };
+

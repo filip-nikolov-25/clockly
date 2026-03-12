@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Wrapper from "../components/base/Wrapper";
 import axios from "axios";
-import { Play, Pause, Square, Coffee, Timer, Info } from "lucide-react";
+import { Play, Square, Coffee, Timer, Info } from "lucide-react";
 
 const TimeManagment = () => {
   const [seconds, setSeconds] = useState(0);
@@ -103,7 +103,6 @@ const TimeManagment = () => {
   const onBreak = entry?.break_start && !entry?.break_end;
   const time = formatTime(seconds);
 
-  // SVG Progress Logic
   const TOTAL_SECONDS = 8 * 60 * 60; // 8 hours goal
   const progress = Math.min(seconds / TOTAL_SECONDS, 1);
   const radius = 90;

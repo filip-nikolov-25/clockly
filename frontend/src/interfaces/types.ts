@@ -1,3 +1,6 @@
+import type { LucideProps } from "lucide-react";
+import type { ReactElement } from "react";
+
 export interface UserType {
   username?: string;
   email: string;
@@ -73,4 +76,27 @@ export interface EmployeeCountryHolidayType {
   countryCode: string;
   date: string;
   localName: string;
+}
+export interface FeatureCardTypes {
+   icon: ReactElement<LucideProps>; 
+  title: string;
+  text: string;
+}
+export interface BentoItemProps {
+  icon: React.ReactNode; 
+  title: string;
+  desc: string;
+}
+export interface CheckItemProps {
+  text: string;
+  dark?: boolean; 
+}
+
+export interface InputGroupTypes {
+  icon: React.ReactNode;
+  label: string;
+  type?: string;
+  placeholder: string;
+  value: string | undefined;
+  onChange: (value: string) => void;
 }

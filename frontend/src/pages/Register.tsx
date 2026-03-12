@@ -1,10 +1,19 @@
 import React, { useState } from "react";
-import type { UserType } from "../interfaces/types";
+import type { InputGroupTypes, UserType } from "../interfaces/types";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import { 
-  User, Mail, Lock, Globe, Building2, 
-  Key, ShieldCheck, UserCircle, ArrowRight, CheckCircle2 
+import {
+  User,
+  Mail,
+  Lock,
+  Globe,
+  Building2,
+  Key,
+  ShieldCheck,
+  UserCircle,
+  ArrowRight,
+  CheckCircle2,
+  ArrowLeft,
 } from "lucide-react";
 
 interface Props {
@@ -23,8 +32,8 @@ const Register = ({ setUser }: Props) => {
     code: "",
     country_code: "",
   });
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleRoleToggle = () => {
@@ -43,8 +52,14 @@ const Register = ({ setUser }: Props) => {
       );
       setUser(response.data.user);
       navigate("/calendar");
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Registration failed. Please check your details.");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(
+          err.response?.data?.message || "Registration failed. Please check your details.",
+        );
+      } else {
+        setError("An unexpected error occurred.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -57,8 +72,16 @@ const Register = ({ setUser }: Props) => {
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-zinc-600/10 rounded-full blur-[120px]" />
       </div>
 
-      <div className="w-full max-w-5xl grid lg:grid-cols-2 bg-zinc-900/50 border border-zinc-800 rounded-[2.5rem] overflow-hidden backdrop-blur-xl shadow-2xl">
+      <div className="relative w-full max-w-5xl grid lg:grid-cols-2 bg-zinc-900/50 border border-zinc-800 rounded-[2.5rem] overflow-hidden backdrop-blur-xl shadow-2xl">
         
+        {/* Go Back Button */}
+        <button 
+          onClick={() => navigate(-1)}
+          className="absolute top-8 left-8 z-10 flex items-center gap-2 text-zinc-500 hover:text-orange-500 transition-colors font-medium text-sm"
+        >
+          <ArrowLeft size={16} /> Back
+        </button>
+
         <div className="hidden lg:flex flex-col justify-between p-12 bg-linear-to-br from-zinc-900 to-black border-r border-zinc-800">
           <div>
             <div className="text-orange-500 font-black text-2xl mb-12">Clockly.</div>
@@ -76,7 +99,6 @@ const Register = ({ setUser }: Props) => {
             <p className="text-zinc-400 text-sm leading-relaxed italic">
               "Clockly can completely transform how you manage your distributed team's hours."
             </p>
-            {/* <p className="text-orange-500 font-bold text-xs mt-3 uppercase tracking-widest">— TechCorp Operations</p> */}
           </div>
         </div>
 
@@ -87,7 +109,6 @@ const Register = ({ setUser }: Props) => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            
             <div className="bg-black/40 p-1.5 rounded-2xl border border-zinc-800 flex mb-6">
               <button
                 type="button"
@@ -110,16 +131,16 @@ const Register = ({ setUser }: Props) => {
                 icon={<User size={18}/>} 
                 label="Full Name" 
                 placeholder="John Doe" 
-                value={userInfo.username}
-                onChange={(v:any) => setUserInfo({...userInfo, username: v})}
+                value={userInfo.username || ""}
+                onChange={(v) => setUserInfo({...userInfo, username: v})}
               />
               <InputGroup 
                 icon={<Mail size={18}/>} 
                 label="Email" 
                 type="email" 
                 placeholder="john@example.com" 
-                value={userInfo.email}
-                onChange={(v:any) => setUserInfo({...userInfo, email: v})}
+                value={userInfo.email || ""}
+                onChange={(v) => setUserInfo({...userInfo, email: v})}
               />
             </div>
 
@@ -131,7 +152,7 @@ const Register = ({ setUser }: Props) => {
                     <Globe size={18} />
                   </div>
                   <select
-                    value={userInfo.country_code}
+                    value={userInfo.country_code || ""}
                     onChange={(e) => setUserInfo({ ...userInfo, country_code: e.target.value })}
                     className="w-full bg-zinc-800/50 text-white pl-12 pr-4 py-3 rounded-2xl border border-zinc-800 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all appearance-none"
                     required
@@ -149,8 +170,8 @@ const Register = ({ setUser }: Props) => {
                 label="Password" 
                 type="password" 
                 placeholder="••••••••" 
-                value={userInfo.password}
-                onChange={(v:any) => setUserInfo({...userInfo, password: v})}
+                value={userInfo.password || ""}
+                onChange={(v) => setUserInfo({...userInfo, password: v})}
               />
             </div>
 
@@ -160,16 +181,16 @@ const Register = ({ setUser }: Props) => {
                   icon={<Building2 size={18}/>} 
                   label="Company ID" 
                   placeholder="e.g. CLOCKLY_GLOBAL" 
-                  value={userInfo.company_id}
-                  onChange={(v:any) => setUserInfo({...userInfo, company_id: v})}
+                  value={userInfo.company_id || ""}
+                  onChange={(v) => setUserInfo({...userInfo, company_id: v})}
                 />
               ) : (
                 <InputGroup 
                   icon={<Key size={18}/>} 
                   label="Invite Code" 
-                  placeholder="Enter 6-digit code" 
-                  value={userInfo.code}
-                  onChange={(v:any) => setUserInfo({...userInfo, code: v})}
+                  placeholder="INV-XXXXXXXXXXXX " 
+                  value={userInfo.code || ""}
+                  onChange={(v) => setUserInfo({...userInfo, code: v})}
                 />
               )}
             </div>
@@ -202,7 +223,7 @@ const Register = ({ setUser }: Props) => {
   );
 };
 
-const InputGroup = ({ icon, label, type = "text", placeholder, value, onChange }: any) => (
+const InputGroup = ({ icon, label, type = "text", placeholder, value, onChange }: InputGroupTypes) => (
   <div className="space-y-1.5">
     <label className="text-xs font-bold uppercase tracking-widest text-zinc-500 ml-1">{label}</label>
     <div className="relative group">
@@ -213,7 +234,7 @@ const InputGroup = ({ icon, label, type = "text", placeholder, value, onChange }
         type={type}
         value={value}
         placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
         className="w-full bg-zinc-800/50 text-white pl-12 pr-4 py-3 rounded-2xl border border-zinc-800 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition-all placeholder:text-zinc-600"
         required
       />
