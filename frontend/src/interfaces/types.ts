@@ -100,3 +100,17 @@ export interface InputGroupTypes {
   value: string | undefined;
   onChange: (value: string) => void;
 }
+export interface WorkEntryType {
+  id: string;
+  user_id: string;
+  company_id: string;
+  work_date: string;      
+  start_time: string;     
+  end_time: string | null;  
+  break_start: string | null; 
+  break_end: string | null;
+  totalBreak: number;    
+  total_minutes: number; 
+  workedMinutes: number; 
+  worked_minutes?: number; 
+}

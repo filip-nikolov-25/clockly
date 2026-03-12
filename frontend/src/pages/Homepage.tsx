@@ -311,7 +311,7 @@ const Homepage = () => {
             Launch Clockly Now <ArrowRight size={24} />
           </motion.button>
 
-          <motion.p
+          {/* <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true, amount: 0.5 }}
@@ -319,7 +319,7 @@ const Homepage = () => {
             className="mt-8 text-zinc-400 uppercase tracking-widest font-bold text-sm"
           >
             No credit card required • 1 MONTH free trial
-          </motion.p>
+          </motion.p> */}
         </Wrapper>
 
         <div className="absolute -z-10 top-1/2 left-1/2 w-200 h-200 bg-orange-500/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl" />

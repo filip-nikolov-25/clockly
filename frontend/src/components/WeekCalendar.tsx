@@ -22,13 +22,21 @@ TODAY_AT_MIDNIGHT.setHours(0, 0, 0, 0);
 interface Props {
   publicHolidays: PublicHolidayType[];
 }
+interface WorkEntryType {
+  total_minutes: number;
+  user_id: string;
+  work_date: string;
+  worked_minutes: number;
+}
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const WeekCalendar = ({ publicHolidays }: Props) => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(false);
-  const [workEntries, setWorkEntries] = useState<{ [key: string]: any }>({});
+  const [workEntries, setWorkEntries] = useState<{
+    [key: string]: WorkEntryType;
+  }>({});
 
   const [startDate, setStartDate] = useState(() => {
     const d = convertMonSunWeekDaysFormat(new Date());
@@ -89,8 +97,8 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
           params: { startDate: startStr, endDate: endStr },
         },
       );
-      const entriesMap: { [key: string]: any } = {};
-      res.data.forEach((entry: any) => {
+      const entriesMap: { [key: string]: WorkEntryType } = {};
+      res.data.forEach((entry: WorkEntryType) => {
         const dateKey = toDateKey(new Date(entry.work_date));
         const key = `${entry.user_id}_${dateKey}`;
         entriesMap[key] = entry;
@@ -111,7 +119,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
     <div className="mt-8 pb-40">
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
-           <Clock3 size={28} className="text-orange-500 animate-spin" />
+          <Clock3 size={28} className="text-orange-500 animate-spin" />
           <p className="text-zinc-500 font-medium">Syncing workforce data...</p>
         </div>
       ) : (

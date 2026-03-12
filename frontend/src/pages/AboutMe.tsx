@@ -15,15 +15,15 @@ import {
   formatTimeDisplay,
   getBreakMinutes,
 } from "../helperFunctions";
-import type { TimeOffRequest, UserType } from "../interfaces/types";
+import type { TimeOffRequest, UserType, WorkEntryType } from "../interfaces/types";
 
 interface Props {
   user: UserType | null;
 }
 
 const AboutMe = ({ user }: Props) => {
-  const [todayWork, setTodayWork] = useState<any>(null);
-  const [previousMonthWork, setPreviousMonthWork] = useState<any[]>([]);
+  const [todayWork, setTodayWork] = useState<WorkEntryType | null>(null);
+  const [previousMonthWork, setPreviousMonthWork] = useState<WorkEntryType[]>([]);
   const [requestTimeOff, setRequestTimeOff] = useState<TimeOffRequest[]>([]);
 
   const formatWorkedTime = (minutes: number) => {
