@@ -16,15 +16,15 @@ interface Entry {
 }
 
 const TimeManagment = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const [seconds, setSeconds] = useState(0);
   const [entry, setEntry] = useState<Entry | null>(null);
   const [running, setRunning] = useState(false);
 
-  console.log("Current entry state:", entry);
- 
   const fetchToday = async () => {
     try {
-      const { data } = await axios.get("http://localhost:5000/api/today");
+      const { data } = await axios.get(`${API_URL}/api/today`);
       if (data && !data.end_time) {
         const normalizedEntry: Entry = { ...data, breaks: data.breaks || [] };
         setEntry(normalizedEntry);
@@ -66,7 +66,7 @@ const TimeManagment = () => {
     try {
       if (!entry) {
         // new wor entry
-        const { data } = await axios.post("http://localhost:5000/api/start");
+        const { data } = await axios.post(`${API_URL}/api/start`);
         const normalizedEntry: Entry = { ...data, breaks: data.breaks || [] };
         setEntry(normalizedEntry);
         setSeconds(0);
@@ -74,9 +74,10 @@ const TimeManagment = () => {
       } else {
         const lastBreak = entry.breaks[entry.breaks.length - 1];
         if (lastBreak && !lastBreak.end_time) {
-          await axios.patch(`http://localhost:5000/api/break-end/${entry.id}`);
+          await axios.patch(`${API_URL}/api/break-end/${entry.id}`);
           const updatedEntry = { ...entry };
-          updatedEntry.breaks[updatedEntry.breaks.length - 1].end_time = new Date().toISOString();
+          updatedEntry.breaks[updatedEntry.breaks.length - 1].end_time =
+            new Date().toISOString();
           setEntry(updatedEntry);
           setRunning(true);
         }
@@ -89,9 +90,12 @@ const TimeManagment = () => {
   const handleBreak = async () => {
     if (!entry) return;
     try {
-      await axios.patch(`http://localhost:5000/api/break-start/${entry.id}`);
+      await axios.patch(`${API_URL}/api/break-start/${entry.id}`);
       const updatedEntry = { ...entry };
-      updatedEntry.breaks.push({ start_time: new Date().toISOString(), end_time: null });
+      updatedEntry.breaks.push({
+        start_time: new Date().toISOString(),
+        end_time: null,
+      });
       setEntry(updatedEntry);
       setRunning(false);
     } catch (err) {
@@ -102,7 +106,7 @@ const TimeManagment = () => {
   const handleEnd = async () => {
     if (!entry) return;
     try {
-      await axios.patch(`http://localhost:5000/api/end/${entry.id}`);
+      await axios.patch(`${API_URL}/api/end/${entry.id}`);
       setEntry(null);
       setSeconds(0);
       setRunning(false);
@@ -182,8 +186,12 @@ const TimeManagment = () => {
                   Elapsed
                 </span>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-5xl font-black text-white tabular-nums">{time.display}</span>
-                  <span className="text-xl font-bold text-orange-500 tabular-nums w-6">{time.seconds}</span>
+                  <span className="text-5xl font-black text-white tabular-nums">
+                    {time.display}
+                  </span>
+                  <span className="text-xl font-bold text-orange-500 tabular-nums w-6">
+                    {time.seconds}
+                  </span>
                 </div>
               </div>
             </div>
@@ -191,11 +199,19 @@ const TimeManagment = () => {
             <div className="mb-10 flex items-center gap-2 px-4 py-2 bg-black/40 border border-zinc-800 rounded-2xl">
               <div
                 className={`w-2 h-2 rounded-full animate-pulse ${
-                  running ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : onBreak ? "bg-yellow-500" : "bg-zinc-600"
+                  running
+                    ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                    : onBreak
+                      ? "bg-yellow-500"
+                      : "bg-zinc-600"
                 }`}
               />
               <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                {running ? "Active Session" : onBreak ? "On Break" : "System Idle"}
+                {running
+                  ? "Active Session"
+                  : onBreak
+                    ? "On Break"
+                    : "System Idle"}
               </span>
             </div>
 
@@ -206,7 +222,9 @@ const TimeManagment = () => {
                   className="col-span-2 group flex items-center justify-center gap-3 bg-orange-500 hover:bg-orange-400 text-white font-black py-4 rounded-2xl transition-all shadow-lg shadow-orange-500/20 active:scale-95"
                 >
                   <Play size={20} fill="currentColor" />
-                  <span className="uppercase tracking-widest text-sm">{onBreak ? "Resume Work" : "Punch In"}</span>
+                  <span className="uppercase tracking-widest text-sm">
+                    {onBreak ? "Resume Work" : "Punch In"}
+                  </span>
                 </button>
               ) : (
                 <>
@@ -215,14 +233,18 @@ const TimeManagment = () => {
                     className="flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold py-4 rounded-2xl transition-all active:scale-95"
                   >
                     <Coffee size={18} />
-                    <span className="uppercase tracking-widest text-xs">Break</span>
+                    <span className="uppercase tracking-widest text-xs">
+                      Break
+                    </span>
                   </button>
                   <button
                     onClick={handleEnd}
                     className="flex items-center justify-center gap-2 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-500 font-bold py-4 rounded-2xl transition-all active:scale-95"
                   >
                     <Square size={16} fill="currentColor" />
-                    <span className="uppercase tracking-widest text-xs">End Shift</span>
+                    <span className="uppercase tracking-widest text-xs">
+                      End Shift
+                    </span>
                   </button>
                 </>
               )}
@@ -233,7 +255,9 @@ const TimeManagment = () => {
         <div className="mt-8 flex items-center gap-4 p-5 bg-zinc-900/30 border border-zinc-800/50 rounded-3xl">
           <Info size={18} className="text-zinc-600 shrink-0" />
           <p className="text-zinc-500 text-[11px] font-medium leading-relaxed">
-            Daily goal is set to <span className="text-zinc-300 font-bold">8 hours</span>. Your progress bar reflects your total worked minutes excluding breaks.
+            Daily goal is set to{" "}
+            <span className="text-zinc-300 font-bold">8 hours</span>. Your
+            progress bar reflects your total worked minutes excluding breaks.
           </p>
         </div>
       </div>

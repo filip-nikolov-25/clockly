@@ -12,6 +12,8 @@ interface Props {
 }
 
 const CalendarPage = ({ user, setUser }: Props) => {
+      const API_URL = import.meta.env.VITE_API_URL;
+
   const [weekView, setWeekView] = useState(false);
   const [publicHolidays, setPublicHolidays] = useState<PublicHolidayType[]>([]);
   const [showRequestModal, setShowRequestModal] = useState(false);
@@ -22,7 +24,7 @@ const CalendarPage = ({ user, setUser }: Props) => {
     const fetchPublicHolidays = async () => {
       try {
         const requests = countries.map((c) =>
-          axios.get(`http://localhost:5000/api/public-holidays`, {
+          axios.get(`${API_URL}/api/public-holidays`, {
             params: {
               country_code: c,
               start_date: `${year}-01-01`,

@@ -22,6 +22,7 @@ interface Props {
 }
 
 const AboutMe = ({ user }: Props) => {
+    const API_URL = import.meta.env.VITE_API_URL;
   const [todayWork, setTodayWork] = useState<WorkEntryType | null>(null);
   const [previousMonthWork, setPreviousMonthWork] = useState<WorkEntryType[]>([]);
   const [requestTimeOff, setRequestTimeOff] = useState<TimeOffRequest[]>([]);
@@ -36,7 +37,7 @@ const AboutMe = ({ user }: Props) => {
   useEffect(() => {
     const fetchTodayWork = async () => {
       try {
-        const { data } = await axios.get("http://localhost:5000/api/today");
+        const { data } = await axios.get(`${API_URL}/api/today`);
         if (!data) return;
         const breakMinutes = getBreakMinutes(data.break_start, data.break_end);
         setTodayWork({
@@ -55,7 +56,7 @@ const AboutMe = ({ user }: Props) => {
     const fetchPreviousMonthWork = async () => {
       try {
         const { data } = await axios.get(
-          "http://localhost:5000/api/work/previous-month",
+          `${API_URL}/api/work/previous-month`,
           {
             params: { t: new Date().getTime() },
           },
@@ -72,7 +73,7 @@ const AboutMe = ({ user }: Props) => {
     const fetchRequestTimeOff = async () => {
       try {
         const { data } = await axios.get(
-          "http://localhost:5000/api/requesttimeoff",
+          `${API_URL}/api/requesttimeoff`,
           {
             params: { months: 2 },
           },

@@ -4,6 +4,8 @@ import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const ForgotPassword = () => {
+      const API_URL = import.meta.env.VITE_API_URL;
+
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -12,7 +14,7 @@ const ForgotPassword = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/forgot-password", { email });
+      const res = await axios.post(`${API_URL}/api/auth/forgot-password`, { email });
       setMessage(res.data.message);
     } catch (err) {
       setMessage("Failed to send reset link. Please try again.");

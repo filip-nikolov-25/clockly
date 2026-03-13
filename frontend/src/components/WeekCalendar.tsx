@@ -32,6 +32,7 @@ interface WorkEntryType {
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const WeekCalendar = ({ publicHolidays }: Props) => {
+    const API_URL = import.meta.env.VITE_API_URL;
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(false);
   const [workEntries, setWorkEntries] = useState<{
@@ -70,7 +71,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
       const startStr = formatDateToISO(start);
       const endStr = formatDateToISO(end);
       const res = await axios.get(
-        "http://localhost:5000/api/users/approved-timeoff",
+        `${API_URL}/api/users/approved-timeoff`,
         {
           params: { startDate: startStr, endDate: endStr },
         },
@@ -92,7 +93,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
       const startStr = formatDateToISO(start);
       const endStr = formatDateToISO(end);
       const res = await axios.get(
-        "http://localhost:5000/api/weekcalendar/work-time",
+        `${API_URL}/api/weekcalendar/work-time`,
         {
           params: { startDate: startStr, endDate: endStr },
         },

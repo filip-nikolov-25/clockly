@@ -11,6 +11,8 @@ interface Props {
 }
 
 const EmployeePage = ({ currentCompany, user }: Props) => {
+      const API_URL = import.meta.env.VITE_API_URL;
+
   const [employees, setEmployees] = useState<AllEmployeeType[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -20,7 +22,7 @@ const EmployeePage = ({ currentCompany, user }: Props) => {
       setLoading(true);
       try {
         const result = await axios.get(
-          "http://localhost:5000/api/work/montly-hours-employees",
+          `${API_URL}/api/work/monthly-hours-employees`,
         );
         setEmployees(result.data);
       } catch (error) {
@@ -44,7 +46,7 @@ const EmployeePage = ({ currentCompany, user }: Props) => {
 
     try {
       const result = await axios.post(
-        "http://localhost:5000/api/users/update-free-days",
+        `${API_URL}/api/users/update-free-days`,
         { free_days, user_id },
       );
 

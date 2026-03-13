@@ -87,11 +87,13 @@ const App = () => {
   const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentCompany, setCurrentCompany] = useState("");
+    const API_URL = import.meta.env.VITE_API_URL;
+
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/auth/me");
+        const response = await axios.get(`${API_URL}/api/auth/me`);
         setUser(response.data);
       } catch (err) {
         setUser(null);
@@ -106,7 +108,7 @@ const App = () => {
     const fetchCurrentCompany = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/current-company",
+          `${API_URL}/api/current-company`,
         );
         setCurrentCompany(res.data.name);
       } catch (err) {

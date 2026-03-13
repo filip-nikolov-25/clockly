@@ -35,6 +35,7 @@ const NavBar = ({
   currentCompany,
   setCurrentCompany,
 }: Props) => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -47,8 +48,8 @@ const NavBar = ({
       try {
         const url =
           user.role === "admin"
-            ? "http://localhost:5000/api/admin-notifications"
-            : "http://localhost:5000/api/notifications";
+            ? `${API_URL}/api/admin-notifications`
+            : `${API_URL}/api/notifications`;
         const res = await axios.get(url);
         setNotifications(res.data);
       } catch (err) {
@@ -62,8 +63,8 @@ const NavBar = ({
     try {
       await axios.patch(
         user?.role === "admin"
-          ? "http://localhost:5000/api/admin-notifications/read"
-          : "http://localhost:5000/api/notifications/read",
+          ? `${API_URL}/api/admin-notifications/read`
+          : `${API_URL}/api/notifications/read`,
       );
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
     } catch (error) {
@@ -74,7 +75,7 @@ const NavBar = ({
   const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   const handleLogout = async () => {
-    await axios.post("http://localhost:5000/api/auth/logout");
+    await axios.post(`${API_URL}/api/auth/logout`);
     setUser(null);
     navigate("/login");
     setMenuOpen(false);

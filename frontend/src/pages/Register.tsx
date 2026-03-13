@@ -22,6 +22,8 @@ interface Props {
 }
 
 const Register = ({ setUser }: Props) => {
+      const API_URL = import.meta.env.VITE_API_URL;
+
   const [userInfo, setUserInfo] = useState<Partial<UserType>>({
     username: "",
     email: "",
@@ -47,7 +49,7 @@ const Register = ({ setUser }: Props) => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/register",
+        `${API_URL}/api/auth/register`,
         userInfo,
       );
       setUser(response.data.user);

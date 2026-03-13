@@ -16,9 +16,7 @@ export const startWorkController = async (req, res) => {
   try {
     const company_id = req.user.company_id;
     const user_id = req.user.id;
-    console.log(company_id, "COMPANY ID ASDASD");
 
-    console.log(user_id, "USER ID FROM START WORK");
     const entry = await createEntry(user_id, company_id);
     res.json(entry);
   } catch (err) {
@@ -148,9 +146,7 @@ export const getPublicHolidaysController = async (req, res) => {
 export const updateUserFreeDaysController = async (req,res) => {
   try {
     const { user_id, free_days } = req.body;
-    console.log(free_days, "FREE DAYS IN CONTROLLER");
     const updatedUser = await updateUserFreeDaysModel(user_id, free_days);
-    console.log(updatedUser, "UPDATED USER IN CONTROLLER");
     res.json(updatedUser);
   } catch (error) {
     console.error("Error updating user free days:", error);

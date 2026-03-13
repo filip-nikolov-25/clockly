@@ -9,6 +9,8 @@ interface Props {
 }
 
 const Login = ({ setUser }: Props) => {
+      const API_URL = import.meta.env.VITE_API_URL;
+
   const [userInfo, setUserInfo] = useState<LoginType>({
     email: "",
     password: "",
@@ -24,7 +26,7 @@ const Login = ({ setUser }: Props) => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
+        `${API_URL}/api/auth/login`,
         userInfo,
       );
       setUser(response.data.user);
@@ -87,13 +89,6 @@ const Login = ({ setUser }: Props) => {
                 <label className="text-xs font-bold uppercase tracking-widest text-zinc-500">
                   Password
                 </label>
-                <button
-                  type="button"
-                  onClick={() => navigate("/forgot-password")}
-                  className="text-[10px] font-bold text-orange-500 hover:text-orange-400 uppercase tracking-tighter"
-                >
-                  Forgot?
-                </button>
               </div>
               <div className="relative group">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors">
@@ -110,6 +105,16 @@ const Login = ({ setUser }: Props) => {
                   required
                 />
               </div>
+              <div className="text-end">
+
+                <button
+                  type="button"
+                  onClick={() => navigate("/forgot-password")}
+                  className="text-[10px]  cursor-help font-bold text-orange-500 hover:text-orange-400 uppercase tracking-tighter"
+                  >
+                  Forgot password ?
+                </button>
+                  </div>
             </div>
 
             {error && (

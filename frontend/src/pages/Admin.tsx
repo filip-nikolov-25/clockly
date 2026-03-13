@@ -18,6 +18,8 @@ interface Props {
 }
 
 const Admin = ({ user, setUser }: Props) => {
+      const API_URL = import.meta.env.VITE_API_URL;
+
   const [inviteCodes, setInviteCodes] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [count, setCount] = useState(0);
@@ -29,7 +31,7 @@ const Admin = ({ user, setUser }: Props) => {
       try {
         setLoadingRequests(true);
         const res = await axios.get(
-          "http://localhost:5000/api/requesttimeoff/admin",
+          `${API_URL}/api/requesttimeoff/admin`
         );
         setRequests(res.data);
       } catch (err) {
@@ -43,7 +45,7 @@ const Admin = ({ user, setUser }: Props) => {
     const fetchInviteCodes = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/all-invitecodes",
+          `${API_URL}/api/all-invitecodes`,
         );
         setInviteCodes(res.data.codes);
       } catch (error) {
@@ -61,7 +63,7 @@ const Admin = ({ user, setUser }: Props) => {
     }
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/sendinvite",
+        `${API_URL}/api/sendinvite`,
         { count },
       );
       setInviteCodes(response.data.codes);
@@ -77,7 +79,7 @@ const Admin = ({ user, setUser }: Props) => {
   ) => {
     try {
       const res = await axios.patch(
-        `http://localhost:5000/api/requesttimeoff/admin/${id}`,
+        `${API_URL}/api/requesttimeoff/admin/${id}`,
         { status },
       );
 
@@ -98,7 +100,6 @@ const Admin = ({ user, setUser }: Props) => {
     }
   };
 
-  console.log(user, "Pending Requests");
   return (
     <Wrapper>
       <div className="py-16">

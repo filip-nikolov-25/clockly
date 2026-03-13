@@ -11,6 +11,7 @@ interface Props {
 }
 
 const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
+    const API_URL = import.meta.env.VITE_API_URL;
   const [leaveStart, setLeaveStart] = useState("");
   const [leaveEnd, setLeaveEnd] = useState("");
   const [leaveType, setLeaveType] = useState("");
@@ -63,7 +64,7 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
     setErrorMessage("");
 
     try {
-      const { data } = await axios.get("http://localhost:5000/api/abscence-availability");
+      const { data } = await axios.get(`${API_URL}/api/abscence-availability`);
 
       if (data.userRequestedAbscence) {
         setErrorMessage("You already have an active absence request.");
@@ -71,7 +72,7 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
         return;
       }
 
-      await axios.post("http://localhost:5000/api/requesttimeoff", {
+      await axios.post(`${API_URL}/api/requesttimeoff`, {
         start_date: leaveStart,
         end_date: leaveEnd,
         leave_type: leaveType,

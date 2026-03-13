@@ -4,6 +4,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Lock, ArrowRight, ShieldCheck } from "lucide-react";
 
 const ResetPassword = () => {
+      const API_URL = import.meta.env.VITE_API_URL;
+
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
 
@@ -30,7 +32,7 @@ const ResetPassword = () => {
 
     try {
       await axios.post(
-        `http://localhost:5000/api/auth/reset-password/${token}`,
+        `${API_URL}/api/auth/reset-password/${token}`,
         {
           password,
         },

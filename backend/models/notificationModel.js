@@ -26,7 +26,6 @@ export const createNotificationModel = async ({
 };
 
 export const getNotificationsForAdminModel = async ({ role, user_id, company_id }) => {
-  console.log("GOES HERE ", role);
   if (role === "admin") {
     const res = await db.query(
       `
