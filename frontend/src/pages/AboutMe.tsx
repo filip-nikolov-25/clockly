@@ -127,7 +127,7 @@ const AboutMe = ({ user }: Props) => {
         <div>
           <h1 className="text-5xl font-black text-white tracking-tighter uppercase italic">
             {user?.username}
-            <span className="text-orange-500">.</span>
+            <span className="text-orange-500 ml-2">.</span>
           </h1>
           <p className="text-zinc-500 font-medium mt-2 tracking-widest uppercase text-xs">
             Employee Dashboard Overview

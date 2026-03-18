@@ -22,7 +22,7 @@ const EmployeePage = ({ currentCompany, user }: Props) => {
       setLoading(true);
       try {
         const result = await axios.get(
-          `${API_URL}/api/work/monthly-hours-employees`,
+          `${API_URL}/api/work/montly-hours-employees`,
         );
         setEmployees(result.data);
       } catch (error) {

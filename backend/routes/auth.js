@@ -5,7 +5,7 @@ import pool from "../db.js";
 import { protect } from "../middleware/auth.js";
 import crypto from "crypto";
 import rateLimit from "express-rate-limit";
-import { sendPasswordResetEmail } from "../controllers/services/sendPassResetEmail.ts";
+import { sendPasswordResetEmail } from "../controllers/services/sendPassResetEmail.js";
 
 const router = Router();
 const cookieOptions = {

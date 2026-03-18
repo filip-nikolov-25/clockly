@@ -77,7 +77,7 @@ const Footer = () => {
                 </Link>
               </li>
 
-              <li>Address: 123 Street Name, City, Country</li>
+              <li>Address: 8th September Street, Probishtip, North Macedonia</li>
             </ul>
           </div>
 

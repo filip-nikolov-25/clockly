@@ -1,5 +1,5 @@
 import { Route, Routes, BrowserRouter, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import type { UserType } from "./interfaces/types";
 import NavBar from "./components/NavBar";
@@ -16,6 +16,8 @@ import Spinner from "./components/Spinner";
 import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
 
+axios.defaults.withCredentials = true;
+
 interface AppContentProps {
   user: UserType | null;
   setUser: React.Dispatch<React.SetStateAction<UserType | null>>;
@@ -30,7 +32,7 @@ const AppContent = ({
   setCurrentCompany,
 }: AppContentProps) => {
   const location = useLocation();
-  const hideNavBarPaths = ["/", "/login", "/register"];
+    const hideNavBarPaths = ["/", "/login", "/register"];
   const shouldShowNavBar = !hideNavBarPaths.includes(location.pathname);
 
   return (
@@ -83,40 +85,41 @@ const AppContent = ({
 };
 
 const App = () => {
-  axios.defaults.withCredentials = true;
   const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentCompany, setCurrentCompany] = useState("");
-    const API_URL = import.meta.env.VITE_API_URL;
+  
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
+  const fetchUser = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/auth/me`);
+      setUser(response.data);
+    } catch (err) {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [API_URL]);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/api/auth/me`);
-        setUser(response.data);
-      } catch (err) {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchUser();
-  }, []);
+  }, [fetchUser]);
 
   useEffect(() => {
     const fetchCurrentCompany = async () => {
       try {
-        const res = await axios.get(
-          `${API_URL}/api/current-company`,
-        );
+        const res = await axios.get(`${API_URL}/api/current-company`);
         setCurrentCompany(res.data.name);
       } catch (err) {
         console.error("Error fetching company:", err);
       }
     };
-    if (user) fetchCurrentCompany();
-  }, [user]);
+
+    if (user) {
+      fetchCurrentCompany();
+    }
+  }, [user, API_URL]);
 
   if (loading) return <Spinner />;
 

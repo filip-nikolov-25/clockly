@@ -12,7 +12,7 @@ interface Props {
 }
 
 const CalendarPage = ({ user, setUser }: Props) => {
-      const API_URL = import.meta.env.VITE_API_URL;
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const [weekView, setWeekView] = useState(false);
   const [publicHolidays, setPublicHolidays] = useState<PublicHolidayType[]>([]);
@@ -32,6 +32,7 @@ const CalendarPage = ({ user, setUser }: Props) => {
             },
           }),
         );
+          console.log(API_URL, "API URL in CalendarPage"); // Debug log to check API URL
 
         const responses = await Promise.all(requests);
 

@@ -76,10 +76,9 @@ const Register = ({ setUser }: Props) => {
 
       <div className="relative w-full max-w-5xl grid lg:grid-cols-2 bg-zinc-900/50 border border-zinc-800 rounded-[2.5rem] overflow-hidden backdrop-blur-xl shadow-2xl">
         
-        {/* Go Back Button */}
         <button 
           onClick={() => navigate(-1)}
-          className="absolute top-8 left-8 z-10 flex items-center gap-2 text-zinc-500 hover:text-orange-500 transition-colors font-medium text-sm"
+          className="absolute top-4 left-8 z-10 flex items-center gap-2 text-zinc-500 hover:text-orange-500 transition-colors font-medium text-sm"
         >
           <ArrowLeft size={16} /> Back
         </button>
