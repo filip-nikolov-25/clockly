@@ -29,4 +29,4 @@ CREATE TABLE IF NOT EXISTS company_invites (
 );
 
 INSERT INTO companies (id, name, created_at)
-VALUES (gen_random_uuid(), 'Filip Rigilog Company', NOW());
+VALUES (gen_random_uuid(), 'Rigilog', NOW());
