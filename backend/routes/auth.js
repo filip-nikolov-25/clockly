@@ -178,7 +178,7 @@ router.post("/forgot-password", passwordResetLimiter, async (req, res) => {
       [hashedToken, expires, user.id],
     );
 
-    const resetURL = `http://localhost:5173/reset-password/${resetToken}`;
+   const resetURL = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
     await sendPasswordResetEmail(user.email, resetURL);
 
     res.json({ message: "If an account exists, a reset link has been sent." });
