@@ -132,23 +132,7 @@ const Homepage = ({ user }: Props) => {
                 </div>
 
                 <div className="relative aspect-16/10 overflow-hidden rounded-4xl bg-zinc-800 border-4 border-zinc-950 flex items-center justify-center group">
-<img src="/img/clockly-week-calendar.png?v=2" alt="Hero Image" />                  {/* <div className="absolute inset-0 bg-linear-to-br from-zinc-800 via-zinc-900 to-black p-8 text-center flex flex-col items-center justify-center text-zinc-600">
-                    <BarChart3
-                      size={60}
-                      strokeWidth={1}
-                      className="mb-4 text-orange-500/60"
-                    />
-                    <p className="font-bold text-lg mb-1 text-zinc-300">
-                      Product Dashboard Mockup
-                    </p>
-                    <p className="text-sm">
-                      Place a screenshot of the Clockly UI here.
-                    </p>
-                    <p className="text-xs font-mono mt-2 p-2 bg-black/40 rounded">
-                      aspect-[16/10]
-                    </p>
-                  </div> */}
-
+                  <img src="/img/week-calendar.png?v=2" alt="Hero Image" />{" "}
                   <div className="absolute inset-0 bg-linear-to-tr from-white/0 via-white/5 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                 </div>
               </div>
