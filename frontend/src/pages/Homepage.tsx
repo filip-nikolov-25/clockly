@@ -20,6 +20,7 @@ import type {
   BentoItemProps,
   CheckItemProps,
   FeatureCardTypes,
+  UserType,
 } from "../interfaces/types";
 
 const heroTextVariants: Variants = {
@@ -29,7 +30,7 @@ const heroTextVariants: Variants = {
     y: 0,
     transition: {
       duration: 0.8,
-      ease: [0.22, 1, 0.36, 1] as const, 
+      ease: [0.22, 1, 0.36, 1] as const,
     },
   },
 };
@@ -41,18 +42,21 @@ const heroImageVariants: Variants = {
     scale: 1,
     y: 0,
     transition: {
-      duration: 1,
-      delay: 0.3,
-      ease: [0.22, 1, 0.36, 1] as const, 
+      duration: 0.3,
+      delay: 1,
+      ease: [0.22, 1, 0.36, 1] as const,
     },
   },
 };
+interface Props {
+  user: UserType | null;
+}
 
-const Homepage = () => {
+const Homepage = ({ user }: Props) => {
   return (
     <div className="text-slate-200 bg-[#050505] selection:bg-orange-500/30 font-sans antialiased">
       <section className="relative flex items-center justify-center min-h-[90vh] overflow-hidden pt-24 pb-12 lg:pt-32 px-6">
-        <div className="absolute top-20 left-10 w-150 h-150 bg-orange-600/10 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute top-20 left-10 w-150 h-150 bg-orange-500/20 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-0 right-10 w-125 h-125 bg-zinc-600/10 rounded-full blur-[100px]" />
 
         <Wrapper>
@@ -86,23 +90,24 @@ const Homepage = () => {
                 secure ecosystem.
               </p>
 
+                {user&& <p className="mb-5 text-orange-400">You are already logged in ! </p>}
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-5">
                 <Link
-                  to="/register"
+                  to={user ? "/calendar" : "/register"}
                   className="group px-10 py-5 bg-orange-500 text-white font-bold rounded-2xl shadow-[0_0_40px_rgba(249,115,22,0.3)] hover:bg-orange-400 transition-all flex items-center gap-3 text-lg"
                 >
-                  Get Started Free
+                  {user ? "Go to Your Profile" : "Get Started Free"}
                   <ArrowRight
                     size={20}
                     className="group-hover:translate-x-1 transition-transform"
                   />
                 </Link>
-                <Link
+              {!user ?   <Link
                   to="/"
                   className="px-10 py-5 bg-zinc-900 text-white font-bold rounded-2xl border border-zinc-800 hover:bg-zinc-800 transition-all text-lg"
-                >
+                  >
                   View Demo
-                </Link>
+                </Link>: ""}
               </div>
             </motion.div>
 
@@ -119,9 +124,9 @@ const Homepage = () => {
                 </div>
 
                 <div className="relative aspect-16/10 overflow-hidden rounded-4xl bg-zinc-800 border-4 border-zinc-950 flex items-center justify-center group">
-                  {/* ADD Img LAter */}
+                  <img src="../../public/img/Clockly-week-calendar.png" alt="Hero Image" />
 
-                  <div className="absolute inset-0 bg-linear-to-br from-zinc-800 via-zinc-900 to-black p-8 text-center flex flex-col items-center justify-center text-zinc-600">
+                  {/* <div className="absolute inset-0 bg-linear-to-br from-zinc-800 via-zinc-900 to-black p-8 text-center flex flex-col items-center justify-center text-zinc-600">
                     <BarChart3
                       size={60}
                       strokeWidth={1}
@@ -136,7 +141,7 @@ const Homepage = () => {
                     <p className="text-xs font-mono mt-2 p-2 bg-black/40 rounded">
                       aspect-[16/10]
                     </p>
-                  </div>
+                  </div> */}
 
                   <div className="absolute inset-0 bg-linear-to-tr from-white/0 via-white/5 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                 </div>

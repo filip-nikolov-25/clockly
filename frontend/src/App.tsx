@@ -47,7 +47,7 @@ const AppContent = ({
       )}
 
       <Routes>
-        <Route path="/" element={<Homepage />} />
+        <Route path="/" element={<Homepage user={user} />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/register" element={<Register setUser={setUser} />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
