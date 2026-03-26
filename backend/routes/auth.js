@@ -72,7 +72,7 @@ router.post("/register", async (req, res) => {
         .json({ message: "Invite code is required for employees" });
     }
     const inviteQuery = await pool.query(
-      "SELECT * FROM company_invites WHERE code = $1 AND created_by IS NULL",
+      "SELECT * FROM company_invites WHERE code = $1 AND used_at IS NULL",
       [code],
     );
     if (inviteQuery.rows.length === 0) {
