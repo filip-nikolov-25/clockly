@@ -46,6 +46,7 @@ const AppContent = ({
         />
       )}
 
+
       <Routes>
         <Route path="/" element={<Homepage user={user} />} />
         <Route path="/login" element={<Login setUser={setUser} />} />

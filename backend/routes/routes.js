@@ -110,5 +110,5 @@ router.patch(
 );
 
 // public holidays
-router.get("/public-holidays", protect, getPublicHolidaysController);
+router.get("/public-holidays", getPublicHolidaysController);
 export default router;
