@@ -124,7 +124,7 @@ const Homepage = ({ user }: Props) => {
                 </div>
 
                 <div className="relative aspect-16/10 overflow-hidden rounded-4xl bg-zinc-800 border-4 border-zinc-950 flex items-center justify-center group">
-                  <img src="../../public/img/Clockly-week-calendar.png" alt="Hero Image" />
+                  <img src="/Clockly-week-calendar.png" alt="Hero Image" />
 
                   {/* <div className="absolute inset-0 bg-linear-to-br from-zinc-800 via-zinc-900 to-black p-8 text-center flex flex-col items-center justify-center text-zinc-600">
                     <BarChart3
