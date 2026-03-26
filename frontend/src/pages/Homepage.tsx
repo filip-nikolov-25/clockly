@@ -90,7 +90,11 @@ const Homepage = ({ user }: Props) => {
                 secure ecosystem.
               </p>
 
-                {user&& <p className="mb-5 text-orange-400">You are already logged in ! </p>}
+              {user && (
+                <p className="mb-5 text-orange-400">
+                  You are already logged in !{" "}
+                </p>
+              )}
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-5">
                 <Link
                   to={user ? "/calendar" : "/register"}
@@ -102,12 +106,16 @@ const Homepage = ({ user }: Props) => {
                     className="group-hover:translate-x-1 transition-transform"
                   />
                 </Link>
-              {!user ?   <Link
-                  to="/"
-                  className="px-10 py-5 bg-zinc-900 text-white font-bold rounded-2xl border border-zinc-800 hover:bg-zinc-800 transition-all text-lg"
+                {!user ? (
+                  <Link
+                    to="/"
+                    className="px-10 py-5 bg-zinc-900 text-white font-bold rounded-2xl border border-zinc-800 hover:bg-zinc-800 transition-all text-lg"
                   >
-                  View Demo
-                </Link>: ""}
+                    View Demo
+                  </Link>
+                ) : (
+                  ""
+                )}
               </div>
             </motion.div>
 
@@ -124,8 +132,7 @@ const Homepage = ({ user }: Props) => {
                 </div>
 
                 <div className="relative aspect-16/10 overflow-hidden rounded-4xl bg-zinc-800 border-4 border-zinc-950 flex items-center justify-center group">
-                  <img src="/clockly-week-calendar.png" alt="Hero Image" />
-
+                  <img src="/img/clockly-week-calendar.png" alt="Hero Image" />
                   {/* <div className="absolute inset-0 bg-linear-to-br from-zinc-800 via-zinc-900 to-black p-8 text-center flex flex-col items-center justify-center text-zinc-600">
                     <BarChart3
                       size={60}
