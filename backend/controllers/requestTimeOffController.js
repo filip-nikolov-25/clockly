@@ -130,7 +130,7 @@ export const adminUpdateTimeOffStatusController = async (req, res) => {
     let calculateTotalLeaveDays;
 
     if (status === "accepted") {
-      const { user_id, start_date, end_date } = updatedRequest;
+      const { user_id, start_date, end_date, leave_type } = updatedRequest;
 
       const user = await getEmployeeById(user_id);
       if (!user) throw new Error("User not found");
@@ -158,16 +158,21 @@ export const adminUpdateTimeOffStatusController = async (req, res) => {
         throw new Error("Invalid free_days value");
       }
 
-      if (totalRequestedLeaveDays > freeDays) {
+      if (leave_type !== "Sick Leave" && totalRequestedLeaveDays > freeDays) {
         return res.status(400).json({
           message: `User only has ${freeDays} leave days remaining.`,
         });
       }
 
-      await updateUserRemainingLeaveModel(
-        user_id,
-        calculateTotalLeaveDays,
-      );
+      if (leave_type !== "Sick Leave") {
+        calculateTotalLeaveDays = freeDays - totalRequestedLeaveDays;
+
+        await updateUserRemainingLeaveModel(user_id, calculateTotalLeaveDays);
+      } else {
+        calculateTotalLeaveDays = freeDays; 
+      }
+
+      await updateUserRemainingLeaveModel(user_id, calculateTotalLeaveDays);
     }
 
     const startStr = format(new Date(updatedRequest.start_date), "dd MMM yyyy");
@@ -200,7 +205,6 @@ export const adminUpdateTimeOffStatusController = async (req, res) => {
     }
 
     return res.status(200).json(responsePayload);
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: err.message });
@@ -208,9 +212,13 @@ export const adminUpdateTimeOffStatusController = async (req, res) => {
 };
 export const getUsersWithApprovedTimeOffController = async (req, res) => {
   const company_id = req.user.company_id;
-  const {startDate,endDate} = req.query;
+  const { startDate, endDate } = req.query;
   try {
-    const users = await getUsersWithApprovedTimeOffModel(company_id,startDate,endDate);
+    const users = await getUsersWithApprovedTimeOffModel(
+      company_id,
+      startDate,
+      endDate,
+    );
     res.status(200).json(users);
   } catch (err) {
     console.error(err);

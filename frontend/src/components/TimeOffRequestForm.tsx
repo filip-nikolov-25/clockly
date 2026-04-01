@@ -1,6 +1,13 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import axios from "axios";
-import { Calendar, Info, X, Clock, AlertCircle, CheckCircle2 } from "lucide-react";
+import {
+  Calendar,
+  Info,
+  X,
+  Clock,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 import type { UserType } from "../interfaces/types";
 
 interface Props {
@@ -11,7 +18,7 @@ interface Props {
 }
 
 const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
-    const API_URL = import.meta.env.VITE_API_URL;
+  const API_URL = import.meta.env.VITE_API_URL;
   const [leaveStart, setLeaveStart] = useState("");
   const [leaveEnd, setLeaveEnd] = useState("");
   const [leaveType, setLeaveType] = useState("");
@@ -32,11 +39,19 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
   }, [leaveStart, leaveEnd]);
 
+  const handleDateFocus = () => {
+    if (!leaveType) {
+      setErrorMessage("Please select type of absence first!");
+    }
+  };
   const handleSubmit = async () => {
-    if (user?.free_days === 0) {
+    if (leaveType === "Sick Leave") {
+      setSuccessMessage("");
+    } else if (user?.free_days === 0) {
       setErrorMessage("You don't have any free days left!");
       return;
     }
+
     if (!leaveStart || !leaveEnd || !leaveType) {
       setErrorMessage("Please fill all required fields!");
       return;
@@ -45,20 +60,23 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
     const start = new Date(leaveStart);
     const end = new Date(leaveEnd);
 
-    if (start.getTime() < today.getTime()) {
-      setErrorMessage("Start date cannot be in the past!");
+    if (leaveType !== "Sick Leave" && start.getTime() < today.getTime()) {
+      setErrorMessage(
+        "Start date cannot be in the past unless it's Sick Leave!",
+      );
       return;
     }
-
     if (end.getTime() < start.getTime()) {
       setErrorMessage("End date cannot be before start date!");
       return;
     }
 
-    if (requestedDays > (user?.free_days || 0)) {
+    if (leaveType !== "Sick Leave" && requestedDays > (user?.free_days || 0)) {
       setErrorMessage(`Insufficient balance (${user?.free_days} days left).`);
       return;
-    }
+    }else if (leaveType === "Sick Leave") {
+      setSuccessMessage("Sick Leave does not require free days. You can submit your request.")
+      }
 
     setLoading(true);
     setErrorMessage("");
@@ -83,17 +101,23 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
       if (onSubmitted) onSubmitted();
       setTimeout(onClose, 1500);
     } catch (err: any) {
-      setErrorMessage(err.response?.data?.message || "Error submitting request.");
+      setErrorMessage(
+        err.response?.data?.message || "Error submitting request.",
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    setErrorMessage("");
+  }, [leaveType]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div 
+      <div
         className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
-        onClick={onClose} 
+        onClick={onClose}
       />
 
       <div className="relative bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl max-w-lg w-full animate-in zoom-in-95 duration-200">
@@ -102,9 +126,14 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
             <div className="p-2 bg-orange-500/10 text-orange-500 rounded-xl">
               <Clock size={20} />
             </div>
-            <h2 className="text-white text-xl font-bold tracking-tight">Request Absence</h2>
+            <h2 className="text-white text-xl font-bold tracking-tight">
+              Request Absence
+            </h2>
           </div>
-          <button onClick={onClose} className="text-zinc-500 hover:text-white transition-colors">
+          <button
+            onClick={onClose}
+            className="text-zinc-500 hover:text-white transition-colors"
+          >
             <X size={20} />
           </button>
         </div>
@@ -115,32 +144,74 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
               <Info size={18} className="text-zinc-500" />
               <span className="text-zinc-400 text-sm">Available Off Days</span>
             </div>
-            <span className="text-white font-black text-lg">{user?.free_days || 0} Days</span>
+            <span className="text-white font-black text-lg">
+              {user?.free_days || 0} Days
+            </span>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">
+              Type of Absence
+            </label>
+            <select
+              value={leaveType}
+              onChange={(e) => {
+                if(e.target.value === "Sick Leave") {
+                  setSuccessMessage("Sick Leave does not require free days. You can submit your request.")
+                } else {
+                  setSuccessMessage("");
+                }
+                setLeaveType(e.target.value)}}
+              className="w-full bg-zinc-800/50 text-white px-4 py-3 rounded-2xl border border-zinc-800 focus:border-orange-500 outline-none transition-all"
+            >
+              <option value="" disabled>
+                Choose category...
+              </option>
+              <option value="Vacation">🌴 Vacation</option>
+              <option value="Sick Leave">🤒 Sick Leave</option>
+              <option value="Personal">🏠 Personal</option>
+            </select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Start Date</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">
+                Start Date
+              </label>
               <div className="relative group">
-                <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors pointer-events-none" />
+                <Calendar
+                  size={16}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors pointer-events-none"
+                />
                 <input
                   type="date"
                   value={leaveStart}
+                  onFocus={handleDateFocus}
                   onChange={(e) => setLeaveStart(e.target.value)}
-                  min={todayStr}
+                  min={leaveType === "Sick Leave" ? undefined : todayStr}
                   className="w-full bg-zinc-800/50 text-white pl-10 pr-4 py-3 rounded-2xl border border-zinc-800 focus:border-orange-500 outline-none transition-all [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                 />
               </div>
             </div>
             <div className="space-y-1.5">
-              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">End Date</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">
+                End Date
+              </label>
               <div className="relative group">
-                <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors pointer-events-none" />
+                <Calendar
+                  size={16}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors pointer-events-none"
+                />
                 <input
                   type="date"
                   value={leaveEnd}
                   onChange={(e) => setLeaveEnd(e.target.value)}
-                  min={leaveStart || todayStr}
+                  onFocus={handleDateFocus}
+                  min={
+                    leaveType === "Sick Leave"
+                      ? undefined
+                      : leaveStart || todayStr
+                  }
                   className="w-full bg-zinc-800/50 text-white pl-10 pr-4 py-3 rounded-2xl border border-zinc-800 focus:border-orange-500 outline-none transition-all [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                 />
               </div>
@@ -148,29 +219,19 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
           </div>
 
           {requestedDays > 0 && (
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase w-fit tracking-wider
-              ${requestedDays > (user?.free_days || 0) ? 'bg-red-500/10 text-red-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
+            <div
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase w-fit tracking-wider
+              ${requestedDays > (user?.free_days || 0) ? "bg-red-500/10 text-red-500" : "bg-emerald-500/10 text-emerald-500"}`}
+            >
               <CheckCircle2 size={12} />
-              Total: {requestedDays} {requestedDays === 1 ? 'Day' : 'Days'}
+              Total: {requestedDays} {requestedDays === 1 ? "Day" : "Days"}
             </div>
           )}
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Type of Absence</label>
-            <select
-              value={leaveType}
-              onChange={(e) => setLeaveType(e.target.value)}
-              className="w-full bg-zinc-800/50 text-white px-4 py-3 rounded-2xl border border-zinc-800 focus:border-orange-500 outline-none transition-all"
-            >
-              <option value="" disabled>Choose category...</option>
-              <option value="Vacation">🌴 Vacation</option>
-              <option value="Sick Leave">🤒 Sick Leave</option>
-              <option value="Personal">🏠 Personal</option>
-            </select>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Notes (Optional)</label>
+            <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">
+              Notes (Optional)
+            </label>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
@@ -188,7 +249,7 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
           )}
 
           {successMessage && (
-            <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 text-xs font-medium animate-in slide-in-from-top-2">
+            <div className={`flex items-center gap-3 p-4 border ${successMessage.includes("Sick Leave") && "bg-emerald-300/20 border-emerald-500/50"} rounded-2xl text-emerald-400 text-xs font-medium animate-in slide-in-from-top-2`}>
               <CheckCircle2 size={16} />
               {successMessage}
             </div>
