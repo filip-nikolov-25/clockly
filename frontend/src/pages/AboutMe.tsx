@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import {
   formatDateDisplay,
+  formatMinutesToHoursAndMinutes,
   formatTimeDisplay,
   getBreakMinutes,
 } from "../helperFunctions";
@@ -290,7 +291,7 @@ const AboutMe = ({ user }: Props) => {
                 <div className="flex justify-between text-[11px] font-bold">
                   <span className="text-zinc-600 uppercase">Break</span>
                   <span className="text-zinc-300">
-                    {entry.break_minutes} min
+                    {formatMinutesToHoursAndMinutes(entry.break_minutes)}
                   </span>
                 </div>
               </div>
