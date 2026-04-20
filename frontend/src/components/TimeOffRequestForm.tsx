@@ -74,9 +74,11 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
     if (leaveType !== "Sick Leave" && requestedDays > (user?.free_days || 0)) {
       setErrorMessage(`Insufficient balance (${user?.free_days} days left).`);
       return;
-    }else if (leaveType === "Sick Leave") {
-      setSuccessMessage("Sick Leave does not require free days. You can submit your request.")
-      }
+    } else if (leaveType === "Sick Leave") {
+      setSuccessMessage(
+        "Sick Leave does not require free days. You can submit your request.",
+      );
+    }
 
     setLoading(true);
     setErrorMessage("");
@@ -89,7 +91,6 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
         setLoading(false);
         return;
       }
-
       await axios.post(`${API_URL}/api/requesttimeoff`, {
         start_date: leaveStart,
         end_date: leaveEnd,
@@ -156,12 +157,15 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
             <select
               value={leaveType}
               onChange={(e) => {
-                if(e.target.value === "Sick Leave") {
-                  setSuccessMessage("Sick Leave does not require free days. You can submit your request.")
+                if (e.target.value === "Sick Leave") {
+                  setSuccessMessage(
+                    " NOTE* Sick Leave does not require free days.",
+                  );
                 } else {
                   setSuccessMessage("");
                 }
-                setLeaveType(e.target.value)}}
+                setLeaveType(e.target.value);
+              }}
               className="w-full bg-zinc-800/50 text-white px-4 py-3 rounded-2xl border border-zinc-800 focus:border-orange-500 outline-none transition-all"
             >
               <option value="" disabled>
@@ -248,12 +252,27 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
             </div>
           )}
 
-          {successMessage && (
-            <div className={`flex items-center gap-3 p-4 border ${successMessage.includes("Sick Leave") && "bg-emerald-300/20 border-emerald-500/50"} rounded-2xl text-emerald-400 text-xs font-medium animate-in slide-in-from-top-2`}>
-              <CheckCircle2 size={16} />
-              {successMessage}
-            </div>
-          )}
+          {successMessage &&
+            (() => {
+              const isSickLeave = successMessage.includes("Sick Leave");
+              const Icon = isSickLeave ? Info : CheckCircle2;
+
+              return (
+                <div
+                  className={`
+        flex items-center gap-3 p-4 border rounded-2xl text-xs font-medium animate-in slide-in-from-top-2
+        ${
+          isSickLeave
+            ? "bg-blue-50 text-orange-700 border-blue-200"
+            : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+        }
+      `}
+                >
+                  <Icon size={16} />
+                  {successMessage}
+                </div>
+              );
+            })()}
 
           <div className="flex gap-3 pt-4">
             <button

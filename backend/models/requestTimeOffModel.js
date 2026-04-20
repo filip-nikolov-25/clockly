@@ -6,13 +6,23 @@ export const sendLeaveRequest = async (
   reason,
   user_id,
   company_id,
-  leave_type,
+  leave_type,working_days
 ) => {
   const result = await db.query(
-    `INSERT INTO leave_requests (start_date, end_date, reason, user_id, company_id, status,leave_type)
-     VALUES ($1, $2, $3, $4, $5, $6,$7)
-     RETURNING status,leave_type,reason,start_date,end_date`,
-    [start_date, end_date, reason, user_id, company_id, "pending", leave_type],
+    `INSERT INTO leave_requests 
+     (start_date, end_date, reason, user_id, company_id, status, leave_type, working_days)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+     RETURNING status, leave_type, reason, start_date, end_date, working_days`,
+    [
+      start_date,
+      end_date,
+      reason,
+      user_id,
+      company_id,
+      "pending",
+      leave_type,
+      working_days, 
+    ],
   );
   return result.rows[0];
 };

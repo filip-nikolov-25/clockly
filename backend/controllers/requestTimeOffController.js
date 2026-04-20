@@ -16,32 +16,12 @@ import {
   updateUserRemainingLeaveModel,
 } from "../models/workTimeModel.js";
 import { getEmployeeById } from "../models/employeesModel.js";
-
-export const countLeaveDays = (startDate, endDate, holidays = []) => {
-  let count = 0;
-  const current = new Date(startDate);
-  const end = new Date(endDate);
-  const holidaySet = new Set(holidays);
-
-  while (current <= end) {
-    const day = current.getDay();
-    const dateStr = current.toISOString().split("T")[0];
-
-    const isWeekend = day === 0 || day === 6;
-    const isHoliday = holidaySet.has(dateStr);
-
-    if (!isWeekend && !isHoliday) {
-      count++;
-    }
-    current.setDate(current.getDate() + 1);
-  }
-
-  return count;
-};
+import { calculateWorkingDays, formatDateLocal } from "../utils/dateUtils.js";
 
 export const requestTimeOffController = async (req, res) => {
   const { start_date, end_date, reason, leave_type } = req.body;
   const user_id = req.user.id;
+  const country_code = req.user.country_code;
   const company_id = req.user.company_id;
   const user = req.user;
   if (!user) throw new Error("User not found");
@@ -54,7 +34,20 @@ export const requestTimeOffController = async (req, res) => {
         message: "You already have an active absence request.",
       });
     }
+    const publicHolidays = await getPublicHolidaysModel(
+      country_code,
+      start_date,
+      end_date,
+    );
+    const holidayDates = publicHolidays.map((h) => {
+      return formatDateLocal(h.date);
+    });
 
+    const workingDays = calculateWorkingDays(
+      start_date,
+      end_date,
+      holidayDates,
+    );
     const result = await sendLeaveRequest(
       start_date,
       end_date,
@@ -62,6 +55,7 @@ export const requestTimeOffController = async (req, res) => {
       user_id,
       company_id,
       leave_type,
+      workingDays,
     );
 
     const startStr = format(new Date(start_date), "dd MMM yyyy");
@@ -143,9 +137,10 @@ export const adminUpdateTimeOffStatusController = async (req, res) => {
         end_date,
       );
 
-      const holidayDates = publicHolidays.map((h) => h.date);
-
-      const totalRequestedLeaveDays = countLeaveDays(
+      const holidayDates = publicHolidays.map((h) => {
+        return formatDateLocal(h.date);
+      });
+      const totalRequestedLeaveDays = calculateWorkingDays(
         start_date,
         end_date,
         holidayDates,
@@ -169,10 +164,8 @@ export const adminUpdateTimeOffStatusController = async (req, res) => {
 
         await updateUserRemainingLeaveModel(user_id, calculateTotalLeaveDays);
       } else {
-        calculateTotalLeaveDays = freeDays; 
+        calculateTotalLeaveDays = freeDays;
       }
-
-      await updateUserRemainingLeaveModel(user_id, calculateTotalLeaveDays);
     }
 
     const startStr = format(new Date(updatedRequest.start_date), "dd MMM yyyy");

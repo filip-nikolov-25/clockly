@@ -32,7 +32,6 @@ const CalendarPage = ({ user, setUser }: Props) => {
             },
           }),
         );
-          console.log(API_URL, "API URL in CalendarPage"); // Debug log to check API URL
 
         const responses = await Promise.all(requests);
 
