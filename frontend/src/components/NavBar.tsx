@@ -174,12 +174,17 @@ const NavBar = ({
                               key={i}
                               className="p-4 border-b border-zinc-800/50 hover:bg-zinc-800/30 cursor-pointer"
                             >
-                              <p className="text-xs font-bold text-white">
-                                {n.title}
-                              </p>
-                              <p className="text-[10px] text-zinc-500 mt-1">
-                                {n.message}
-                              </p>
+                              <Link
+                                to={`${user.role === "admin" ? "/admin" : "/aboutme"}`}  
+                                className="text-zinc-400 hover:text-white transition-colors"
+                              >
+                                <p className="text-xs font-bold text-white">
+                                  {n.title}
+                                </p>
+                                <p className="text-[10px] text-zinc-500 mt-1">
+                                  {n.message}
+                                </p>
+                              </Link>
                             </div>
                           ))
                         )}
