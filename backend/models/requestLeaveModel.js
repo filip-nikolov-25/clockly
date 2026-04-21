@@ -1,12 +1,13 @@
 import db from "../db.js";
 
-export const sendLeaveRequest = async (
+export const sendLeaveRequestForEmployee = async (
   start_date,
   end_date,
   reason,
   user_id,
   company_id,
-  leave_type,working_days
+  leave_type,
+  working_days,
 ) => {
   const result = await db.query(
     `INSERT INTO leave_requests 
@@ -21,26 +22,30 @@ export const sendLeaveRequest = async (
       company_id,
       "pending",
       leave_type,
-      working_days, 
+      working_days,
     ],
   );
   return result.rows[0];
 };
 
-export const getLeaveRequests = async (user_id, company_id) => {
+export const getLeaveRequestsForEmployeeModel = async (
+  user_id,
+  company_id,
+  limit,
+  offset,
+) => {
   const result = await db.query(
     `SELECT status, start_date, end_date, leave_type, reason 
      FROM leave_requests 
      WHERE user_id = $1 
      AND company_id = $2 
-     -- Filters for requests made in the last 2 months
-     AND requested_at >= NOW() - INTERVAL '2 months'
-     ORDER BY requested_at DESC`,
-    [user_id, company_id],
+     ORDER BY requested_at DESC
+     LIMIT $3 OFFSET $4`,
+    [user_id, company_id, limit, offset],
   );
   return result.rows;
 };
-export const getTimeOffRequestsForAdminModel = async (company_id) => {
+export const getLeaveRequestsForAdminModel = async (company_id) => {
   const result = await db.query(
     `
     SELECT 
@@ -74,7 +79,7 @@ export const getTimeOffRequestsForAdminModel = async (company_id) => {
   return result.rows;
 };
 
-export const adminUpdateTimeOffStatusModel = async (id, status, company_id) => {
+export const updateAdminLeaveRequestStatusModel = async (id, status, company_id) => {
   const normalizedStatus = status?.trim().toLowerCase();
 
   if (!["accepted", "rejected"].includes(normalizedStatus)) {

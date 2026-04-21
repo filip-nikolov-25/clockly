@@ -74,10 +74,6 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
     if (leaveType !== "Sick Leave" && requestedDays > (user?.free_days || 0)) {
       setErrorMessage(`Insufficient balance (${user?.free_days} days left).`);
       return;
-    } else if (leaveType === "Sick Leave") {
-      setSuccessMessage(
-        "Sick Leave does not require free days. You can submit your request.",
-      );
     }
 
     setLoading(true);
@@ -91,7 +87,7 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
         setLoading(false);
         return;
       }
-      await axios.post(`${API_URL}/api/requesttimeoff`, {
+      await axios.post(`${API_URL}/api/request-leave`, {
         start_date: leaveStart,
         end_date: leaveEnd,
         leave_type: leaveType,

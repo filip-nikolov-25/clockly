@@ -3,13 +3,13 @@ import {
   updateAdminNotificationsModel,
 } from "../models/notificationModel.js";
 import {
-  sendLeaveRequest,
-  getLeaveRequests,
-  getTimeOffRequestsForAdminModel,
-  adminUpdateTimeOffStatusModel,
   getUsersWithApprovedTimeOffModel,
   getEmployeePendingTimeOffModel,
-} from "../models/requestTimeOffModel.js";
+  getLeaveRequestsForEmployeeModel,
+  sendLeaveRequestForEmployee,
+  getLeaveRequestsForAdminModel,
+  updateAdminLeaveRequestStatusModel,
+} from "../models/requestLeaveModel.js";
 import { format } from "date-fns";
 import {
   getPublicHolidaysModel,
@@ -18,7 +18,7 @@ import {
 import { getEmployeeById } from "../models/employeesModel.js";
 import { calculateWorkingDays, formatDateLocal } from "../utils/dateUtils.js";
 
-export const requestTimeOffController = async (req, res) => {
+export const requestLeaveController = async (req, res) => {
   const { start_date, end_date, reason, leave_type } = req.body;
   const user_id = req.user.id;
   const country_code = req.user.country_code;
@@ -48,7 +48,7 @@ export const requestTimeOffController = async (req, res) => {
       end_date,
       holidayDates,
     );
-    const result = await sendLeaveRequest(
+    const result = await sendLeaveRequestForEmployee(
       start_date,
       end_date,
       reason,
@@ -78,30 +78,38 @@ export const requestTimeOffController = async (req, res) => {
   }
 };
 
-export const getTimeOffRequestsController = async (req, res) => {
+export const getLeaveRequestsForEmployeeController = async (req, res) => {
   const user_id = req.user.id;
   const company_id = req.user.company_id;
 
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = parseInt(req.query.offset) || 0;
+
   try {
-    const result = await getLeaveRequests(user_id, company_id);
+    const result = await getLeaveRequestsForEmployeeModel(
+      user_id,
+      company_id,
+      limit,
+      offset,
+    );
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-export const getTimeOffRequestsForAdminController = async (req, res) => {
+export const getLeaveRequestsForAdminController = async (req, res) => {
   const company_id = req.user.company_id;
 
   try {
-    const result = await getTimeOffRequestsForAdminModel(company_id);
+    const result = await getLeaveRequestsForAdminModel(company_id);
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-export const adminUpdateTimeOffStatusController = async (req, res) => {
+export const updateAdminLeaveRequestStatusController = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
   const company_id = req.user.company_id;
@@ -111,7 +119,7 @@ export const adminUpdateTimeOffStatusController = async (req, res) => {
   }
 
   try {
-    const updatedRequest = await adminUpdateTimeOffStatusModel(
+    const updatedRequest = await updateAdminLeaveRequestStatusModel(
       id,
       status,
       company_id,

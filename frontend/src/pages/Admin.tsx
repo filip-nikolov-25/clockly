@@ -31,7 +31,7 @@ const Admin = ({ user, setUser }: Props) => {
       try {
         setLoadingRequests(true);
         const res = await axios.get(
-          `${API_URL}/api/requesttimeoff/admin`
+          `${API_URL}/api/request-leave/admin`
         );
         setRequests(res.data);
       } catch (err) {
@@ -79,9 +79,10 @@ const Admin = ({ user, setUser }: Props) => {
   ) => {
     try {
       const res = await axios.patch(
-        `${API_URL}/api/requesttimeoff/admin/${id}`,
+        `${API_URL}/api/update-leave-status/admin/${id}`,
         { status },
       );
+      
 
       setRequests((prev) =>
         prev.map((r) => (r.id === id ? { ...r, status: res.data.status } : r)),

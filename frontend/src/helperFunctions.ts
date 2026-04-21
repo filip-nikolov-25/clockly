@@ -109,3 +109,9 @@ export const toDateKey = (date: Date) => {
     return days;
   };
 
+  export   const formatWorkedTime = (minutes: number) => {
+    if (!minutes) return "0h 0m";
+    const hrs = Math.floor(minutes / 60);
+    const mins = Math.floor(minutes % 60);
+    return `${hrs}h ${mins}m`;
+  };

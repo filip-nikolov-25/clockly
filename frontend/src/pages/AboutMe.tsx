@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Wrapper from "../components/base/Wrapper";
 import axios from "axios";
 import {
@@ -14,26 +14,62 @@ import {
   formatDateDisplay,
   formatMinutesToHoursAndMinutes,
   formatTimeDisplay,
+  formatWorkedTime,
   getBreakMinutes,
 } from "../helperFunctions";
-import type { TimeOffRequest, UserType, WorkEntryType } from "../interfaces/types";
+import type {
+  TimeOffRequest,
+  UserType,
+  WorkEntryType,
+} from "../interfaces/types";
 
 interface Props {
   user: UserType | null;
 }
 
 const AboutMe = ({ user }: Props) => {
-    const API_URL = import.meta.env.VITE_API_URL;
+  const API_URL = import.meta.env.VITE_API_URL;
   const [todayWork, setTodayWork] = useState<WorkEntryType | null>(null);
-  const [previousMonthWork, setPreviousMonthWork] = useState<WorkEntryType[]>([]);
+  const [previousMonthWork, setPreviousMonthWork] = useState<WorkEntryType[]>(
+    [],
+  );
   const [requestTimeOff, setRequestTimeOff] = useState<TimeOffRequest[]>([]);
+  const [offset, setOffset] = useState(0);
+  const [limit] = useState(6);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  const formatWorkedTime = (minutes: number) => {
-    if (!minutes) return "0h 0m";
-    const hrs = Math.floor(minutes / 60);
-    const mins = Math.floor(minutes % 60);
-    return `${hrs}h ${mins}m`;
+  const fetchRequestTimeOff = async (newOffset: number) => {
+    if (loading) return;
+
+    setLoading(true);
+
+    try {
+      const params = {
+        limit,
+        offset: newOffset,
+      };
+      const { data } = await axios.get(`${API_URL}/api/employee-leave-requests`, {
+        params,
+      });
+      setRequestTimeOff((prev) =>
+        newOffset === 0 ? data : [...prev, ...data],
+      );
+
+      setHasMore(data.length === limit);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
+  const loadMore = useCallback(() => {
+    if (!hasMore || loading) return;
+
+    const newOffset = offset + limit;
+    setOffset(newOffset);
+    fetchRequestTimeOff(newOffset);
+  }, [offset, hasMore, loading]);
 
   useEffect(() => {
     const fetchTodayWork = async () => {
@@ -56,12 +92,9 @@ const AboutMe = ({ user }: Props) => {
   useEffect(() => {
     const fetchPreviousMonthWork = async () => {
       try {
-        const { data } = await axios.get(
-          `${API_URL}/api/work/previous-month`,
-          {
-            params: { t: new Date().getTime() },
-          },
-        );
+        const { data } = await axios.get(`${API_URL}/api/work/previous-month`, {
+          params: { t: new Date().getTime() },
+        });
         setPreviousMonthWork(data);
       } catch (err) {
         console.error("Fetch previous month work failed", err);
@@ -71,22 +104,25 @@ const AboutMe = ({ user }: Props) => {
   }, []);
 
   useEffect(() => {
-    const fetchRequestTimeOff = async () => {
-      try {
-        const { data } = await axios.get(
-          `${API_URL}/api/requesttimeoff`,
-          {
-            params: { months: 2 },
-          },
-        );
+    fetchRequestTimeOff(0);
+  }, []);
 
-        setRequestTimeOff(data);
-      } catch (err) {
-        console.error("Time off requests failed", err);
+  useEffect(() => {
+    const handleScroll = () => {
+      if (loading || !hasMore) return;
+
+      const scrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const fullHeight = document.body.offsetHeight;
+
+      if (scrollY + windowHeight >= fullHeight - 200) {
+        loadMore();
       }
     };
-    fetchRequestTimeOff();
-  }, []);
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [loadMore, loading, hasMore]);
   const totalPreviousMonthMinutes = previousMonthWork.reduce(
     (sum, entry) => sum + Number(entry.worked_minutes || 0),
     0,

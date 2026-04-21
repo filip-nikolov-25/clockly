@@ -5,13 +5,13 @@ import {
 } from "../controllers/adminController.js";
 import { protect } from "../middleware/auth.js";
 import {
-  adminUpdateTimeOffStatusController,
   getEmployeePendingTimeOffController,
-  getTimeOffRequestsController,
-  getTimeOffRequestsForAdminController,
+  getLeaveRequestsForAdminController,
+  getLeaveRequestsForEmployeeController,
   getUsersWithApprovedTimeOffController,
-  requestTimeOffController,
-} from "../controllers/requestTimeOffController.js";
+  requestLeaveController,
+  updateAdminLeaveRequestStatusController,
+} from "../controllers/requestLeaveController.js";
 import {
   breakEndController,
   breakStartController,
@@ -39,17 +39,17 @@ router.post("/sendinvite", protect, sendInviteController);
 router.get("/all-invitecodes", protect, getInviteCodesForEmployeesController);
 
 //Abscence managment routes
-router.post("/requesttimeoff", protect, requestTimeOffController);
-router.get("/requesttimeoff", protect, getTimeOffRequestsController);
+router.post("/request-leave", protect, requestLeaveController);
+router.get("/employee-leave-requests", protect, getLeaveRequestsForEmployeeController);
 router.get(
-  "/requesttimeoff/admin",
+  "/request-leave/admin",
   protect,
-  getTimeOffRequestsForAdminController,
+  getLeaveRequestsForAdminController,
 );
 router.patch(
-  "/requesttimeoff/admin/:id",
+  "/update-leave-status/admin/:id",
   protect,
-  adminUpdateTimeOffStatusController,
+  updateAdminLeaveRequestStatusController,
 );
 router.get(
   "/abscence-availability",
@@ -62,7 +62,7 @@ router.post(
   updateUserFreeDaysController,
 );
 
-// routes for approved for employee time off
+// routes for approved for employee time off for WEEK CALENDAR
 router.get(
   "/users/approved-timeoff",
   protect,
