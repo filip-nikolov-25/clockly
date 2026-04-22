@@ -22,6 +22,7 @@ import type {
   UserType,
   WorkEntryType,
 } from "../interfaces/types";
+import ButtonWithLoadingState from "../components/base/ButtonWithLoadingState";
 
 interface Props {
   user: UserType | null;
@@ -33,6 +34,10 @@ const AboutMe = ({ user }: Props) => {
   const [previousMonthWork, setPreviousMonthWork] = useState<WorkEntryType[]>(
     [],
   );
+  const [prevMonthOffSet, setPrevMonthOffSet] = useState(0);
+  const [prevMonthCardsLimit] = useState(6);
+  const [prevMonthHasMore, setPrevMonthHasMore] = useState(true);
+  const [prevMonthLoading, setPrevMonthLoading] = useState(false);
   const [requestTimeOff, setRequestTimeOff] = useState<TimeOffRequest[]>([]);
   const [offset, setOffset] = useState(0);
   const [limit] = useState(6);
@@ -49,13 +54,15 @@ const AboutMe = ({ user }: Props) => {
         limit,
         offset: newOffset,
       };
-      const { data } = await axios.get(`${API_URL}/api/employee-leave-requests`, {
-        params,
-      });
+      const { data } = await axios.get(
+        `${API_URL}/api/employee-leave-requests`,
+        {
+          params,
+        },
+      );
       setRequestTimeOff((prev) =>
         newOffset === 0 ? data : [...prev, ...data],
       );
-
       setHasMore(data.length === limit);
     } catch (err) {
       console.error(err);
@@ -65,11 +72,37 @@ const AboutMe = ({ user }: Props) => {
   };
   const loadMore = useCallback(() => {
     if (!hasMore || loading) return;
-
-    const newOffset = offset + limit;
-    setOffset(newOffset);
-    fetchRequestTimeOff(newOffset);
+    setOffset((prev) => {
+      const newOffset = prev + limit;
+      fetchRequestTimeOff(newOffset);
+      return newOffset;
+    });
   }, [offset, hasMore, loading]);
+
+  const fetchPreviousMonthWork = async (newOffset: number) => {
+    if (prevMonthLoading) return;
+
+    setPrevMonthLoading(true);
+
+    try {
+      const { data } = await axios.get(`${API_URL}/api/work/previous-month`, {
+        params: {
+          limit: prevMonthCardsLimit,
+          offset: newOffset,
+        },
+      });
+
+      setPreviousMonthWork((prev) =>
+        newOffset === 0 ? data : [...prev, ...data],
+      );
+
+      setPrevMonthHasMore(data.length === prevMonthCardsLimit);
+    } catch (err) {
+      console.error("Fetch previous month work failed", err);
+    } finally {
+      setPrevMonthLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchTodayWork = async () => {
@@ -90,17 +123,7 @@ const AboutMe = ({ user }: Props) => {
   }, []);
 
   useEffect(() => {
-    const fetchPreviousMonthWork = async () => {
-      try {
-        const { data } = await axios.get(`${API_URL}/api/work/previous-month`, {
-          params: { t: new Date().getTime() },
-        });
-        setPreviousMonthWork(data);
-      } catch (err) {
-        console.error("Fetch previous month work failed", err);
-      }
-    };
-    fetchPreviousMonthWork();
+    fetchPreviousMonthWork(0);
   }, []);
 
   useEffect(() => {
@@ -338,6 +361,19 @@ const AboutMe = ({ user }: Props) => {
             No history recorded
           </div>
         )}
+      </div>
+      <div className="flex justify-center mt-4 mb-12">
+        <ButtonWithLoadingState
+          loading={prevMonthLoading}
+          disabled={!prevMonthHasMore || prevMonthLoading}
+          buttonText="+ Load More Requests +"
+          onClick={() => {
+            if (!prevMonthHasMore || prevMonthLoading) return;
+            const newOffset = prevMonthOffSet + prevMonthCardsLimit;
+            setPrevMonthOffSet(newOffset);
+            fetchPreviousMonthWork(newOffset);
+          }}
+        />
       </div>
 
       <h2 className="flex items-center gap-2 text-zinc-400 font-black uppercase tracking-[0.2em] text-xs mb-6">

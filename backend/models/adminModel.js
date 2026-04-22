@@ -15,3 +15,10 @@ export const getInviteCodesForEmployeesModel = async (company_id) => {
   );
   return res.rows;
 };
+export const getAdminEmailByCompanyId = async (company_id) => {
+  const res = await db.query(
+    `SELECT email FROM users WHERE company_id = $1 AND role = 'admin'`,
+    [company_id]
+  );
+  return res.rows; 
+};

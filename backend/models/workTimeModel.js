@@ -70,11 +70,13 @@ export const getTodayEntry = async (userId, companyId) => {
   return result.rows[0];
 };
 // // get working time for employee past 30 days
-export const getEntriesForPeriod = async (
+export const getLastMonthWorkTimeModel = async (
   user_id,
   company_id,
   startDate,
   endDate,
+  limit,
+  offset
 ) => {
   const query = `
   SELECT *,
@@ -91,8 +93,9 @@ WHERE user_id = $1
   AND company_id = $2
   AND work_date BETWEEN $3 AND $4
 ORDER BY work_date DESC
+LIMIT $5 OFFSET $6
   `;
-  const values = [user_id, company_id, startDate, endDate];
+  const values = [user_id, company_id, startDate, endDate, limit, offset];
   const result = await db.query(query, values);
   return result.rows;
 };

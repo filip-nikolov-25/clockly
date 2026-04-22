@@ -18,11 +18,11 @@ import {
   endWorkController,
   getTodayController,
   getWorkTimeForAllUsersForWeekCalendarController,
-  currentMonthWorkController,
   startWorkController,
   getMonthlyHoursEmployeeController,
   getPublicHolidaysController,
   updateUserFreeDaysController,
+  getLastMonthWorkTimeController,
 } from "../controllers/workTimeController.js";
 import { getCurrentCompanyController } from "../controllers/employeesController.js";
 import {
@@ -77,7 +77,7 @@ router.patch("/end/:id", protect, endWorkController);
 router.get("/today", protect, getTodayController);
 
 //get all work time for past month
-router.get("/work/previous-month", protect, currentMonthWorkController);
+router.get("/work/previous-month", protect, getLastMonthWorkTimeController);
 router.get(
   "/work/montly-hours-employees",
   protect,

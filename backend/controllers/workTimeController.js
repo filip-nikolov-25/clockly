@@ -2,7 +2,7 @@ import {
   createEntry,
   endBreak,
   endWork,
-  getEntriesForPeriod,
+  getLastMonthWorkTimeModel,
   getMonthlyHoursEmployeeModel,
   getPublicHolidaysModel,
   getTodayEntry,
@@ -74,7 +74,7 @@ export const getTodayController = async (req, res) => {
   }
 };
 
-export const currentMonthWorkController = async (req, res) => {
+export const getLastMonthWorkTimeController = async (req, res) => {
   try {
     const user_id = req.user.id;
     const company_id = req.user.company_id;
@@ -82,8 +82,11 @@ export const currentMonthWorkController = async (req, res) => {
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth(), 1);
     const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const params = req.query;
+    const limit = parseInt(params.limit) || 6;
+    const offset = parseInt(params.offset) || 0;
 
-    const entries = await getEntriesForPeriod(user_id, company_id, start, end);
+    const entries = await getLastMonthWorkTimeModel(user_id, company_id, start, end, limit, offset);
     res.json(entries);
   } catch (err) {
     console.error("Previous month fetch failed", err);

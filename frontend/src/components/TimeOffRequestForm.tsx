@@ -9,6 +9,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import type { UserType } from "../interfaces/types";
+import ButtonWithLoadingState from "./base/ButtonWithLoadingState";
 
 interface Props {
   onClose: () => void;
@@ -26,6 +27,7 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [dateError, setDateError] = useState("");
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -45,6 +47,7 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
     }
   };
   const handleSubmit = async () => {
+    if (dateError) return;
     if (leaveType === "Sick Leave") {
       setSuccessMessage("");
     } else if (user?.free_days === 0) {
@@ -75,18 +78,16 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
       setErrorMessage(`Insufficient balance (${user?.free_days} days left).`);
       return;
     }
-
-    setLoading(true);
     setErrorMessage("");
 
     try {
       const { data } = await axios.get(`${API_URL}/api/abscence-availability`);
-
       if (data.userRequestedAbscence) {
         setErrorMessage("You already have an active absence request.");
         setLoading(false);
         return;
       }
+      setLoading(true);
       await axios.post(`${API_URL}/api/request-leave`, {
         start_date: leaveStart,
         end_date: leaveEnd,
@@ -187,7 +188,16 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
                   type="date"
                   value={leaveStart}
                   onFocus={handleDateFocus}
-                  onChange={(e) => setLeaveStart(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setLeaveStart(value);
+
+                    if (leaveEnd && new Date(value) > new Date(leaveEnd)) {
+                      setDateError("Start date cannot be after end date!");
+                    } else {
+                      setDateError("");
+                    }
+                  }}
                   min={leaveType === "Sick Leave" ? undefined : todayStr}
                   className="w-full bg-zinc-800/50 text-white pl-10 pr-4 py-3 rounded-2xl border border-zinc-800 focus:border-orange-500 outline-none transition-all [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                 />
@@ -205,7 +215,16 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
                 <input
                   type="date"
                   value={leaveEnd}
-                  onChange={(e) => setLeaveEnd(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setLeaveEnd(value);
+
+                    if (leaveStart && new Date(value) < new Date(leaveStart)) {
+                      setDateError("End date cannot be before start date!");
+                    } else {
+                      setDateError("");
+                    }
+                  }}
                   onFocus={handleDateFocus}
                   min={
                     leaveType === "Sick Leave"
@@ -248,6 +267,13 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
             </div>
           )}
 
+          {dateError && (
+            <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-xs font-medium animate-in slide-in-from-top-2">
+              <AlertCircle size={16} />
+              {dateError}
+            </div>
+          )}
+
           {successMessage &&
             (() => {
               const isSickLeave = successMessage.includes("Sick Leave");
@@ -270,20 +296,20 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
               );
             })()}
 
-          <div className="flex gap-3 pt-4">
-            <button
+          <div className="flex justify-between gap-3 pt-4">
+            <ButtonWithLoadingState
+              buttonText="Discard"
               onClick={onClose}
-              className="flex-1 px-4 py-4 rounded-2xl font-bold text-zinc-400 hover:text-white hover:bg-zinc-800 border border-zinc-800 transition-all"
-            >
-              Discard
-            </button>
-            <button
+              variant="secondary"
+            />
+
+            <ButtonWithLoadingState
+              loading={loading}
+              variant="primary"
+              buttonText="Submit Request"
+              disabled={!!errorMessage || loading}
               onClick={handleSubmit}
-              disabled={loading}
-              className="flex-2 bg-orange-500 hover:bg-orange-400 disabled:bg-zinc-700 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-orange-500/20 transition-all active:scale-95"
-            >
-              {loading ? "Processing..." : "Submit Request"}
-            </button>
+            />
           </div>
         </div>
       </div>

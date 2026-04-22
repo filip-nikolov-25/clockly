@@ -45,7 +45,7 @@ export const getLeaveRequestsForEmployeeModel = async (
   );
   return result.rows;
 };
-export const getLeaveRequestsForAdminModel = async (company_id) => {
+export const getLeaveRequestsForAdminModel = async (company_id, limit, offset) => {
   const result = await db.query(
     `
     SELECT 
@@ -66,14 +66,14 @@ export const getLeaveRequestsForAdminModel = async (company_id) => {
       OR 
       (
         lr.status IN ('accepted', 'rejected') 
-        AND lr.requested_at >= CURRENT_TIMESTAMP - INTERVAL '1 month'
       )
     )
     ORDER BY 
-      CASE WHEN lr.status = 'pending' THEN 1 ELSE 2 END, -- Pending on top
+      CASE WHEN lr.status = 'pending' THEN 1 ELSE 2 END, 
       lr.requested_at DESC
+      LIMIT $2 OFFSET $3
     `,
-    [company_id],
+    [company_id, limit, offset],
   );
 
   return result.rows;

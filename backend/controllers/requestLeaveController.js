@@ -17,6 +17,8 @@ import {
 } from "../models/workTimeModel.js";
 import { getEmployeeById } from "../models/employeesModel.js";
 import { calculateWorkingDays, formatDateLocal } from "../utils/dateUtils.js";
+import { getAdminEmailByCompanyId } from "../models/adminModel.js";
+import { sendLeaveRequestEmailToAdmin } from "./services/sendLeaveRequests.js";
 
 export const requestLeaveController = async (req, res) => {
   const { start_date, end_date, reason, leave_type } = req.body;
@@ -24,6 +26,7 @@ export const requestLeaveController = async (req, res) => {
   const country_code = req.user.country_code;
   const company_id = req.user.company_id;
   const user = req.user;
+  console.log(leave_type, "leave type in controller");
   if (!user) throw new Error("User not found");
   try {
     const { userRequestedAbscence } =
@@ -60,7 +63,20 @@ export const requestLeaveController = async (req, res) => {
 
     const startStr = format(new Date(start_date), "dd MMM yyyy");
     const endStr = format(new Date(end_date), "dd MMM yyyy");
+    const adminEmails = await getAdminEmailByCompanyId(company_id);
 
+    await Promise.allSettled(// allSetled cause if one fails the others will still be sent
+      adminEmails.map((admin) =>
+        sendLeaveRequestEmailToAdmin({
+          adminEmail: admin.email,
+          username: req.user.username,
+          startStr,
+          endStr,
+          leave_type,
+          reason,
+        }),
+      ),
+    );
     await createNotificationModel({
       user_id: null,
       title: "New Time Off Request",
@@ -100,9 +116,14 @@ export const getLeaveRequestsForEmployeeController = async (req, res) => {
 
 export const getLeaveRequestsForAdminController = async (req, res) => {
   const company_id = req.user.company_id;
-
+  const limit = parseInt(req.query.limit) || 10;
+  const offset = parseInt(req.query.offset) || 0;
   try {
-    const result = await getLeaveRequestsForAdminModel(company_id);
+    const result = await getLeaveRequestsForAdminModel(
+      company_id,
+      limit,
+      offset,
+    );
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });

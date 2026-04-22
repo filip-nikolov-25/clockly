@@ -132,7 +132,7 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
               </div>
               <div>
                 <h3 className="text-xl font-bold text-white tracking-tight leading-none">
-                  Workforce Weekly
+                  Week Calendar
                 </h3>
                 <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">
                   Schedule Overview

@@ -4,6 +4,7 @@ import {
   type FormEvent,
   type Dispatch,
   type SetStateAction,
+  useCallback,
 } from "react";
 import type { TimeOffRequest, UserType } from "../interfaces/types";
 import axios from "axios";
@@ -18,42 +19,76 @@ interface Props {
 }
 
 const Admin = ({ user, setUser }: Props) => {
-      const API_URL = import.meta.env.VITE_API_URL;
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const [inviteCodes, setInviteCodes] = useState<string[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [count, setCount] = useState(0);
   const [requests, setRequests] = useState<TimeOffRequest[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
+  const [limit] = useState(6);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+
+  const fetchInviteCodes = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/all-invitecodes`);
+      setInviteCodes(res.data.codes);
+    } catch (error) {
+      console.error("Error getting all inv codes:", error);
+    }
+  };
+
+  const fetchRequests = async (newOffset: number) => {
+    if (loadingRequests) return;
+    setLoadingRequests(true);
+    try {
+      const res = await axios.get(`${API_URL}/api/request-leave/admin`, {
+        params: {
+          limit: limit,
+          offset: newOffset,
+        },
+      });
+      setRequests((prev) =>
+        newOffset === 0 ? res.data : [...prev, ...res.data],
+      );
+      setHasMore(res.data.length === limit);
+    } catch (err) {
+      console.error("Error fetching admin requests:", err);
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
+  const loadMore = useCallback(() => {
+    if (loadingRequests || !hasMore) return;
+
+    const newOffset = offset + limit;
+    setOffset(newOffset);
+    fetchRequests(newOffset);
+  }, [loadingRequests, hasMore, offset, limit]);
 
   useEffect(() => {
-    const fetchRequests = async () => {
-      try {
-        setLoadingRequests(true);
-        const res = await axios.get(
-          `${API_URL}/api/request-leave/admin`
-        );
-        setRequests(res.data);
-      } catch (err) {
-        console.error("Error fetching admin requests:", err);
-      } finally {
-        setLoadingRequests(false);
-      }
-    };
-    fetchRequests();
-
-    const fetchInviteCodes = async () => {
-      try {
-        const res = await axios.get(
-          `${API_URL}/api/all-invitecodes`,
-        );
-        setInviteCodes(res.data.codes);
-      } catch (error) {
-        console.error("Error getting all inv codes:", error);
-      }
-    };
     fetchInviteCodes();
+    fetchRequests(0);
   }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (loadingRequests || !hasMore) return;
+
+      const scrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const fullHeight = document.body.offsetHeight;
+
+      if (scrollY + windowHeight >= fullHeight - 200) {
+        loadMore();
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [loadMore, loadingRequests, hasMore]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -62,10 +97,7 @@ const Admin = ({ user, setUser }: Props) => {
       return;
     }
     try {
-      const response = await axios.post(
-        `${API_URL}/api/sendinvite`,
-        { count },
-      );
+      const response = await axios.post(`${API_URL}/api/sendinvite`, { count });
       setInviteCodes(response.data.codes);
       setErrorMessage("");
     } catch (err: any) {
@@ -82,7 +114,6 @@ const Admin = ({ user, setUser }: Props) => {
         `${API_URL}/api/update-leave-status/admin/${id}`,
         { status },
       );
-      
 
       setRequests((prev) =>
         prev.map((r) => (r.id === id ? { ...r, status: res.data.status } : r)),
@@ -172,67 +203,62 @@ const Admin = ({ user, setUser }: Props) => {
             Showing Pending & Last 60 Days
           </p>
         </div>
-        {loadingRequests ? (
-           <div className="flex flex-col items-center justify-center py-20 gap-4">
-           <Clock3 size={32} className="text-orange-500 animate-spin" />
-          <p className="text-zinc-500 font-medium">Syncing workforce data...</p>
-        </div>
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {requests.map((request) => (
-              <div
-                key={request.id}
-                className="bg-zinc-900/40 border border-zinc-800 p-6 rounded-3xl group hover:border-zinc-700 transition-all"
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <span className="text-xs font-black uppercase tracking-widest text-zinc-500">
-                    {request.leave_type}
-                  </span>
-                  {request.status === "pending" ? (
-                    <Clock3 className="text-yellow-500" size={16} />
-                  ) : request.status === "accepted" ? (
-                    <CheckCircle2 className="text-emerald-500" size={16} />
-                  ) : (
-                    <XCircle className="text-red-500" size={16} />
-                  )}
-                </div>
-                <p className="text-lg font-bold text-white">
-                  {request.username}
-                </p>
-                <p className="text-xs text-zinc-500 mb-4">{request.email}</p>
-                <div className="text-center">
-                <ReasonToggle reason={request.reason} />
-                </div>
+  
 
-                <div className="text-[11px] font-bold text-zinc-400 mb-4">
-                  {formatDateDisplay(request.start_date)} —{" "}
-                  {formatDateDisplay(request.end_date)}
-                </div>
-
-                {request.status === "pending" && (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() =>
-                        updateRequestStatus(request.id!, "accepted")
-                      }
-                      className="flex-1 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 py-2 rounded-xl text-xs font-bold transition-all"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      onClick={() =>
-                        updateRequestStatus(request.id!, "rejected")
-                      }
-                      className="flex-1 bg-red-500/10 text-red-500 hover:bg-red-500/20 py-2 rounded-xl text-xs font-bold transition-all"
-                    >
-                      Decline
-                    </button>
-                  </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {requests.map((request) => (
+            <div
+              key={request.id}
+              className="bg-zinc-900/40 border border-zinc-800 p-6 rounded-3xl group hover:border-zinc-700 transition-all"
+            >
+              <div className="flex justify-between items-start mb-4">
+                <span className="text-xs font-black uppercase tracking-widest text-zinc-500">
+                  {request.leave_type}
+                </span>
+                {request.status === "pending" ? (
+                  <Clock3 className="text-yellow-500" size={16} />
+                ) : request.status === "accepted" ? (
+                  <CheckCircle2 className="text-emerald-500" size={16} />
+                ) : (
+                  <XCircle className="text-red-500" size={16} />
                 )}
               </div>
-            ))}
-          </div>
-        )}
+              <p className="text-lg font-bold text-white">{request.username}</p>
+              <p className="text-xs text-zinc-500 mb-4">{request.email}</p>
+              <div className="text-center">
+                <ReasonToggle reason={request.reason} />
+              </div>
+
+              <div className="text-[11px] font-bold text-zinc-400 mb-4">
+                {formatDateDisplay(request.start_date)} —{" "}
+                {formatDateDisplay(request.end_date)}
+              </div>
+
+              {request.status === "pending" && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => updateRequestStatus(request.id!, "accepted")}
+                    className="flex-1 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 py-2 rounded-xl text-xs font-bold transition-all"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => updateRequestStatus(request.id!, "rejected")}
+                    className="flex-1 bg-red-500/10 text-red-500 hover:bg-red-500/20 py-2 rounded-xl text-xs font-bold transition-all"
+                  >
+                    Decline
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+           {loadingRequests && (
+  <div className="flex flex-col items-center justify-center py-20 gap-4">
+    <Clock3 size={32} className="text-orange-500 animate-spin" />
+    <p className="text-zinc-500 font-medium">Loading More Requests...</p>
+  </div>
+)}
       </div>
     </Wrapper>
   );
