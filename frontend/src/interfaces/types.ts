@@ -114,3 +114,11 @@ export interface WorkEntryType {
   workedMinutes: number; 
   worked_minutes?: number; 
 }
+export interface NotificationType {
+  id: string;
+  title: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+}
+

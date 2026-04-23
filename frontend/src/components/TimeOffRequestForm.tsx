@@ -47,7 +47,7 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
     }
   };
   const handleSubmit = async () => {
-    if (dateError) return;
+    if (dateError && leaveType !== "Sick Leave") return;
     if (leaveType === "Sick Leave") {
       setSuccessMessage("");
     } else if (user?.free_days === 0) {
@@ -55,22 +55,11 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
       return;
     }
 
-    if (!leaveStart || !leaveEnd || !leaveType) {
+    if (
+      !leaveType ||
+      (leaveType !== "Sick Leave" && (!leaveStart || !leaveEnd))
+    ) {
       setErrorMessage("Please fill all required fields!");
-      return;
-    }
-
-    const start = new Date(leaveStart);
-    const end = new Date(leaveEnd);
-
-    if (leaveType !== "Sick Leave" && start.getTime() < today.getTime()) {
-      setErrorMessage(
-        "Start date cannot be in the past unless it's Sick Leave!",
-      );
-      return;
-    }
-    if (end.getTime() < start.getTime()) {
-      setErrorMessage("End date cannot be before start date!");
       return;
     }
 
@@ -108,7 +97,10 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
   };
 
   useEffect(() => {
+    setDateError("");
     setErrorMessage("");
+    setLeaveStart("");
+    setLeaveEnd("");
   }, [leaveType]);
 
   return (
@@ -191,6 +183,10 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
                   onChange={(e) => {
                     const value = e.target.value;
                     setLeaveStart(value);
+                    if (leaveType === "Sick Leave") {
+                      setDateError("");
+                      return;
+                    }
 
                     if (leaveEnd && new Date(value) > new Date(leaveEnd)) {
                       setDateError("Start date cannot be after end date!");
@@ -218,6 +214,10 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
                   onChange={(e) => {
                     const value = e.target.value;
                     setLeaveEnd(value);
+                    if (leaveType === "Sick Leave") {
+                      setDateError("");
+                      return;
+                    }
 
                     if (leaveStart && new Date(value) < new Date(leaveStart)) {
                       setDateError("End date cannot be before start date!");
@@ -236,7 +236,6 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
               </div>
             </div>
           </div>
-
           {requestedDays > 0 && (
             <div
               className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase w-fit tracking-wider

@@ -25,7 +25,13 @@ export const createNotificationModel = async ({
   return result.rows[0];
 };
 
-export const getNotificationsForAdminModel = async ({ role, user_id, company_id }) => {
+export const getNotificationsForAdminModel = async ({
+  role,
+  user_id,
+  company_id,
+  offSet,
+  limit,
+}) => {
   if (role === "admin") {
     const res = await db.query(
       `
@@ -41,8 +47,9 @@ export const getNotificationsForAdminModel = async ({ role, user_id, company_id 
             AND lr.status = 'pending'
         )
       ORDER BY is_read ASC, created_at DESC
+      LIMIT $2 OFFSET $3
       `,
-      [company_id],
+      [company_id, limit, offSet],
     );
 
     return res.rows;
@@ -63,7 +70,12 @@ export const getNotificationsForAdminModel = async ({ role, user_id, company_id 
 
   return res.rows;
 };
-export const getNotificationsForEmployeeModel = async (user_id, company_id) => {
+export const getNotificationsForEmployeeModel = async ({
+  user_id,
+  company_id,
+  offSet,
+  limit,
+}) => {
   const res = await db.query(
     `
     SELECT n.id, n.title, n.message, n.is_read, n.created_at
@@ -74,8 +86,9 @@ export const getNotificationsForEmployeeModel = async (user_id, company_id) => {
       AND lr.status != 'pending'
       AND n.created_at >= date_trunc('month', CURRENT_DATE) - interval '1 month'
     ORDER BY n.is_read ASC, n.created_at DESC
+    LIMIT $3 OFFSET $4
     `,
-    [user_id, company_id],
+    [user_id, company_id, limit, offSet],
   );
 
   return res.rows;
@@ -104,7 +117,10 @@ export const updateStatusNotificationModel = async ({
   return res.rows;
 };
 
-export const updateEmployeeNotificationsStatusModel = async (user_id, company_id) => {
+export const updateEmployeeNotificationsStatusModel = async (
+  user_id,
+  company_id,
+) => {
   const res = await db.query(
     `
     UPDATE notifications

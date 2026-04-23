@@ -9,12 +9,16 @@ export const getNotificationsForAdminController = async (req, res) => {
   const user_id = req.user.id;
   const role = req.user.role;
   const company_id = req.user.company_id;
+  const offSet = parseInt(req.query.offset) || 0;
+  const limit = parseInt(req.query.limit) || 10;
 
   try {
     const notifications = await getNotificationsForAdminModel({
       role,
       user_id,
       company_id,
+      offSet,
+      limit,
     });
 
     return res.json(notifications);
@@ -37,11 +41,15 @@ export const updateStatusNotificationController = async (req, res) => {
 export const getEmployeeNotificationsController = async (req, res) => {
   const user_id = req.user.id;
   const company_id = req.user.company_id;
+  const offSet = parseInt(req.query.offset) || 0;
+  const limit = parseInt(req.query.limit) || 10;
 
   try {
     const notifications = await getNotificationsForEmployeeModel(
       user_id,
       company_id,
+      offSet,
+      limit
     );
     res.json(notifications);
   } catch (error) {

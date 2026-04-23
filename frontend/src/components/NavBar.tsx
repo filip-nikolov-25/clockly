@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import type { UserType } from "../interfaces/types";
+import { useState, useEffect, useRef } from "react";
+import type { NotificationType, UserType } from "../interfaces/types";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import {
@@ -21,14 +21,6 @@ interface Props {
   setCurrentCompany: (companyName: string) => void;
 }
 
-interface NotificationType {
-  id: string;
-  title: string;
-  message: string;
-  is_read: boolean;
-  created_at: string;
-}
-
 const NavBar = ({
   user,
   setUser,
@@ -41,22 +33,74 @@ const NavBar = ({
   const [menuOpen, setMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const notificationRef = useRef<HTMLDivElement | null>(null);
+  const [limit] = useState(10);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const fetchNotifications = async (newOffset = 0, reset = false) => {
+    try {
+      const url =
+        user?.role === "admin"
+          ? `${API_URL}/api/admin-notifications`
+          : `${API_URL}/api/notifications`;
+
+      const res = await axios.get(url, {
+        params: {
+          limit,
+          offset: newOffset,
+        },
+      });
+
+      const data = res.data;
+
+      if (reset) {
+        setNotifications(data);
+      } else {
+        setNotifications((prev) => [...prev, ...data]);
+      }
+
+      if (data.length < limit) {
+        setHasMore(false);
+      }
+    } catch (err) {
+      console.error("Failed to fetch notifications:", err);
+    }
+  };
+  const loadMore = async () => {
+    if (loadingMore) return;
+
+    setLoadingMore(true);
+
+    const newOffset = offset + limit;
+
+    await fetchNotifications(newOffset);
+    setOffset(newOffset);
+
+    setLoadingMore(false);
+  };
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+
+    const isBottom =
+      target.scrollHeight - target.scrollTop <= target.clientHeight + 10;
+
+    if (isBottom && hasMore && !loadingMore) {
+      loadMore();
+    }
+  };
+  const handleOpenedNotifications = () => {
+    localStorage.setItem("lastSeenNotifications", new Date().toISOString());
+  };
 
   useEffect(() => {
     if (!user) return;
-    const fetchNotifications = async () => {
-      try {
-        const url =
-          user.role === "admin"
-            ? `${API_URL}/api/admin-notifications`
-            : `${API_URL}/api/notifications`;
-        const res = await axios.get(url);
-        setNotifications(res.data);
-      } catch (err) {
-        console.error("Failed to fetch notifications:", err);
-      }
-    };
-    fetchNotifications();
+
+    setOffset(0);
+    setHasMore(true);
+
+    fetchNotifications(0, true);
   }, [user]);
 
   const updateNotificationStatus = async () => {
@@ -72,8 +116,13 @@ const NavBar = ({
     }
   };
 
-  const unreadCount = notifications.filter((n) => !n.is_read).length;
+  const lastSeen = localStorage.getItem("lastSeenNotifications");
 
+  const unreadCount = notifications.filter((n) => {
+    if (!lastSeen) return true;
+
+    return new Date(n.created_at) > new Date(lastSeen);
+  }).length;
   const handleLogout = async () => {
     await axios.post(`${API_URL}/api/auth/logout`);
     setUser(null);
@@ -85,6 +134,22 @@ const NavBar = ({
   useEffect(() => {
     if (showNotifications && unreadCount > 0) updateNotificationStatus();
   }, [showNotifications]);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target as Node) //handle click outside of notification dropdown to close it
+      ) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const navLinks = [
     { name: "Calendar", path: "/calendar", icon: <Calendar size={16} /> },
@@ -147,9 +212,19 @@ const NavBar = ({
                   </Link>
                 )}
 
-                <div className="relative mt-2">
+                <div ref={notificationRef} className="relative mt-2">
                   <button
-                    onClick={() => setShowNotifications(!showNotifications)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!showNotifications) {
+                        handleOpenedNotifications();
+                        setOffset(0);
+                        setHasMore(true);
+                        fetchNotifications(0, true);
+                      }
+
+                      setShowNotifications(!showNotifications);
+                    }}
                     className="relative text-zinc-400 hover:text-white transition-colors"
                   >
                     <Bell size={20} />
@@ -157,13 +232,15 @@ const NavBar = ({
                       <span className="absolute -top-1 -right-1 w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
                     )}
                   </button>
-
                   {showNotifications && (
                     <div className="absolute right-0 mt-4 w-80 bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-4">
                       <div className="p-4 border-b border-zinc-800 text-[10px] font-black uppercase tracking-widest text-zinc-500">
                         Notifications
                       </div>
-                      <div className="max-h-80 overflow-y-auto">
+                      <div
+                        className="max-h-80 overflow-y-auto"
+                        onScroll={handleScroll}
+                      >
                         {notifications.length === 0 ? (
                           <p className="p-6 text-center text-xs text-zinc-600">
                             No new notifications
@@ -175,7 +252,7 @@ const NavBar = ({
                               className="p-4 border-b border-zinc-800/50 hover:bg-zinc-800/30 cursor-pointer"
                             >
                               <Link
-                                to={`${user.role === "admin" ? "/admin" : "/aboutme"}`}  
+                                to={`${user.role === "admin" ? "/admin" : "/aboutme"}`}
                                 className="text-zinc-400 hover:text-white transition-colors"
                               >
                                 <p className="text-xs font-bold text-white">

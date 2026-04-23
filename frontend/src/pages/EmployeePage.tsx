@@ -123,7 +123,7 @@ const EmployeePage = ({ currentCompany, user }: Props) => {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <Clock3 size={28} className="text-orange-500 animate-spin" />
-          <p className="text-zinc-500 font-medium">Syncing workforce data...</p>
+          <p className="text-zinc-500 font-medium">Syncing company employees...</p>
         </div>
       ) : filteredEmployees.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
