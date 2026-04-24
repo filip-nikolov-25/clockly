@@ -4,6 +4,7 @@ import {
   updateEmployee,
   deleteEmployee,
   getCurrentCompanyModel,
+  getEmployeesForCompanyModel,
 } from "../models/employeesModel.js";
 
 // GET ONE
@@ -59,3 +60,12 @@ export const getCurrentCompanyController = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+export const getEmployeesForCompanyController = async (req, res) => {
+  const company_id = req.user.company_id;
+  try {
+    const allEmployees = await getEmployeesForCompanyModel(company_id);
+    res.status(200).json(allEmployees);
+  } catch (error) {
+    res.status(500).json({ error: "Server error nestp" });
+  }
+}

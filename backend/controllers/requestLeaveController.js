@@ -65,7 +65,7 @@ export const requestLeaveController = async (req, res) => {
     const endStr = format(new Date(end_date), "dd MMM yyyy");
     const adminEmails = await getAdminEmailByCompanyId(company_id);
 
-    await Promise.allSettled(// allSetled cause if one fails the others will still be sent
+    await Promise.allSettled(
       adminEmails.map((admin) =>
         sendLeaveRequestEmailToAdmin({
           adminEmail: admin.email,
@@ -100,6 +100,8 @@ export const getLeaveRequestsForEmployeeController = async (req, res) => {
 
   const limit = parseInt(req.query.limit) || 10;
   const offset = parseInt(req.query.offset) || 0;
+  const startDate = req.query.startDate || null;
+  const endDate = req.query.endDate || null;
 
   try {
     const result = await getLeaveRequestsForEmployeeModel(
@@ -107,6 +109,8 @@ export const getLeaveRequestsForEmployeeController = async (req, res) => {
       company_id,
       limit,
       offset,
+      startDate,
+      endDate,
     );
     res.status(200).json(result);
   } catch (error) {
@@ -118,11 +122,18 @@ export const getLeaveRequestsForAdminController = async (req, res) => {
   const company_id = req.user.company_id;
   const limit = parseInt(req.query.limit) || 10;
   const offset = parseInt(req.query.offset) || 0;
+  const employee = req.query.employee || null;
+  const startDate = req.query.startDate || null;
+  const endDate = req.query.endDate || null;
+
   try {
     const result = await getLeaveRequestsForAdminModel(
       company_id,
       limit,
       offset,
+      employee,
+      startDate,
+      endDate,
     );
     res.status(200).json(result);
   } catch (error) {

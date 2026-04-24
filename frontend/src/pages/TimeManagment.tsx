@@ -1,7 +1,17 @@
 import { useEffect, useState } from "react";
 import Wrapper from "../components/base/Wrapper";
 import axios from "axios";
-import { Play, Square, Coffee, Timer, Info } from "lucide-react";
+import {
+  Play,
+  Square,
+  Coffee,
+  Timer,
+  Info,
+  AlertTriangle,
+  X,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
 
 interface Break {
   start_time: string;
@@ -21,15 +31,22 @@ const TimeManagment = () => {
   const [seconds, setSeconds] = useState(0);
   const [entry, setEntry] = useState<Entry | null>(null);
   const [running, setRunning] = useState(false);
+  const [showConfirmEnd, setShowConfirmEnd] = useState(false);
+  const [isFinishedToday, setIsFinishedToday] = useState(false);
 
   const fetchToday = async () => {
     try {
       const { data } = await axios.get(`${API_URL}/api/today`);
-      if (data && !data.end_time) {
+      if (data && data.end_time) {
+        setIsFinishedToday(true);
+        const normalizedEntry: Entry = { ...data, breaks: data.breaks || [] };
+        setSeconds(calculateElapsedSeconds(normalizedEntry));
+      } else if (data && !data.end_time) {
         const normalizedEntry: Entry = { ...data, breaks: data.breaks || [] };
         setEntry(normalizedEntry);
         setSeconds(calculateElapsedSeconds(normalizedEntry));
         setRunning(!normalizedEntry.breaks.some((b) => !b.end_time));
+        setIsFinishedToday(false);
       }
     } catch (err) {
       console.error("Fetch today failed", err);
@@ -41,9 +58,12 @@ const TimeManagment = () => {
     const start = new Date(entry.start_time).getTime();
     let totalElapsedMs = now - start;
 
+    const shiftEnd = entry.end_time ? new Date(entry.end_time).getTime() : now;
+    if (entry.end_time) totalElapsedMs = shiftEnd - start;
+
     entry.breaks.forEach((b) => {
       const breakStart = new Date(b.start_time).getTime();
-      const breakEnd = b.end_time ? new Date(b.end_time).getTime() : now;
+      const breakEnd = b.end_time ? new Date(b.end_time).getTime() : shiftEnd;
       totalElapsedMs -= breakEnd - breakStart;
     });
 
@@ -55,17 +75,17 @@ const TimeManagment = () => {
   }, []);
 
   useEffect(() => {
-    if (!entry) return;
+    if (!entry || isFinishedToday) return;
     const interval = setInterval(() => {
       setSeconds(calculateElapsedSeconds(entry));
     }, 1000);
     return () => clearInterval(interval);
-  }, [entry]);
+  }, [entry, isFinishedToday]);
 
   const handleStart = async () => {
+    if (isFinishedToday) return;
     try {
       if (!entry) {
-        // new wor entry
         const { data } = await axios.post(`${API_URL}/api/start`);
         const normalizedEntry: Entry = { ...data, breaks: data.breaks || [] };
         setEntry(normalizedEntry);
@@ -108,8 +128,10 @@ const TimeManagment = () => {
     try {
       await axios.patch(`${API_URL}/api/end/${entry.id}`);
       setEntry(null);
-      setSeconds(0);
       setRunning(false);
+      setShowConfirmEnd(false);
+      setIsFinishedToday(true);
+      fetchToday();
     } catch (err) {
       console.error(err);
     }
@@ -136,6 +158,60 @@ const TimeManagment = () => {
 
   return (
     <Wrapper>
+      {showConfirmEnd && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowConfirmEnd(false)}
+          />
+          <div className="relative bg-zinc-950 border border-zinc-800 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex justify-between items-start mb-6">
+              <div className="p-3 bg-red-500/10 text-red-500 rounded-2xl border border-red-500/20">
+                <AlertTriangle size={24} />
+              </div>
+              <button
+                onClick={() => setShowConfirmEnd(false)}
+                className="p-2 text-zinc-500 hover:text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <h3 className="text-2xl font-black text-white mb-2 uppercase tracking-tight">
+              Finalize{" "}
+              <span className="text-red-500 text-3xl block">Shift?</span>
+            </h3>
+
+            <div className="flex gap-2 p-3 bg-red-500/5 border border-red-500/10 rounded-xl mb-6">
+              <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5" />
+              <p className="text-[11px] font-bold text-red-400 uppercase tracking-wider leading-tight">
+                Careful: This action is irreversible. You cannot punch back in
+                until tomorrow.
+              </p>
+            </div>
+
+            <p className="text-zinc-400 text-sm leading-relaxed mb-8">
+              Confirming will stop the clock and log your total hours for today.
+            </p>
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleEnd}
+                className="w-full bg-red-600 hover:bg-red-500 text-white font-black py-4 rounded-2xl transition-all active:scale-95 shadow-lg shadow-red-900/40 uppercase tracking-widest text-xs"
+              >
+                Confirm & Lock Shift
+              </button>
+              <button
+                onClick={() => setShowConfirmEnd(false)}
+                className="w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold py-4 rounded-2xl transition-all active:scale-95 uppercase tracking-widest text-xs"
+              >
+                Go Back
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="mt-16 mb-12 flex flex-col items-center">
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 bg-orange-500/10 text-orange-500 rounded-xl">
@@ -172,7 +248,7 @@ const TimeManagment = () => {
                   cx="100"
                   cy="100"
                   r={radius}
-                  stroke="#fb923c"
+                  stroke={isFinishedToday ? "#10b981" : "#fb923c"}
                   strokeWidth="8"
                   fill="none"
                   strokeDasharray={circumference}
@@ -183,13 +259,15 @@ const TimeManagment = () => {
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-1">
-                  Elapsed
+                  {isFinishedToday ? "Total Worked" : "Elapsed"}
                 </span>
                 <div className="flex items-baseline gap-1">
                   <span className="text-5xl font-black text-white tabular-nums">
                     {time.display}
                   </span>
-                  <span className="text-xl font-bold text-orange-500 tabular-nums w-6">
+                  <span
+                    className={`text-xl font-bold tabular-nums w-6 ${isFinishedToday ? "text-emerald-500" : "text-orange-500"}`}
+                  >
                     {time.seconds}
                   </span>
                 </div>
@@ -198,25 +276,39 @@ const TimeManagment = () => {
 
             <div className="mb-10 flex items-center gap-2 px-4 py-2 bg-black/40 border border-zinc-800 rounded-2xl">
               <div
-                className={`w-2 h-2 rounded-full animate-pulse ${
+                className={`w-2 h-2 rounded-full ${
                   running
-                    ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-                    : onBreak
-                      ? "bg-yellow-500"
-                      : "bg-zinc-600"
+                    ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse"
+                    : isFinishedToday
+                      ? "bg-emerald-500"
+                      : onBreak
+                        ? "bg-yellow-500 animate-pulse"
+                        : "bg-zinc-600"
                 }`}
               />
               <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                {running
-                  ? "Active Session"
-                  : onBreak
-                    ? "On Break"
-                    : "System Idle"}
+                {isFinishedToday
+                  ? "Shift Completed"
+                  : running
+                    ? "Active Session"
+                    : onBreak
+                      ? "On Break"
+                      : "System Idle"}
               </span>
             </div>
 
             <div className="grid grid-cols-2 gap-4 w-full">
-              {!running ? (
+              {isFinishedToday ? (
+                <button
+                  disabled
+                  className="col-span-2 flex items-center justify-center gap-3 bg-zinc-800 text-zinc-500 font-black py-4 rounded-2xl cursor-not-allowed opacity-50"
+                >
+                  <CheckCircle2 size={20} />
+                  <span className="uppercase tracking-widest text-sm">
+                    Shift Logged
+                  </span>
+                </button>
+              ) : !running ? (
                 <button
                   onClick={handleStart}
                   className="col-span-2 group flex items-center justify-center gap-3 bg-orange-500 hover:bg-orange-400 text-white font-black py-4 rounded-2xl transition-all shadow-lg shadow-orange-500/20 active:scale-95"
@@ -238,7 +330,7 @@ const TimeManagment = () => {
                     </span>
                   </button>
                   <button
-                    onClick={handleEnd}
+                    onClick={() => setShowConfirmEnd(true)}
                     className="flex items-center justify-center gap-2 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-500 font-bold py-4 rounded-2xl transition-all active:scale-95"
                   >
                     <Square size={16} fill="currentColor" />
@@ -255,9 +347,9 @@ const TimeManagment = () => {
         <div className="mt-8 flex items-center gap-4 p-5 bg-zinc-900/30 border border-zinc-800/50 rounded-3xl">
           <Info size={18} className="text-zinc-600 shrink-0" />
           <p className="text-zinc-500 text-[11px] font-medium leading-relaxed">
-            Daily goal is set to{" "}
-            <span className="text-zinc-300 font-bold">8 hours</span>. Your
-            progress bar reflects your total worked minutes excluding breaks.
+            {isFinishedToday
+              ? "Your session for today is locked. See you tomorrow!"
+              : "Careful: Once you end your shift, you cannot record more time today. Goal: 8 hours."}
           </p>
         </div>
       </div>

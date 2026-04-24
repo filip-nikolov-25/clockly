@@ -34,10 +34,11 @@ export const getCurrentCompanyModel = async (id) => {
   const res = await db.query("SELECT name FROM companies WHERE id = $1 ", [id]);
   return res.rows[0];
 };
-export const getEmployeeForCompanyModel = async (company_id) => {
+//get ALL EmploYees for company
+export const getEmployeesForCompanyModel = async (company_id) => {
   const res = await db.query(
-    "SELECT id, username, email, role FROM users WHERE company_id = $1",
+    "SELECT id, username, role FROM users WHERE company_id = $1",
     [company_id],
   );
   return res.rows;
-}
+};

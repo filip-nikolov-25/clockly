@@ -33,21 +33,57 @@ export const getLeaveRequestsForEmployeeModel = async (
   company_id,
   limit,
   offset,
+  startDate,
+  endDate,
 ) => {
-  const result = await db.query(
-    `SELECT status, start_date, end_date, leave_type, reason 
-     FROM leave_requests 
-     WHERE user_id = $1 
-     AND company_id = $2 
-     ORDER BY requested_at DESC
-     LIMIT $3 OFFSET $4`,
-    [user_id, company_id, limit, offset],
-  );
+  let query = `
+    SELECT 
+      status,
+      start_date,
+      end_date,
+      leave_type,
+      reason,
+      requested_at
+    FROM leave_requests 
+    WHERE user_id = $1 
+    AND company_id = $2
+  `;
+
+  const values = [user_id, company_id];
+  let paramIndex = 3;
+
+  if (startDate) {
+    query += ` AND start_date >= $${paramIndex}`;
+    values.push(startDate);
+    paramIndex++;
+  }
+
+  if (endDate) {
+    query += ` AND end_date <= $${paramIndex}`;
+    values.push(endDate);
+    paramIndex++;
+  }
+
+  query += `
+    ORDER BY requested_at DESC
+  `;
+
+  query += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+
+  values.push(limit, offset);
+
+  const result = await db.query(query, values);
   return result.rows;
 };
-export const getLeaveRequestsForAdminModel = async (company_id, limit, offset) => {
-  const result = await db.query(
-    `
+export const getLeaveRequestsForAdminModel = async (
+  company_id,
+  limit,
+  offset,
+  employee,
+  startDate,
+  endDate,
+) => {
+  let query = `
     SELECT 
       lr.id,
       lr.status,
@@ -61,25 +97,52 @@ export const getLeaveRequestsForAdminModel = async (company_id, limit, offset) =
     FROM leave_requests lr
     JOIN users u ON lr.user_id = u.id
     WHERE lr.company_id = $1
+  `;
+
+  const values = [company_id];
+  let paramIndex = 2;
+
+  if (employee) {
+    query += ` AND u.username = $${paramIndex}`;
+    values.push(employee);
+    paramIndex++;
+  }
+  if (startDate) {
+    query += ` AND lr.start_date >= $${paramIndex}`;
+    values.push(startDate);
+    paramIndex++;
+  }
+
+  if (endDate) {
+    query += ` AND lr.end_date <= $${paramIndex}`;
+    values.push(endDate);
+    paramIndex++;
+  }
+
+  query += `
     AND (
       lr.status = 'pending' 
-      OR 
-      (
-        lr.status IN ('accepted', 'rejected') 
-      )
+      OR lr.status IN ('accepted', 'rejected')
     )
+  `;
+
+  query += `
     ORDER BY 
       CASE WHEN lr.status = 'pending' THEN 1 ELSE 2 END, 
       lr.requested_at DESC
-      LIMIT $2 OFFSET $3
-    `,
-    [company_id, limit, offset],
-  );
+  `;
+
+  query += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+  values.push(limit, offset);
+  const result = await db.query(query, values);
 
   return result.rows;
 };
-
-export const updateAdminLeaveRequestStatusModel = async (id, status, company_id) => {
+export const updateAdminLeaveRequestStatusModel = async (
+  id,
+  status,
+  company_id,
+) => {
   const normalizedStatus = status?.trim().toLowerCase();
 
   if (!["accepted", "rejected"].includes(normalizedStatus)) {

@@ -24,7 +24,10 @@ import {
   updateUserFreeDaysController,
   getLastMonthWorkTimeController,
 } from "../controllers/workTimeController.js";
-import { getCurrentCompanyController } from "../controllers/employeesController.js";
+import {
+  getCurrentCompanyController,
+  getEmployeesForCompanyController,
+} from "../controllers/employeesController.js";
 import {
   getEmployeeNotificationsController,
   getNotificationsForAdminController,
@@ -34,18 +37,21 @@ import {
 
 const router = Router();
 
+// Employee routes
+router.get("/employees", protect, getEmployeesForCompanyController);
+
 // invite routes
 router.post("/sendinvite", protect, sendInviteController);
 router.get("/all-invitecodes", protect, getInviteCodesForEmployeesController);
 
 //Abscence managment routes
 router.post("/request-leave", protect, requestLeaveController);
-router.get("/employee-leave-requests", protect, getLeaveRequestsForEmployeeController);
 router.get(
-  "/request-leave/admin",
+  "/employee-leave-requests",
   protect,
-  getLeaveRequestsForAdminController,
+  getLeaveRequestsForEmployeeController,
 );
+router.get("/request-leave/admin", protect, getLeaveRequestsForAdminController);
 router.patch(
   "/update-leave-status/admin/:id",
   protect,
@@ -56,11 +62,7 @@ router.get(
   protect,
   getEmployeePendingTimeOffController,
 );
-router.post(
-  "/users/update-free-days",
-  protect,
-  updateUserFreeDaysController,
-);
+router.post("/users/update-free-days", protect, updateUserFreeDaysController);
 
 // routes for approved for employee time off for WEEK CALENDAR
 router.get(

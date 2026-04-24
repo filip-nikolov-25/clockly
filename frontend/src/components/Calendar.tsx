@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Gift, CalendarDays } from "lucide-react";
 
 interface PublicHoliday {
@@ -13,9 +13,11 @@ interface MonthCalendarProps {
 }
 
 const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const AVAILABLE_COUNTRIES = ["MK", "CH", "DE"];
 
 const Calendar = ({ publicHolidays = [], onDateClick }: MonthCalendarProps) => {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [activeFilter, setActiveFilter] = useState<string>("ALL");
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -27,54 +29,90 @@ const Calendar = ({ publicHolidays = [], onDateClick }: MonthCalendarProps) => {
 
   const handlePrev = () => setCurrentDate(new Date(year, month - 1, 1));
   const handleNext = () => setCurrentDate(new Date(year, month + 1, 1));
-  const holidaysInMonth = publicHolidays.reduce<Record<string, PublicHoliday[]>>((acc, h) => {
-    const holidayDate = new Date(h.date);
-    if (holidayDate.getMonth() === month && holidayDate.getFullYear() === year) {
-      const key = holidayDate.getDate().toString();
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(h);
-    }
-    return acc;
-  }, {});
+
+  const holidaysInMonth = useMemo(() => {
+    return publicHolidays.reduce<Record<string, PublicHoliday[]>>((acc, h) => {
+      const holidayDate = new Date(h.date);
+      const matchesDate =
+        holidayDate.getMonth() === month && holidayDate.getFullYear() === year;
+      const matchesFilter =
+        activeFilter === "ALL" || h.countryCode === activeFilter;
+
+      if (matchesDate && matchesFilter) {
+        const key = holidayDate.getDate().toString();
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(h);
+      }
+      return acc;
+    }, {});
+  }, [publicHolidays, month, year, activeFilter]);
 
   return (
     <div className="mt-8 pb-40 text-white">
-      <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-6">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-orange-500/10 text-orange-500 rounded-2xl border border-orange-500/20">
             <CalendarDays size={28} />
           </div>
           <div>
             <h2 className="text-3xl font-black tracking-tight leading-none uppercase">
-              {monthName} <span className="text-zinc-500 font-light">{year}</span>
+              {monthName}{" "}
+              <span className="text-zinc-500 font-light">{year}</span>
             </h2>
-            <p className="text-zinc-500 text-sm font-medium mt-1 uppercase tracking-widest">Monthly Overview</p>
           </div>
         </div>
 
-        <div className="flex items-center bg-zinc-900/50 p-1.5 rounded-2xl border border-zinc-800 backdrop-blur-md">
-          <button
-            onClick={handlePrev}
-            className="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-xl transition-all duration-200"
-            title="Previous Month"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <div className="w-px h-6 bg-zinc-800 mx-1" />
-          <button
-            onClick={handleNext}
-            className="p-2.5 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-xl transition-all duration-200"
-            title="Next Month"
-          >
-            <ChevronRight size={20} />
-          </button>
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center bg-zinc-900/50 p-1 rounded-xl border border-zinc-800 backdrop-blur-md">
+            <button
+              onClick={() => setActiveFilter("ALL")}
+              className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${
+                activeFilter === "ALL"
+                  ? "bg-orange-500 text-white"
+                  : "text-zinc-500 hover:text-white"
+              }`}
+            >
+              All
+            </button>
+            {AVAILABLE_COUNTRIES.map((code) => (
+              <button
+                key={code}
+                onClick={() => setActiveFilter(code)}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${
+                  activeFilter === code
+                    ? "bg-purple-500 text-white"
+                    : "text-zinc-500 hover:text-white"
+                }`}
+              >
+                {code}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center bg-zinc-900/50 p-1.5 rounded-2xl border border-zinc-800">
+            <button
+              onClick={handlePrev}
+              className="p-2.5 hover:bg-zinc-800 text-zinc-400 rounded-xl"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button
+              onClick={handleNext}
+              className="p-2.5 hover:bg-zinc-800 text-zinc-400 rounded-xl"
+            >
+              <ChevronRight size={20} />
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="bg-zinc-900/40 border border-zinc-800 rounded-[2.5rem] overflow-hidden backdrop-blur-xl shadow-2xl">
         <div className="grid grid-cols-7 border-b border-zinc-800 bg-zinc-900/50">
           {days.map((day) => (
-            <div key={day} className="py-4 text-center text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+            <div
+              key={day}
+              className="py-4 text-center text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500"
+            >
               {day}
             </div>
           ))}
@@ -87,49 +125,72 @@ const Calendar = ({ publicHolidays = [], onDateClick }: MonthCalendarProps) => {
 
           {Array.from({ length: daysInMonth }, (_, i) => {
             const date = i + 1;
+            const dayOfWeek = (firstDayOfMonth + i) % 7;
             const isToday =
               date === today.getDate() &&
               month === today.getMonth() &&
               year === today.getFullYear();
-
             const holidayList = holidaysInMonth[date.toString()] || [];
-            const isHoliday = holidayList.length > 0;
+            const isRightSide = dayOfWeek > 3;
 
             return (
               <div
                 key={date}
                 onClick={() => onDateClick?.(`${year}-${month + 1}-${date}`)}
-                className={`group relative bg-[#0c0c0e] h-32 md:h-40 flex flex-col p-3 transition-all duration-300 cursor-pointer overflow-hidden
-                  ${isToday ? "ring-2 ring-inset ring-orange-500/50 z-10" : "hover:bg-zinc-900"}`}
+                className={`group relative bg-[#0c0c0e] h-32 md:h-40 flex flex-col p-3 transition-all duration-300 cursor-pointer 
+                  ${isToday ? "ring-2 ring-inset ring-orange-500/50 z-20" : "hover:bg-zinc-900 hover:z-30"}`}
               >
-                <span className={`text-lg font-bold mb-1 transition-colors
-                  ${isToday ? "text-orange-500" : "text-zinc-400 group-hover:text-white"}`}>
+                <span
+                  className={`text-lg font-bold mb-1 ${isToday ? "text-orange-500" : "text-zinc-400 group-hover:text-white"}`}
+                >
                   {date}
                 </span>
 
-                {isToday && (
-                  <span className="text-[9px] font-black uppercase tracking-tighter text-orange-500 mb-2">
-                    Today
-                  </span>
-                )}
+                {holidayList.length > 0 && (
+                  <div className="mt-auto space-y-1 relative">
+                    {holidayList.map((h, idx) => (
+                      <div key={idx} className="relative group/holiday">
+                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400">
+                          <div className="flex flex-col overflow-hidden">
+                            <span className="text-[7px] font-black uppercase opacity-60">
+                              {h.countryCode}
+                            </span>
+                            <span className="text-[9px] font-bold truncate leading-none">
+                              {h.localName}
+                            </span>
+                          </div>
+                        </div>
 
-                {isHoliday && (
-                  <div className="mt-auto space-y-1">
-                    {holidayList.map((h, index) => (
-                      <div 
-                        key={`${h.countryCode}-${h.date}-${index}`}
-                        className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400"
-                      >
-                        <Gift size={10} className="shrink-0" />
-                        <span className="text-[9px] font-bold truncate leading-none">
-                          {h.localName}
-                        </span>
+                        <div
+                          className={`
+                          pointer-events-none absolute bottom-full mb-3 z-100
+                          hidden group-hover/holiday:block
+                          ${isRightSide ? "right-0" : "left-0"}
+                        `}
+                        >
+                          <div className="relative animate-in fade-in zoom-in duration-200">
+                            <div className="bg-zinc-950 border border-zinc-700/50 p-3 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-xl min-w-35">
+                              <div className="flex items-center gap-2 mb-1.5">
+                                <div className="p-1.5 bg-orange-500/20 rounded-md">
+                                  <Gift size={12} className="text-orange-500" />
+                                </div>
+                                <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest">
+                                  {h.countryCode} Holiday
+                                </span>
+                              </div>
+                              <p className="text-xs font-bold text-white leading-tight">
+                                {h.localName}
+                              </p>
+                              <div
+                                className={`absolute top-full w-3 h-3 bg-zinc-950 border-r border-b border-zinc-700/50 rotate-45 -translate-y-1.5 ${isRightSide ? "right-4" : "left-4"}`}
+                              />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </div>
                 )}
-
-                <div className="absolute -bottom-10 -right-10 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl group-hover:bg-orange-500/10 transition-all duration-500" />
               </div>
             );
           })}

@@ -9,6 +9,7 @@ import {
   Plane,
   CheckCircle2,
   Timer,
+  FilterX,
 } from "lucide-react";
 import {
   formatDateDisplay,
@@ -43,6 +44,8 @@ const AboutMe = ({ user }: Props) => {
   const [limit] = useState(6);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const fetchRequestTimeOff = async (newOffset: number) => {
     if (loading) return;
@@ -53,12 +56,14 @@ const AboutMe = ({ user }: Props) => {
       const params = {
         limit,
         offset: newOffset,
+        employee: undefined,
+        startDate: startDate || undefined,
+        endDate: endDate || undefined,
       };
+
       const { data } = await axios.get(
         `${API_URL}/api/employee-leave-requests`,
-        {
-          params,
-        },
+        { params },
       );
       setRequestTimeOff((prev) =>
         newOffset === 0 ? data : [...prev, ...data],
@@ -72,11 +77,10 @@ const AboutMe = ({ user }: Props) => {
   };
   const loadMore = useCallback(() => {
     if (!hasMore || loading) return;
-    setOffset((prev) => {
-      const newOffset = prev + limit;
-      fetchRequestTimeOff(newOffset);
-      return newOffset;
-    });
+
+    const newOffset = offset + limit;
+    setOffset(newOffset);
+    fetchRequestTimeOff(newOffset);
   }, [offset, hasMore, loading]);
 
   const fetchPreviousMonthWork = async (newOffset: number) => {
@@ -127,8 +131,11 @@ const AboutMe = ({ user }: Props) => {
   }, []);
 
   useEffect(() => {
+    setOffset(0);
+    setRequestTimeOff([]);
+    setHasMore(true);
     fetchRequestTimeOff(0);
-  }, []);
+  }, [startDate, endDate]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -376,9 +383,93 @@ const AboutMe = ({ user }: Props) => {
         />
       </div>
 
-      <h2 className="flex items-center gap-2 text-zinc-400 font-black uppercase tracking-[0.2em] text-xs mb-6">
-        <Plane size={14} className="text-emerald-500" /> Absence Requests
-      </h2>
+      <div className="bg-zinc-900/30 border border-zinc-800 p-6 rounded-3xl mb-8">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+          <div>
+            <h2 className="text-3xl font-black text-white tracking-tighter">
+              My Absence Requests
+            </h2>
+            <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest mt-1">
+              Personal Filter View
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full lg:w-auto">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">
+                Start Date
+              </label>
+              <div className="relative group">
+                <Calendar
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors pointer-events-none z-10"
+                  size={14}
+                />
+                <input
+                  type="date"
+                  value={startDate}
+                  max={endDate || undefined}
+                  onChange={(e) => {
+                    setStartDate(e.target.value);
+                    setOffset(0);
+                  }}
+                  className="w-full bg-black border border-zinc-800 rounded-xl py-2 pl-10 pr-4 text-sm text-white focus:border-orange-500/50 outline-none transition-all 
+                  relative z-0 cursor-pointer
+                  [&::-webkit-calendar-picker-indicator]:absolute 
+                  [&::-webkit-calendar-picker-indicator]:inset-0 
+                  [&::-webkit-calendar-picker-indicator]:w-full 
+                  [&::-webkit-calendar-picker-indicator]:h-full 
+                  [&::-webkit-calendar-picker-indicator]:bg-transparent 
+                  [&::-webkit-calendar-picker-indicator]:text-transparent 
+                  [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                />
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-black uppercase text-zinc-500 ml-1">
+                End Date
+              </label>
+              <div className="relative group">
+                <Calendar
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-orange-500 transition-colors pointer-events-none z-10"
+                  size={14}
+                />
+                <input
+                  type="date"
+                  value={endDate}
+                  min={startDate || undefined}
+                  onChange={(e) => {
+                    setEndDate(e.target.value);
+                    setOffset(0);
+                  }}
+                  className="w-full bg-black border border-zinc-800 rounded-xl py-2 pl-10 pr-4 text-sm text-white focus:border-orange-500/50 outline-none transition-all 
+                  relative z-0 cursor-pointer
+                  [&::-webkit-calendar-picker-indicator]:absolute 
+                  [&::-webkit-calendar-picker-indicator]:inset-0 
+                  [&::-webkit-calendar-picker-indicator]:w-full 
+                  [&::-webkit-calendar-picker-indicator]:h-full 
+                  [&::-webkit-calendar-picker-indicator]:bg-transparent 
+                  [&::-webkit-calendar-picker-indicator]:text-transparent 
+                  [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                />
+              </div>
+            </div>
+
+            {/* Reset Button */}
+            <div className="flex items-end">
+              <button
+                onClick={() => {
+                  setStartDate("");
+                  setEndDate("");
+                  setOffset(0);
+                  setHasMore(true);
+                }}
+                className="flex items-center justify-center gap-2 text-[10px] font-black uppercase bg-zinc-800 hover:bg-zinc-700 text-zinc-300 py-3 px-4 rounded-xl transition-all active:scale-95 w-full h-9.5"
+              >
+                <FilterX size={14} /> Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-20">
         {requestTimeOff.length > 0 ? (
           requestTimeOff.map((request: TimeOffRequest, index: number) => {
