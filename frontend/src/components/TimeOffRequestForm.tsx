@@ -183,6 +183,9 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
                   onChange={(e) => {
                     const value = e.target.value;
                     setLeaveStart(value);
+
+                    setErrorMessage("");
+
                     if (leaveType === "Sick Leave") {
                       setDateError("");
                       return;
@@ -214,6 +217,7 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
                   onChange={(e) => {
                     const value = e.target.value;
                     setLeaveEnd(value);
+                    setErrorMessage("");
                     if (leaveType === "Sick Leave") {
                       setDateError("");
                       return;
@@ -237,12 +241,26 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
             </div>
           </div>
           {requestedDays > 0 && (
-            <div
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase w-fit tracking-wider
-              ${requestedDays > (user?.free_days || 0) ? "bg-red-500/10 text-red-500" : "bg-emerald-500/10 text-emerald-500"}`}
-            >
-              <CheckCircle2 size={12} />
-              Total: {requestedDays} {requestedDays === 1 ? "Day" : "Days"}
+            <div className="space-y-2">
+              <div
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase w-fit tracking-wider
+      ${
+        requestedDays > (user?.free_days || 0)
+          ? "bg-red-500/10 text-red-500"
+          : "bg-emerald-500/10 text-emerald-500"
+      }`}
+              >
+                <CheckCircle2 size={12} />
+                Total: {requestedDays} {requestedDays === 1 ? "Day" : "Days"}
+              </div>
+
+              {leaveType !== "Sick Leave" &&
+                requestedDays > (user?.free_days || 0) && (
+                  <div className="flex items-center gap-2 text-[10px] text-red-400 font-medium">
+                    <AlertCircle size={12} />
+                    Insufficient balance ({user?.free_days || 0} days available)
+                  </div>
+                )}
             </div>
           )}
 

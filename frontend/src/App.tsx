@@ -15,6 +15,7 @@ import ProtectedRoute from "./components/ProtectedRoutes";
 import Spinner from "./components/Spinner";
 import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
+import AdminRoute from "./components/AdminRoute";
 
 axios.defaults.withCredentials = true;
 
@@ -56,7 +57,12 @@ const AppContent = ({
         <Route element={<ProtectedRoute user={user} />}>
           <Route
             path="/admin"
-            element={<Admin user={user} setUser={setUser} />}
+            element={
+              <AdminRoute user={user}>
+                <Admin user={user} setUser={setUser} />
+              </AdminRoute>
+          
+          }
           />
           <Route
             path="/calendar"
