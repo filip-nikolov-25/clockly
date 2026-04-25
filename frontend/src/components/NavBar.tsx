@@ -70,22 +70,16 @@ const NavBar = ({
   };
   const loadMore = async () => {
     if (loadingMore) return;
-
     setLoadingMore(true);
-
     const newOffset = offset + limit;
-
     await fetchNotifications(newOffset);
     setOffset(newOffset);
-
     setLoadingMore(false);
   };
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const target = e.currentTarget;
-
     const isBottom =
       target.scrollHeight - target.scrollTop <= target.clientHeight + 10;
-
     if (isBottom && hasMore && !loadingMore) {
       loadMore();
     }
@@ -96,10 +90,8 @@ const NavBar = ({
 
   useEffect(() => {
     if (!user) return;
-
     setOffset(0);
     setHasMore(true);
-
     fetchNotifications(0, true);
   }, [user]);
 
@@ -120,7 +112,6 @@ const NavBar = ({
 
   const unreadCount = notifications.filter((n) => {
     if (!lastSeen) return true;
-
     return new Date(n.created_at) > new Date(lastSeen);
   }).length;
   const handleLogout = async () => {
@@ -164,22 +155,22 @@ const NavBar = ({
         <div className="w-11/12 mx-auto flex justify-between items-center py-4 text-white">
           <Link
             to={currentCompany ? "/calendar" : "/"}
-            className="flex items-center gap-3"
+            className="flex items-center gap-3 shrink-0"
           >
             {currentCompany ? (
-              <span className="text-orange-500 border border-orange-500/30 bg-orange-500/5 px-4 py-1.5 rounded-full font-black text-xs uppercase tracking-[0.2em]">
+              <span className="text-orange-500 border border-orange-500/30 bg-orange-500/5 px-3 md:px-4 py-1.5 rounded-full font-black text-[10px] md:text-xs uppercase tracking-[0.2em] truncate max-w-37.5 md:max-w-none">
                 {currentCompany}
               </span>
             ) : (
               <img
                 src="/img/LOGO-1.png"
                 alt="Logo"
-                className="h-10 w-auto rounded-xl border border-white/10"
+                className="h-8 md:h-10 w-auto rounded-xl border border-white/10"
               />
             )}
           </Link>
 
-          <ul className="hidden md:flex items-center gap-8">
+          <ul className="hidden md:flex items-center gap-6 lg:gap-8">
             {!currentCompany && (
               <Link
                 to="/"
@@ -222,7 +213,6 @@ const NavBar = ({
                         setHasMore(true);
                         fetchNotifications(0, true);
                       }
-
                       setShowNotifications(!showNotifications);
                     }}
                     className="relative text-zinc-400 hover:text-white transition-colors"
@@ -254,6 +244,7 @@ const NavBar = ({
                               <Link
                                 to={`${user.role === "admin" ? "/admin" : "/aboutme"}`}
                                 className="text-zinc-400 hover:text-white transition-colors"
+                                onClick={() => setShowNotifications(false)}
                               >
                                 <p className="text-xs font-bold text-white">
                                   {n.title}
@@ -291,11 +282,107 @@ const NavBar = ({
             )}
           </ul>
 
-          <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden">
-            {menuOpen ? <X /> : <Menu />}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="md:hidden p-2 text-zinc-400 hover:text-white transition-colors"
+          >
+            {menuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
+
+      {menuOpen && (
+        <div className="md:hidden fixed inset-0 top-18.25 bg-[#101010] z-40 animate-in slide-in-from-right duration-300">
+          <nav className="flex flex-col p-6 gap-6">
+            {!currentCompany && (
+              <Link
+                to="/"
+                onClick={() => setMenuOpen(false)}
+                className="text-lg font-bold uppercase tracking-widest text-zinc-400 border-b border-white/5 pb-4"
+              >
+                Demo
+              </Link>
+            )}
+
+            {user ? (
+              <>
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    onClick={() => setMenuOpen(false)}
+                    className={`text-lg font-bold uppercase tracking-widest flex items-center gap-4 py-2 ${location.pathname === link.path ? "text-orange-500" : "text-zinc-400"}`}
+                  >
+                    <span className="p-2 bg-zinc-900 rounded-lg">{link.icon}</span>
+                    {link.name}
+                  </Link>
+                ))}
+
+                <div className="h-px bg-white/5 my-2" />
+
+                <div className="flex items-center justify-between">
+                  {user.role === "admin" && (
+                    <Link
+                      to="/admin"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-4 text-emerald-500 font-bold uppercase tracking-widest"
+                    >
+                      <ShieldCheck size={20} /> Admin Panel
+                    </Link>
+                  )}
+
+                  <div className="flex items-center gap-6">
+                    <button
+                      onClick={() => {
+                        setShowNotifications(!showNotifications);
+                        if (!showNotifications) {
+                          handleOpenedNotifications();
+                          fetchNotifications(0, true);
+                        }
+                      }}
+                      className="relative text-zinc-400"
+                    >
+                      <Bell size={24} />
+                      {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-orange-500 rounded-full" />
+                      )}
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="text-zinc-500 flex items-center gap-2"
+                    >
+                      <LogOut size={24} />
+                    </button>
+                  </div>
+                </div>
+                
+                {showNotifications && (
+                   <div className="mt-4 bg-zinc-900/50 rounded-2xl border border-white/5 max-h-[30vh] overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <p className="p-4 text-center text-xs text-zinc-600">No notifications</p>
+                      ) : (
+                        notifications.slice(0, 5).map((n, i) => (
+                          <div key={i} className="p-4 border-b border-white/5">
+                            <p className="text-xs font-bold text-white">{n.title}</p>
+                            <p className="text-[10px] text-zinc-500">{n.message}</p>
+                          </div>
+                        ))
+                      )}
+                   </div>
+                )}
+              </>
+            ) : (
+              <Link
+                to="/login"
+                onClick={() => setMenuOpen(false)}
+                className="text-center py-4 bg-orange-500 rounded-2xl font-black uppercase tracking-widest text-white"
+              >
+                Login
+              </Link>
+            )}
+          </nav>
+        </div>
+      )}
     </div>
   );
 };

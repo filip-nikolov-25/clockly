@@ -26,7 +26,6 @@ export const requestLeaveController = async (req, res) => {
   const country_code = req.user.country_code;
   const company_id = req.user.company_id;
   const user = req.user;
-  console.log(leave_type, "leave type in controller");
   if (!user) throw new Error("User not found");
   try {
     const { userRequestedAbscence } =

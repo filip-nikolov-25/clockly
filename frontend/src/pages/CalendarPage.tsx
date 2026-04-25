@@ -51,33 +51,38 @@ const CalendarPage = ({ user, setUser }: Props) => {
 
     fetchPublicHolidays();
   }, []);
+
   return (
     <Wrapper>
-      <header className="text-6xl mt-14 font-extrabold text-white">
+      <header className="text-4xl sm:text-5xl md:text-6xl mt-8 sm:mt-14 font-extrabold text-white">
         Calendar
       </header>
 
-      <div className="flex justify-between items-center mb-6 mt-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 mb-6 mt-6">
         <div className="flex items-center space-x-3">
           <span
-            className={`text-gray-300 font-semibold ${!weekView ? "text-orange-400" : ""}`}
+            className={`text-sm sm:text-base text-gray-300 font-semibold ${
+              !weekView ? "text-orange-400" : ""
+            }`}
           >
             Month View
           </span>
           <button
             onClick={() => setWeekView(!weekView)}
-            className={`w-14 h-8 flex items-center bg-gray-600 rounded-full p-1 cursor-pointer transition-colors duration-300 ${
+            className={`w-12 h-7 sm:w-14 sm:h-8 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${
               weekView ? "bg-gray-600" : "bg-orange-500"
             }`}
           >
             <div
-              className={`bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 ${
-                weekView ? "translate-x-6" : "translate-x-0"
+              className={`bg-white w-5 h-5 sm:w-6 sm:h-6 rounded-full shadow-md transform transition-transform duration-300 ${
+                weekView ? "translate-x-5 sm:translate-x-6" : "translate-x-0"
               }`}
             />
           </button>
           <span
-            className={`text-gray-300 ${weekView ? "text-orange-400" : ""} font-semibold`}
+            className={`text-sm sm:text-base text-gray-300 ${
+              weekView ? "text-orange-400" : ""
+            } font-semibold`}
           >
             Week View
           </span>
@@ -85,7 +90,7 @@ const CalendarPage = ({ user, setUser }: Props) => {
 
         <button
           onClick={() => setShowRequestModal(true)}
-          className="px-8 py-2 border-2 border-orange-400 text-orange-500 font-semibold rounded-lg hover:bg-orange-400 hover:text-white transition-colors duration-200"
+          className="w-full sm:w-auto px-6 sm:px-8 py-2 border-2 border-orange-400 text-orange-500 font-semibold rounded-lg hover:bg-orange-400 hover:text-white transition-colors duration-200"
         >
           Request Time Off
         </button>
@@ -100,11 +105,13 @@ const CalendarPage = ({ user, setUser }: Props) => {
         />
       )}
 
-      {weekView ? (
-        <WeekCalendar publicHolidays={publicHolidays} />
-      ) : (
-        <Calendar publicHolidays={publicHolidays} />
-      )}
+      <div className="overflow-x-auto">
+        {weekView ? (
+          <WeekCalendar publicHolidays={publicHolidays} />
+        ) : (
+          <Calendar publicHolidays={publicHolidays} />
+        )}
+      </div>
     </Wrapper>
   );
 };
