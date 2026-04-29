@@ -251,7 +251,7 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
       }`}
               >
                 <CheckCircle2 size={12} />
-                Total: {requestedDays} {requestedDays === 1 ? "Day" : "Days"}
+                Your Total Free Days : {requestedDays} {requestedDays === 1 ? "Day" : "Days"}
               </div>
 
               {leaveType !== "Sick Leave" &&
