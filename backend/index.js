@@ -14,8 +14,11 @@ const PORT = process.env.PORT || 5000;
 //     credentials: true,
 //   }),
 // );
-
-const allowedOrigins = ["https://clockly.it.com"];
+const allowedOrigins = [
+  "https://clockly.it.com",
+  "https://www.clockly.it.com",
+  "https://clockly-alpha.vercel.app"
+];
 
 app.use(
   cors({
@@ -24,15 +27,14 @@ app.use(
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
+      } else {
+        console.log("Blocked CORS origin:", origin);
+        return callback(new Error("Not allowed by CORS"));
       }
-
-      console.log("Blocked CORS origin:", origin);
-      return callback(null, false);
     },
     credentials: true,
-  }),
+  })
 );
-
 app.use(express.json());
 app.use(cookieParser());
 
