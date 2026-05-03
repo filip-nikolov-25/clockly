@@ -8,12 +8,35 @@ import authRoutes from "./routes/auth.js";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
+// app.use(
+//   cors({
+//     origin: process.env.CLIENT_URL,
+//     credentials: true,
+//   }),
+// );
+
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://clockly-alpha.vercel.app",
+  "https://clockly.it.com",
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
-  }),
+  })
 );
+
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -23,3 +46,4 @@ app.use("/api", employeesRoutes);
 app.listen(PORT, () => {
   console.log(`SERVER HAS STARTED ON PORT ${PORT}`);
 });
+
