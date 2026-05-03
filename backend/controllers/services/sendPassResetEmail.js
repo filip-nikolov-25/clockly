@@ -4,7 +4,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendPasswordResetEmail = async (email, resetURL) => {
   return await resend.emails.send({
-    from: "Clockly <onboarding@resend.dev>",
+    from: "Clockly <noreply@clockly.it.com>",
     to: email,
     subject: "Reset your Clockly password",
     html: `

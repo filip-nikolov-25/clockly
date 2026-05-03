@@ -11,7 +11,7 @@ export const sendLeaveRequestEmailToAdmin = async ({
   reason,
 }) => {
   return await resend.emails.send({
-    from: "Clockly <onboarding@resend.dev>",
+    from: "Clockly <noreply@clockly.it.com>",
     to: adminEmail,
     subject: `Leave Request Notification: ${username}`,
     html: `

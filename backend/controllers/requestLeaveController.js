@@ -19,6 +19,7 @@ import { getEmployeeById } from "../models/employeesModel.js";
 import { calculateWorkingDays, formatDateLocal } from "../utils/dateUtils.js";
 import { getAdminEmailByCompanyId } from "../models/adminModel.js";
 import { sendLeaveRequestEmailToAdmin } from "./services/sendLeaveRequests.js";
+import { sendLeaveStatusEmailToEmployee } from "./services/sendLeaveStatusEmailToEmployee.js";
 
 export const requestLeaveController = async (req, res) => {
   const { start_date, end_date, reason, leave_type } = req.body;
@@ -176,9 +177,8 @@ export const updateAdminLeaveRequestStatusController = async (req, res) => {
         end_date,
       );
 
-      const holidayDates = publicHolidays.map((h) => {
-        return formatDateLocal(h.date);
-      });
+      const holidayDates = publicHolidays.map((h) => formatDateLocal(h.date));
+
       const totalRequestedLeaveDays = calculateWorkingDays(
         start_date,
         end_date,
@@ -186,7 +186,6 @@ export const updateAdminLeaveRequestStatusController = async (req, res) => {
       );
 
       const freeDays = Number(user.free_days || 0);
-      calculateTotalLeaveDays = freeDays - totalRequestedLeaveDays;
 
       if (!Number.isFinite(freeDays)) {
         throw new Error("Invalid free_days value");
@@ -224,6 +223,23 @@ export const updateAdminLeaveRequestStatusController = async (req, res) => {
     });
 
     await updateAdminNotificationsModel(company_id);
+
+    const employee = await getEmployeeById(updatedRequest.user_id);
+
+    let emailResult = null;
+
+    if (employee?.email) {
+      emailResult = await sendLeaveStatusEmailToEmployee({
+        employeeEmail: employee.email,
+        username: employee.username,
+        startStr,
+        endStr,
+        status,
+      });
+
+    } else {
+      console.error("Employee email missing, skipping email send");
+    }
 
     const responsePayload = {
       ...updatedRequest,
