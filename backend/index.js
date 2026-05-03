@@ -15,11 +15,7 @@ const PORT = process.env.PORT || 5000;
 //   }),
 // );
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://clockly-alpha.vercel.app",
-  "https://clockly.it.com",
-];
+const allowedOrigins = ["https://clockly.it.com"];
 
 app.use(
   cors({
@@ -34,7 +30,7 @@ app.use(
       return callback(null, false);
     },
     credentials: true,
-  })
+  }),
 );
 
 app.use(express.json());
@@ -46,4 +42,3 @@ app.use("/api", employeesRoutes);
 app.listen(PORT, () => {
   console.log(`SERVER HAS STARTED ON PORT ${PORT}`);
 });
-
