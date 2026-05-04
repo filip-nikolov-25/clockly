@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import Wrapper from "../components/base/Wrapper";
 import axios from "axios";
-import { Users, Search, ShieldCheck, Clock3 } from "lucide-react";
+import {
+  Users,
+  Search,
+  ShieldCheck,
+  Clock3,
+  AlertTriangle,
+} from "lucide-react";
 import type { AllEmployeeType, UserType } from "../interfaces/types";
 import EmployeeCard from "../components/EmployeeCard";
 
@@ -17,6 +23,18 @@ const EmployeePage = ({ currentCompany, user }: Props) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    userId: string;
+    userName: string;
+    newDays: number;
+  }>({
+    isOpen: false,
+    userId: "",
+    userName: "",
+    newDays: 0,
+  });
+
   useEffect(() => {
     const getAllEmployees = async () => {
       setLoading(true);
@@ -31,28 +49,41 @@ const EmployeePage = ({ currentCompany, user }: Props) => {
         setLoading(false);
       }
     };
-
     getAllEmployees();
-  }, []);
+  }, [API_URL]);
 
-  const updateEmployeeFreeDays = async (user_id: string, free_days: number) => {
+  const updateEmployeeFreeDays = (user_id: string, free_days: number) => {
+    const emp = employees.find((e) => e.user_id === user_id);
+    setConfirmModal({
+      isOpen: true,
+      userId: user_id,
+      userName: emp?.username || "this employee",
+      newDays: free_days,
+    });
+  };
+
+  const executeUpdate = async () => {
+    const { userId, newDays } = confirmModal;
+
     setEmployees((prevEmployees) =>
       prevEmployees.map((employee) =>
-        employee.user_id === user_id
-          ? { ...employee, free_days: free_days }
+        employee.user_id === userId
+          ? { ...employee, free_days: newDays }
           : employee,
       ),
     );
 
+    setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+
     try {
       const result = await axios.post(`${API_URL}/api/users/update-free-days`, {
-        free_days,
-        user_id,
+        free_days: newDays,
+        user_id: userId,
       });
 
       setEmployees((prevEmployees) =>
         prevEmployees.map((employee) =>
-          employee.user_id === user_id
+          employee.user_id === userId
             ? { ...employee, free_days: result.data.free_days }
             : employee,
         ),
@@ -68,6 +99,56 @@ const EmployeePage = ({ currentCompany, user }: Props) => {
 
   return (
     <Wrapper>
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-3xl max-w-md w-full shadow-2xl">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 bg-orange-500/10 text-orange-500 rounded-2xl">
+                <AlertTriangle size={24} />
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-lg">
+                  Confirm Changes
+                </h3>
+                <p className="text-zinc-400 text-sm italic">
+                  Administrative action
+                </p>
+              </div>
+            </div>
+
+            <p className="text-zinc-300 mb-6 leading-relaxed">
+              You are about to change{" "}
+              <span className="text-white font-bold">
+                {confirmModal.userName}'s
+              </span>{" "}
+              balance to
+              <span className="text-orange-500 font-bold">
+                {" "}
+                {confirmModal.newDays} free days
+              </span>
+              . Are you sure you want to proceed?
+            </p>
+
+            <div className="flex gap-3 mt-2">
+              <button
+                onClick={() =>
+                  setConfirmModal((prev) => ({ ...prev, isOpen: false }))
+                }
+                className="flex-1 px-4 py-3 rounded-xl bg-zinc-800 text-zinc-300 font-bold text-sm hover:bg-zinc-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={executeUpdate}
+                className="flex-1 px-4 py-3 rounded-xl bg-orange-500 text-white font-bold text-sm hover:bg-orange-600 transition-colors shadow-lg shadow-orange-500/20"
+              >
+                Confirm Update
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="mt-8 md:mt-16 mb-8 md:mb-12">
         <div className="flex items-center gap-3 mb-4">
           <div className="p-2 bg-orange-500/10 text-orange-500 rounded-lg">
