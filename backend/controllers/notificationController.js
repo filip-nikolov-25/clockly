@@ -45,12 +45,12 @@ export const getEmployeeNotificationsController = async (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
 
   try {
-    const notifications = await getNotificationsForEmployeeModel(
+    const notifications = await getNotificationsForEmployeeModel({
       user_id,
       company_id,
       offSet,
-      limit
-    );
+      limit,
+    });
     res.json(notifications);
   } catch (error) {
     console.error(error);

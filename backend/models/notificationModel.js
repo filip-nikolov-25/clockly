@@ -80,13 +80,11 @@ export const getNotificationsForEmployeeModel = async ({
     `
     SELECT n.id, n.title, n.message, n.is_read, n.created_at
     FROM notifications n
-    JOIN leave_requests lr ON lr.user_id = n.user_id
     WHERE n.user_id = $1
       AND n.company_id = $2
-      AND lr.status != 'pending'
       AND n.created_at >= date_trunc('month', CURRENT_DATE) - interval '1 month'
     ORDER BY n.is_read ASC, n.created_at DESC
-    LIMIT $3 OFFSET $4
+    LIMIT $3 OFFSET $4;
     `,
     [user_id, company_id, limit, offSet],
   );
