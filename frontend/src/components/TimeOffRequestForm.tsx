@@ -47,7 +47,7 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
     }
   };
   const handleSubmit = async () => {
-    if (dateError && leaveType !== "Sick Leave") return;
+    if (dateError) return;
     if (leaveType === "Sick Leave") {
       setSuccessMessage("");
     } else if (user?.free_days === 0) {
@@ -186,11 +186,6 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
 
                     setErrorMessage("");
 
-                    if (leaveType === "Sick Leave") {
-                      setDateError("");
-                      return;
-                    }
-
                     if (leaveEnd && new Date(value) > new Date(leaveEnd)) {
                       setDateError("Start date cannot be after end date!");
                     } else {
@@ -218,10 +213,6 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
                     const value = e.target.value;
                     setLeaveEnd(value);
                     setErrorMessage("");
-                    if (leaveType === "Sick Leave") {
-                      setDateError("");
-                      return;
-                    }
 
                     if (leaveStart && new Date(value) < new Date(leaveStart)) {
                       setDateError("End date cannot be before start date!");
@@ -251,7 +242,8 @@ const TimeOffRequestForm = ({ onClose, onSubmitted, user }: Props) => {
       }`}
               >
                 <CheckCircle2 size={12} />
-                Your Total Free Days : {requestedDays} {requestedDays === 1 ? "Day" : "Days"}
+                Your Total Free Days : {requestedDays}
+                {requestedDays === 1 ? "Day" : "Days"}
               </div>
 
               {leaveType !== "Sick Leave" &&

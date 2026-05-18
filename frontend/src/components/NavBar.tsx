@@ -125,6 +125,7 @@ const NavBar = ({
   useEffect(() => {
     if (showNotifications && unreadCount > 0) updateNotificationStatus();
   }, [showNotifications]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -313,7 +314,9 @@ const NavBar = ({
                     onClick={() => setMenuOpen(false)}
                     className={`text-lg font-bold uppercase tracking-widest flex items-center gap-4 py-2 ${location.pathname === link.path ? "text-orange-500" : "text-zinc-400"}`}
                   >
-                    <span className="p-2 bg-zinc-900 rounded-lg">{link.icon}</span>
+                    <span className="p-2 bg-zinc-900 rounded-lg">
+                      {link.icon}
+                    </span>
                     {link.name}
                   </Link>
                 ))}
@@ -355,20 +358,26 @@ const NavBar = ({
                     </button>
                   </div>
                 </div>
-                
+
                 {showNotifications && (
-                   <div className="mt-4 bg-zinc-900/50 rounded-2xl border border-white/5 max-h-[30vh] overflow-y-auto">
-                      {notifications.length === 0 ? (
-                        <p className="p-4 text-center text-xs text-zinc-600">No notifications</p>
-                      ) : (
-                        notifications.slice(0, 5).map((n, i) => (
-                          <div key={i} className="p-4 border-b border-white/5">
-                            <p className="text-xs font-bold text-white">{n.title}</p>
-                            <p className="text-[10px] text-zinc-500">{n.message}</p>
-                          </div>
-                        ))
-                      )}
-                   </div>
+                  <div className="mt-4 bg-zinc-900/50 rounded-2xl border border-white/5 max-h-[30vh] overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <p className="p-4 text-center text-xs text-zinc-600">
+                        No notifications
+                      </p>
+                    ) : (
+                      notifications.slice(0, 5).map((n, i) => (
+                        <div key={i} className="p-4 border-b border-white/5">
+                          <p className="text-xs font-bold text-white">
+                            {n.title}
+                          </p>
+                          <p className="text-[10px] text-zinc-500">
+                            {n.message}
+                          </p>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 )}
               </>
             ) : (
