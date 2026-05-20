@@ -52,18 +52,15 @@ export const getLeaveRequestsForEmployeeModel = async (
   const values = [user_id, company_id];
   let paramIndex = 3;
 
-  if (startDate) {
-    query += ` AND start_date >= $${paramIndex}`;
-    values.push(startDate);
-    paramIndex++;
-  }
+  if (startDate && endDate) {
+    query += `
+    AND DATE(start_date) >= $${paramIndex}
+    AND DATE(end_date) <= $${paramIndex + 1}
+  `;
 
-  if (endDate) {
-    query += ` AND end_date <= $${paramIndex}`;
-    values.push(endDate);
-    paramIndex++;
+    values.push(startDate, endDate);
+    paramIndex += 2;
   }
-
   query += `
     ORDER BY requested_at DESC
   `;
@@ -107,28 +104,20 @@ export const getLeaveRequestsForAdminModel = async (
     values.push(employee);
     paramIndex++;
   }
-  if (startDate) {
-    query += ` AND lr.start_date >= $${paramIndex}`;
-    values.push(startDate);
-    paramIndex++;
-  }
 
-  if (endDate) {
-    query += ` AND lr.end_date <= $${paramIndex}`;
-    values.push(endDate);
-    paramIndex++;
-  }
+  if (startDate && endDate) {
+    query += `
+      AND DATE(lr.start_date) >= $${paramIndex}
+      AND DATE(lr.end_date) <= $${paramIndex + 1}
+    `;
 
-  query += `
-    AND (
-      lr.status = 'pending' 
-      OR lr.status IN ('accepted', 'rejected')
-    )
-  `;
+    values.push(startDate, endDate);
+    paramIndex += 2;
+  }
 
   query += `
     ORDER BY 
-      CASE WHEN lr.status = 'pending' THEN 1 ELSE 2 END, 
+      CASE WHEN lr.status = 'pending' THEN 1 ELSE 2 END,
       lr.requested_at DESC
   `;
 

@@ -30,7 +30,6 @@ export const sendPasswordResetEmail = async (email, resetURL) => {
 
         <div style="background-color:#f9fafb; padding:20px; text-align:center; font-size:12px; color:#6b7280; border-top:1px solid #e5e7eb;">
           <p style="margin:0;">Clockly Inc. | North Macedonia</p>
-          <p style="margin:8px 0 0 0;">If you're having trouble, copy and paste this link into your browser:<br/>${resetURL}</p>
         </div>
 
       </div>

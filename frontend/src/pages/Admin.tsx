@@ -71,22 +71,42 @@ const Admin = ({ user, setUser }: Props) => {
     }
   };
 
-  const fetchRequests = async (newOffset: number) => {
+  const fetchRequests = async (
+    newOffset: number,
+    filters?: {
+      employee?: string;
+      startDate?: string;
+      endDate?: string;
+    },
+  ) => {
     if (loadingRequests) return;
+
     setLoadingRequests(true);
+
     try {
       const res = await axios.get(`${API_URL}/api/request-leave/admin`, {
         params: {
           limit,
           offset: newOffset,
-          employee: selectedEmployee || undefined,
-          startDate: startDate || undefined,
-          endDate: endDate || undefined,
+          employee:
+            filters?.employee !== undefined
+              ? filters.employee
+              : selectedEmployee || undefined,
+          startDate:
+            filters?.startDate !== undefined
+              ? filters.startDate
+              : startDate || undefined,
+          endDate:
+            filters?.endDate !== undefined
+              ? filters.endDate
+              : endDate || undefined,
         },
       });
+
       setRequests((prev) =>
         newOffset === 0 ? res.data : [...prev, ...res.data],
       );
+
       setHasMore(res.data.length === limit);
     } catch (err) {
       console.error("Error fetching admin requests:", err);
@@ -131,7 +151,12 @@ const Admin = ({ user, setUser }: Props) => {
     setOffset(0);
     setHasMore(true);
     setWarningMessage("");
-    setTimeout(() => fetchRequests(0), 0);
+
+    fetchRequests(0, {
+      employee: "",
+      startDate: "",
+      endDate: "",
+    });
   };
 
   const handleSubmitInvite = async (e: FormEvent) => {
