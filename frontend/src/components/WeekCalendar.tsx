@@ -110,6 +110,8 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
     fetchWorkHoursData(startDate, endDate);
   }, [startDate]);
 
+  const endDate = next7Days[6];
+  const displayRange = `${startDate.getDate()} - ${endDate.getDate()}`;
   return (
     <div className="mt-8 pb-40">
       {loading ? (
@@ -128,22 +130,26 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                 <h3 className="text-lg md:text-xl font-bold text-white tracking-tight leading-none">
                   Week Calendar
                 </h3>
-                <p className="text-[9px] md:text-[10px] text-zinc-500 font-bold uppercase tracking-widest mt-1">
-                  Schedule Overview
+                <p className="text-[10px] md:text-xs font-bold text-orange-500 uppercase tracking-widest mt-1">
+                  {startDate.toLocaleString("default", { month: "long" })}{" "}
+                  {startDate.getFullYear()}
                 </p>
               </div>
             </div>
-
-            <div className="flex items-center gap-2 bg-black/40 p-1 rounded-xl md:rounded-2xl border border-zinc-800 w-full sm:w-auto justify-between sm:justify-start">
+            <div className="flex items-center bg-black/40 p-1 rounded-xl md:rounded-2xl border border-zinc-800 w-full sm:w-auto">
               <button
                 onClick={handlePrevWeek}
                 className="p-2 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-lg md:rounded-xl transition-all"
               >
                 <ChevronLeft size={18} />
               </button>
-              <div className="px-2 md:px-4 text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-300">
-                {startDate.getFullYear()}
+
+              <div className="flex-1 text-center px-4">
+                <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-zinc-500 whitespace-nowrap">
+                  {displayRange}
+                </span>
               </div>
+
               <button
                 onClick={handleNextWeek}
                 className="p-2 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-lg md:rounded-xl transition-all"
@@ -232,8 +238,8 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                           ? formatMinutesToHoursAndMinutes(entry.worked_minutes)
                           : "0h 00m";
                         styleClass = entry
-                          ? "text-emerald-400 font-mono font-bold"
-                          : "text-zinc-700 font-mono";
+                          ? "text-emerald-400  "
+                          : "text-zinc-700 ";
                       } else {
                         label = "Working";
                         styleClass = isToday
@@ -254,7 +260,14 @@ const WeekCalendar = ({ publicHolidays }: Props) => {
                               </span>
                             )}
                             <span
-                              className={`text-[9px] md:text-[10px] tracking-tight uppercase ${styleClass} truncate max-w-full px-1`}
+                              className={`truncate max-w-full px-1 ${
+                                isPast &&
+                                !leaveType &&
+                                !isWeekend &&
+                                dayHolidayList.length === 0
+                                  ? "text-sm md:text-md font-mono font-bold tracking-normal"
+                                  : "text-[9px] md:text-[10px] uppercase tracking-tight"
+                              } ${styleClass}`}
                             >
                               {label}
                             </span>
